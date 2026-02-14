@@ -104,6 +104,7 @@ body {
 }
 
 .tab-link {
+  display: block;
   border: 1px solid var(--line);
   background: #f4f7fd;
   border-radius: 12px;
@@ -113,6 +114,10 @@ body {
   text-align: left;
   font-weight: 700;
   transition: all 0.2s ease;
+}
+
+.tab-link-anchor {
+  text-decoration: none;
 }
 
 .tab-link:hover {
@@ -146,23 +151,56 @@ body {
   line-height: 1.45;
 }
 
+.rail-note a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
 .workspace {
   display: grid;
   gap: 14px;
 }
 
 .top-nav {
-  padding: 14px 18px;
+  padding: 7px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-height: 52px;
+}
+
+.top-gnb {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.top-gnb a {
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #fff;
+}
+
+.top-gnb a:hover {
+  border-color: var(--line-strong);
+  background: #f8fbff;
 }
 
 .top-nav-copy h2 {
   margin: 0;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 22px;
+  font-size: 16px;
+}
+
+.top-nav .eyebrow {
+  margin: 0;
+  font-size: 10px;
 }
 
 .eyebrow {
@@ -177,6 +215,24 @@ body {
 .auth-actions {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.auth-actions .btn {
+  padding: 7px 10px;
+  border-radius: 10px;
+}
+
+.language-select {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  background: #fff;
+  min-width: 64px;
 }
 
 .main-grid {
@@ -221,6 +277,23 @@ body {
 
 .hero-copy p {
   margin: 8px 0 0;
+}
+
+.competitor-block {
+  margin-bottom: 8px;
+}
+
+.competitor-block label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.mini-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-soft);
 }
 
 .search-row {
@@ -318,6 +391,7 @@ textarea:focus {
   border-radius: 14px;
   padding: 14px;
   background: #fff;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
 .price-card h3 {
@@ -330,17 +404,31 @@ textarea:focus {
   font-family: "Space Grotesk", sans-serif;
 }
 
-.price-card.featured {
-  border-color: #a8bff1;
-  background: #f4f8ff;
-}
-
 .price-card ul {
   margin: 0;
   padding-left: 18px;
   color: var(--text-soft);
   display: grid;
   gap: 6px;
+}
+
+.plan-card[data-plan="pro"],
+.plan-card[data-plan="enterprise"] {
+  cursor: pointer;
+}
+
+.plan-card[data-plan="pro"]:hover,
+.plan-card[data-plan="enterprise"]:hover {
+  transform: translateY(-2px);
+  border-color: #b8c8e4;
+  background: #f6f9ff;
+  box-shadow: 0 9px 22px rgba(20, 44, 93, 0.1);
+}
+
+.pricing-click-hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--text-soft);
 }
 
 .enterprise-form {
@@ -658,6 +746,17 @@ textarea:focus {
   font-size: 13px;
 }
 
+.mini-output {
+  margin: 8px 0 0;
+  border: 1px solid #e8eef8;
+  border-radius: 10px;
+  background: #f8fbff;
+  padding: 10px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @media (max-width: 1200px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -682,6 +781,10 @@ textarea:focus {
   .top-nav {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .top-gnb {
+    width: 100%;
   }
 
   .auth-actions {

@@ -10,8 +10,11 @@ SnapYourScope is a fast web analyzer that checks a single URL and returns SEO, G
 - SEO checks: title, description, canonical, robots, viewport, Open Graph, schema, hreflang, headings, images, content length
 - AEO checks: answer-first structure, content structure, AI-friendly schema, readability, E-E-A-T signals
 - GEO snapshot: per-region availability and latency summary (US/KR/JP/UK)
-- Dashboard UI with charts (SEO score, latency chart, status mix)
+- 5-page app structure: main, dashboard, keyword rank, prompt tracker, AEO optimizer
+- Unified dashboard-style shell across keyword rank / prompt tracker / AEO optimizer pages
+- Dashboard UI with charts (SEO score, latency chart, status mix) and competitor comparison
 - Auth flow (register/login/JWT), guest-mode single analysis, paid-tier sitemap batch endpoints
+- Prompt tracking policy: 30 prompts included, +$10/month per extra 5 prompts
 
 ## Tech Stack
 
@@ -94,6 +97,12 @@ Create `.env` in project root if needed.
 
 | Variable | Required | Description |
 |---|---|---|
+| `STRIPE_SECRET_KEY` | Billing only | Stripe secret key |
+| `STRIPE_PUBLISHABLE_KEY` | Billing only | Stripe publishable key |
+| `STRIPE_WEBHOOK_SECRET` | Billing only | Stripe webhook signing secret |
+| `STRIPE_PRICE_PRO_MONTHLY` | Billing only | Stripe price id for Pro |
+| `STRIPE_PRICE_ENTERPRISE_MONTHLY` | Billing only | Stripe price id for Enterprise |
+| `APP_BASE_URL` | Billing only | App base URL used in checkout callbacks |
 | `PAGESPEED_KEYS` | No | Comma-separated Google PageSpeed API keys |
 | `RICH_RESULTS_KEYS` | No | Comma-separated rich-results related keys |
 | `PROXY_LIST` | No | Comma-separated proxies for outbound requests |
@@ -108,6 +117,12 @@ Create `.env` in project root if needed.
 | `POST` | `/api/analyze` | Single URL SEO/GEO/AEO analysis |
 | `POST` | `/api/analyze/sitemap-batch` | Create sitemap batch job (paid tier) |
 | `GET` | `/api/analyze/sitemap-batch/{job_id}` | Check sitemap batch status |
+| `POST` | `/api/search-rank` | Search rank tracking (single free, batch paid) |
+| `POST` | `/api/prompt-track` | Prompt visibility tracking (paid) |
+| `POST` | `/api/aeo-optimizer/recommend` | AEO optimization recommendations (paid) |
+| `POST` | `/api/billing/create-checkout-session` | Create Stripe checkout session |
+| `POST` | `/api/billing/create-portal-session` | Create Stripe billing portal session |
+| `POST` | `/api/billing/webhook` | Stripe webhook endpoint |
 | `GET` | `/health` | Health check |
 
 ## Validation Commands
@@ -128,6 +143,7 @@ npm run build
 
 - Guest users can run one single URL analysis in current frontend flow.
 - Full sitemap analysis is gated for paid-tier users (`pro`/`enterprise`).
+- Billing flow is currently Stripe-only.
 - Current auth module uses a development `SECRET_KEY` constant in `api/auth.py`; replace it before production deployment.
 
 ## Roadmap (High-Level)

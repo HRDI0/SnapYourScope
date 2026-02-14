@@ -4,173 +4,120 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEO GEO AEO Reporter</title>
+  <title>SnapYourScope | SEO, AEO, GEO Intelligence</title>
+  <meta name="description" content="SnapYourScope helps teams audit URL visibility across SEO, AEO, GEO, and search/LLM surfaces." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/landing.css" />
 </head>
 
 <body>
-  <div id="app" class="app-shell">
-    <aside class="left-rail panel">
-      <div class="brand">
-        <span class="brand-mark">S</span>
-        <div>
-          <h1>SearchScope</h1>
-          <p>SEO/GEO/AEO Intelligence</p>
-        </div>
+  <header class="landing-header">
+    <div class="brand-block">
+      <span class="brand-mark">S</span>
+      <div>
+        <h1>SnapYourScope</h1>
+        <p id="landing-tagline">Lightweight URL-based SEO/AEO intelligence</p>
       </div>
-
-      <nav class="tab-links" id="tab-links">
-        <button class="tab-link active" data-tab="analyze">Dashboard</button>
-        <button class="tab-link" data-tab="pricing">Plans</button>
-        <button class="tab-link" data-tab="enterprise">Enterprise</button>
+    </div>
+    <div class="header-right">
+      <select id="language-select" class="language-select" aria-label="Language">
+        <option value="en">EN</option>
+        <option value="ko">KR</option>
+        <option value="ja">JP</option>
+        <option value="zh">CN</option>
+      </select>
+      <nav class="header-nav">
+        <a id="landing-nav-dashboard" href="/app.html">Dashboard</a>
+        <a id="landing-nav-keyword" href="/keyword-rank.html">Keyword Rank</a>
+        <a id="landing-nav-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
+        <a id="landing-nav-optimizer" href="/aeo-optimizer.html">AEO Optimizer</a>
       </nav>
-
-      <div class="rail-note">
-        <strong>Realtime mode</strong>
-        <p>Single URL analysis with charted diagnostics and ranked issues.</p>
-      </div>
-    </aside>
-
-    <div class="workspace">
-      <header class="top-nav panel">
-        <div class="top-nav-copy">
-          <p class="eyebrow">Analytics Workspace</p>
-          <h2>Competitive Visibility Dashboard</h2>
-        </div>
-
-        <div class="auth-actions">
-          <button id="open-login-btn" class="btn btn-ghost">Log in</button>
-          <button id="open-register-btn" class="btn btn-primary">Get started</button>
-          <button id="logout-btn" class="btn btn-ghost hidden">Logout</button>
-        </div>
-      </header>
-
-      <main class="main-grid">
-      <section id="tab-analyze" class="tab-panel">
-        <div class="panel hero-panel">
-          <div class="hero-copy">
-            <p class="eyebrow">URL intelligence</p>
-            <h3>Run a live audit and view all key signals in one screen</h3>
-            <p>Inspired by enterprise analytics layouts: KPI ribbon, chart board, and prioritized fixes.</p>
-          </div>
-
-          <div class="search-row">
-            <input type="url" id="target-url" placeholder="https://example.com" />
-            <button id="analyze-btn" class="btn btn-primary">Analyze URL</button>
-          </div>
-
-          <div class="hero-meta">
-            <span>Guest: one URL analysis</span>
-            <span>Pro: full sitemap batch</span>
-            <span>Mode: realtime snapshot</span>
-          </div>
-        </div>
-
-        <div id="analysis-result" class="panel hidden">
-          <h3>Analysis report</h3>
-          <div id="report-content"></div>
-        </div>
-
-        <div id="post-analysis-cta" class="panel cta-panel hidden">
-          <h3>Need full sitemap analysis?</h3>
-          <p>Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).</p>
-          <div class="cta-actions">
-            <button id="cta-open-pricing" class="btn btn-primary">View Pricing</button>
-            <button id="cta-open-login" class="btn btn-ghost">Login to upgrade</button>
-          </div>
-        </div>
-
-        <div class="panel full-batch-panel">
-          <h3>Full sitemap analysis (paid)</h3>
-          <p>Backend logic is implemented. Frontend API wiring can be connected next.</p>
-          <div class="search-row">
-            <input type="url" id="sitemap-url" placeholder="https://example.com/sitemap.xml" />
-            <button id="sitemap-analyze-btn" class="btn btn-secondary">Start full analysis</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="tab-pricing" class="tab-panel hidden">
-        <div class="panel pricing-wrap">
-          <h2>Pricing</h2>
-          <p>Choose a plan based on crawl depth and workflow scale.</p>
-          <div class="pricing-grid">
-            <article class="price-card">
-              <h3>Free</h3>
-              <p class="price">$0</p>
-              <ul>
-                <li>Single URL report</li>
-                <li>SEO + GEO + AEO snapshot</li>
-                <li>No sitemap batch</li>
-              </ul>
-            </article>
-            <article class="price-card featured">
-              <h3>Pro</h3>
-              <p class="price">$49/mo</p>
-              <ul>
-                <li>Full sitemap analysis</li>
-                <li>URL queue + background batch</li>
-                <li>Batch status tracking</li>
-              </ul>
-            </article>
-            <article class="price-card">
-              <h3>Enterprise</h3>
-              <p class="price">Custom</p>
-              <ul>
-                <li>Improvement strategy</li>
-                <li>Managed optimization workflow</li>
-                <li>Dedicated support</li>
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section id="tab-enterprise" class="tab-panel hidden">
-        <div class="panel">
-          <h2>Enterprise Improvement & Management</h2>
-          <p>If you want ongoing site improvement and operational management, send an enterprise inquiry.</p>
-          <form id="enterprise-form" class="enterprise-form">
-            <input type="text" id="company-name" placeholder="Company name" required />
-            <input type="email" id="contact-email" placeholder="Work email" required />
-            <textarea id="enterprise-needs" rows="5" placeholder="Tell us your SEO/GEO/AEO goals" required></textarea>
-            <button type="submit" class="btn btn-primary">Send enterprise inquiry</button>
-          </form>
-        </div>
-      </section>
-      </main>
     </div>
-  </div>
+  </header>
 
-  <div id="auth-modal" class="modal hidden">
-    <div class="modal-card panel">
-      <button id="close-auth-modal" class="close-btn" aria-label="Close">x</button>
-
-      <div id="login-container">
-        <h2>Log in</h2>
-        <form id="login-form" class="auth-form">
-          <input type="email" id="email" placeholder="Email" required />
-          <input type="password" id="password" placeholder="Password" required />
-          <button type="submit" class="btn btn-primary">Sign in</button>
-        </form>
-        <p class="switch-link">No account? <button id="to-register" type="button">Create one</button></p>
+  <main>
+    <section class="hero">
+      <div>
+        <p id="landing-eyebrow" class="eyebrow">Visibility Operating System</p>
+        <h2 id="landing-hero-title">Track your brand in web search and AI answers from one workflow</h2>
+        <p id="landing-hero-description">Built for teams that need practical SEO + AEO execution: quick URL audits, paid prompt tracking, and recommendation workflows.</p>
+        <div class="hero-actions">
+          <a id="landing-open-dashboard" class="btn btn-primary" href="/app.html">Open Dashboard</a>
+          <a id="landing-open-keyword" class="btn btn-ghost" href="/keyword-rank.html">Open Keyword Rank</a>
+          <a id="landing-try-prompt" class="btn btn-ghost" href="/prompt-tracker.html">Try Prompt Tracker</a>
+        </div>
       </div>
+      <article class="hero-card">
+        <h3 id="landing-what-now">What you can run now</h3>
+        <ul>
+          <li id="landing-li-1">Single URL SEO/AEO/GEO analysis</li>
+          <li id="landing-li-2">Free web search rank tracking (Google/Bing/Naver)</li>
+          <li id="landing-li-3">Paid prompt tracking with share-of-model scoring</li>
+          <li id="landing-li-4">Paid AEO optimization recommendations</li>
+        </ul>
+      </article>
+    </section>
 
-      <div id="register-container" class="hidden">
-        <h2>Create account</h2>
-        <form id="register-form" class="auth-form">
-          <input type="email" id="reg-email" placeholder="Email" required />
-          <input type="password" id="reg-password" placeholder="Password" required />
-          <button type="submit" class="btn btn-primary">Sign up</button>
-        </form>
-        <p class="switch-link">Already registered? <button id="to-login" type="button">Back to login</button></p>
+    <section class="features">
+      <article>
+        <h3 id="landing-feature-1-title">SEO & AEO Dashboard</h3>
+        <p id="landing-feature-1-desc">Analyze technical and answer-engine signals with chart-based diagnostics.</p>
+      </article>
+      <article>
+        <h3 id="landing-feature-2-title">Prompt Tracking</h3>
+        <p id="landing-feature-2-desc">Score brand visibility by tier: not mentioned, mentioned, linked, core mention.</p>
+      </article>
+      <article>
+        <h3 id="landing-feature-3-title">Search Rank Monitor</h3>
+        <p id="landing-feature-3-desc">Check the position where your brand URL appears in web search results.</p>
+      </article>
+      <article>
+        <h3 id="landing-feature-4-title">AEO Optimizer</h3>
+        <p id="landing-feature-4-desc">Generate practical recommendations based on URL audit outputs and GEO/AEO principles.</p>
+      </article>
+    </section>
+
+    <section class="plans">
+      <h3 id="landing-plans-title">Plans</h3>
+      <div class="plan-grid">
+        <article class="landing-plan-card" data-plan="free">
+          <h4 id="landing-plan-free-title">Free</h4>
+          <p class="price">$0</p>
+          <ul>
+            <li id="landing-plan-free-f1">Single URL dashboard audit</li>
+            <li id="landing-plan-free-f2">Search rank tracking (API-key based)</li>
+          </ul>
+        </article>
+        <article class="landing-plan-card" data-plan="pro">
+          <h4 id="landing-plan-pro-title">Pro</h4>
+          <p class="price">$49/mo</p>
+          <ul>
+            <li id="landing-plan-pro-f1">Sitemap batch analysis</li>
+            <li id="landing-plan-pro-f2">Prompt tracking and scoring</li>
+            <li id="landing-plan-pro-f3">AEO optimization recommendations</li>
+          </ul>
+        </article>
+        <article class="landing-plan-card" data-plan="enterprise">
+          <h4 id="landing-plan-ent-title">Enterprise</h4>
+          <p class="price">Custom</p>
+          <ul>
+            <li id="landing-plan-ent-f1">Workflow and policy customization</li>
+            <li id="landing-plan-ent-f2">Provider strategy and reliability controls</li>
+          </ul>
+        </article>
       </div>
-    </div>
-  </div>
+      <p id="landing-plan-hint" class="plan-hint">Click Pro or Enterprise to continue to checkout.</p>
+    </section>
+  </main>
 
-  <script type="module" src="/src/main.js"></script>
+  <footer class="landing-footer">
+    <p>SnapYourScope</p>
+    <a id="landing-go-product" href="/app.html">Go to product</a>
+  </footer>
+
+  <script type="module" src="/src/landing.js"></script>
 </body>
 
 </html>

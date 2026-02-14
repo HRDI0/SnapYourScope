@@ -110,6 +110,18 @@ app.include_router(geo_analysis.router, prefix="/api", tags=["GEO Analysis"])
 from .routes import history
 
 app.include_router(history.router, prefix="/api", tags=["History"])
+from .routes import provider_capabilities
+
+app.include_router(provider_capabilities.router, prefix="/api", tags=["Providers"])
+from .routes import prompt_tracking
+
+app.include_router(prompt_tracking.router, prefix="/api", tags=["Prompt Tracking"])
+from .routes import aeo_optimizer
+
+app.include_router(aeo_optimizer.router, prefix="/api", tags=["AEO Optimizer"])
+from .routes import billing
+
+app.include_router(billing.router, prefix="/api", tags=["Billing"])
 
 
 # Dependency

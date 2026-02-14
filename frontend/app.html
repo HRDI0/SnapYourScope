@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapYourScope App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app" class="app-shell">
+    <aside class="left-rail panel">
+      <div class="brand">
+        <span class="brand-mark">S</span>
+        <div>
+          <h1>SnapYourScope</h1>
+          <p id="brand-tagline">SEO/GEO/AEO Intelligence</p>
+        </div>
+      </div>
+
+      <nav class="tab-links" id="tab-links">
+        <button id="tab-analyze-btn" class="tab-link active" data-tab="analyze">Dashboard</button>
+        <button id="tab-pricing-btn" class="tab-link" data-tab="pricing">Plans</button>
+        <button id="tab-enterprise-btn" class="tab-link" data-tab="enterprise">Enterprise</button>
+        <a id="tab-keyword-link" class="tab-link tab-link-anchor" href="/keyword-rank.html">Keyword Rank</a>
+        <a id="tab-prompt-link" class="tab-link tab-link-anchor" href="/prompt-tracker.html">Prompt Tracker</a>
+        <a id="tab-aeo-link" class="tab-link tab-link-anchor" href="/aeo-optimizer.html">AEO Optimizer</a>
+      </nav>
+
+      <div class="rail-note">
+        <strong>Realtime mode</strong>
+        <p>Single URL analysis with charted diagnostics and ranked issues.</p>
+      </div>
+
+      <div class="rail-note">
+        <strong>Feature pages</strong>
+        <p><a href="/">Main</a> | <a href="/keyword-rank.html">Keyword Rank</a> | <a href="/prompt-tracker.html">Prompt Tracker</a> | <a href="/aeo-optimizer.html">AEO Optimizer</a></p>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="top-nav panel">
+        <div class="top-nav-copy">
+          <p id="workspace-eyebrow" class="eyebrow">Analytics Workspace</p>
+          <h2 id="workspace-title">Competitive Visibility Dashboard</h2>
+        </div>
+
+        <nav class="top-gnb" aria-label="Product navigation">
+          <a id="gnb-main" href="/">Main</a>
+          <a id="gnb-keyword" href="/keyword-rank.html">Keyword Rank</a>
+          <a id="gnb-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
+          <a id="gnb-aeo" href="/aeo-optimizer.html">AEO Optimizer</a>
+        </nav>
+
+        <div class="auth-actions">
+          <select id="language-select" class="language-select" aria-label="Language">
+            <option value="en">EN</option>
+            <option value="ko">KR</option>
+            <option value="ja">JP</option>
+            <option value="zh">CN</option>
+          </select>
+          <button id="open-login-btn" class="btn btn-ghost">Log in</button>
+          <button id="open-register-btn" class="btn btn-primary">Get started</button>
+          <button id="logout-btn" class="btn btn-ghost hidden">Logout</button>
+        </div>
+      </header>
+
+      <main class="main-grid">
+      <section id="tab-analyze" class="tab-panel">
+        <div class="panel hero-panel">
+          <div class="hero-copy">
+            <p id="hero-eyebrow" class="eyebrow">URL intelligence</p>
+            <h3 id="hero-title">Run a live audit and view all key signals in one screen</h3>
+            <p id="hero-description">Inspired by enterprise analytics layouts: KPI ribbon, chart board, and prioritized fixes.</p>
+          </div>
+
+          <div class="search-row">
+            <input type="url" id="target-url" placeholder="https://example.com" />
+            <button id="analyze-btn" class="btn btn-primary">Analyze URL</button>
+          </div>
+
+          <div class="competitor-block">
+            <label id="competitor-label" for="competitor-urls">Competitor URLs (one per line)</label>
+            <textarea id="competitor-urls" rows="3" placeholder="https://competitor-a.com"></textarea>
+            <p id="competitor-policy" class="mini-note">
+              Free: 1 competitor | Paid: 5 included, +$3/month each above 5 | Pro hard cap: 10
+            </p>
+          </div>
+
+          <div class="hero-meta">
+            <span id="hero-meta-guest">Guest: one URL analysis</span>
+            <span id="hero-meta-pro">Pro: full sitemap batch</span>
+            <span id="hero-meta-mode">Mode: realtime snapshot</span>
+          </div>
+        </div>
+
+        <div id="analysis-result" class="panel hidden">
+          <h3 id="analysis-report-title">Analysis report</h3>
+          <div id="report-content"></div>
+        </div>
+
+        <div id="post-analysis-cta" class="panel cta-panel hidden">
+          <h3 id="post-cta-title">Need full sitemap analysis?</h3>
+          <p id="post-cta-description">Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).</p>
+          <div class="cta-actions">
+            <button id="cta-open-pricing" class="btn btn-primary">View Pricing</button>
+            <button id="cta-open-login" class="btn btn-ghost">Login to upgrade</button>
+          </div>
+        </div>
+
+        <div class="panel full-batch-panel">
+          <h3 id="batch-title">Full sitemap analysis (paid)</h3>
+          <p id="batch-description">Backend logic is implemented. Frontend API wiring can be connected next.</p>
+          <div class="search-row">
+            <input type="url" id="sitemap-url" placeholder="https://example.com/sitemap.xml" />
+            <button id="sitemap-analyze-btn" class="btn btn-secondary">Start full analysis</button>
+          </div>
+          <p id="batch-refresh-policy" class="mini-note">Refresh policy: weekly (LLM/API-intensive).</p>
+          <pre id="sitemap-output" class="mini-output">This section requires paid tier.</pre>
+        </div>
+      </section>
+
+      <section id="tab-pricing" class="tab-panel hidden">
+        <div class="panel pricing-wrap">
+          <h2 id="pricing-title">Pricing</h2>
+          <p id="pricing-description">Choose a plan based on crawl depth and workflow scale.</p>
+          <div class="pricing-grid">
+            <article class="price-card plan-card" data-plan="free">
+              <h3 id="plan-free-title">Free</h3>
+              <p class="price">$0</p>
+              <ul>
+                <li id="plan-free-f1">Single URL report</li>
+                <li id="plan-free-f2">SEO + GEO + AEO snapshot</li>
+                <li id="plan-free-f3">No sitemap batch</li>
+              </ul>
+            </article>
+            <article class="price-card plan-card" data-plan="pro">
+              <h3 id="plan-pro-title">Pro</h3>
+              <p class="price">$49/mo</p>
+              <ul>
+                <li id="plan-pro-f1">Full sitemap analysis</li>
+                <li id="plan-pro-f2">URL queue + background batch</li>
+                <li id="plan-pro-f3">Batch status tracking</li>
+              </ul>
+            </article>
+            <article class="price-card plan-card" data-plan="enterprise">
+              <h3 id="plan-ent-title">Enterprise</h3>
+              <p id="plan-ent-price-label" class="price">Custom</p>
+              <ul>
+                <li id="plan-ent-f1">Improvement strategy</li>
+                <li id="plan-ent-f2">Managed optimization workflow</li>
+                <li id="plan-ent-f3">Dedicated support</li>
+              </ul>
+            </article>
+          </div>
+          <p id="pricing-click-hint" class="pricing-click-hint">Click Pro to continue checkout. Enterprise opens inquiry.</p>
+        </div>
+      </section>
+
+      <section id="tab-enterprise" class="tab-panel hidden">
+        <div class="panel">
+          <h2 id="enterprise-title">Enterprise Improvement & Management</h2>
+          <p id="enterprise-description">If you want ongoing site improvement and operational management, send an enterprise inquiry.</p>
+          <form id="enterprise-form" class="enterprise-form">
+            <input type="text" id="company-name" placeholder="Company name" required />
+            <input type="email" id="contact-email" placeholder="Work email" required />
+            <textarea id="enterprise-needs" rows="5" placeholder="Tell us your SEO/GEO/AEO goals" required></textarea>
+            <button id="enterprise-submit" type="submit" class="btn btn-primary">Send enterprise inquiry</button>
+          </form>
+        </div>
+      </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="auth-modal" class="modal hidden">
+    <div class="modal-card panel">
+      <button id="close-auth-modal" class="close-btn" aria-label="Close">x</button>
+
+      <div id="login-container">
+        <h2 id="login-title">Log in</h2>
+        <form id="login-form" class="auth-form">
+          <input type="email" id="email" placeholder="Email" required />
+          <input type="password" id="password" placeholder="Password" required />
+          <button id="login-submit" type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+        <p class="switch-link"><span id="login-switch-label">No account?</span> <button id="to-register" type="button">Create one</button></p>
+      </div>
+
+      <div id="register-container" class="hidden">
+        <h2 id="register-title">Create account</h2>
+        <form id="register-form" class="auth-form">
+          <input type="email" id="reg-email" placeholder="Email" required />
+          <input type="password" id="reg-password" placeholder="Password" required />
+          <button id="register-submit" type="submit" class="btn btn-primary">Sign up</button>
+        </form>
+        <p class="switch-link"><span id="register-switch-label">Already registered?</span> <button id="to-login" type="button">Back to login</button></p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

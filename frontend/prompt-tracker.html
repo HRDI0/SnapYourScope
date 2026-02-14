@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapYourScope | Prompt Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/tools.css" />
+</head>
+
+<body>
+  <div class="tool-shell">
+    <aside class="tool-rail panel">
+      <div class="brand">
+        <span class="brand-mark">S</span>
+        <div>
+          <h2>SnapYourScope</h2>
+          <p>SEO/GEO/AEO Intelligence</p>
+        </div>
+      </div>
+
+      <nav class="tool-nav">
+        <a id="pt-nav-main" href="/">Main</a>
+        <a id="pt-nav-dashboard" href="/app.html">Dashboard</a>
+        <a id="pt-nav-keyword" href="/keyword-rank.html">Keyword Rank</a>
+        <a id="pt-nav-prompt" class="active" href="/prompt-tracker.html">Prompt Tracker</a>
+        <a id="pt-nav-optimizer" href="/aeo-optimizer.html">AEO Optimizer</a>
+      </nav>
+
+      <div class="rail-note">
+        <strong>Tracking mode</strong>
+        <p id="pt-refresh-note">Refresh policy: weekly (LLM/API-intensive).</p>
+      </div>
+    </aside>
+
+    <div class="tool-workspace">
+      <header class="tool-top panel">
+        <div>
+          <p class="eyebrow">AI Visibility</p>
+          <h1 id="pt-title">Prompt Tracker</h1>
+        </div>
+
+        <div class="header-controls">
+          <select id="language-select" aria-label="Language">
+            <option value="en">EN</option>
+            <option value="ko">KR</option>
+            <option value="ja">JP</option>
+            <option value="zh">CN</option>
+          </select>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel">
+          <h2 id="pt-paid-title">Paid Prompt Tracking (Pro / Enterprise)</h2>
+          <p id="pt-paid-desc">Score mention tier in LLM answers plus linked web search ranking.</p>
+          <form id="prompt-track-form" class="grid">
+            <label id="pt-prompt-query-label">Prompt / Query (one per line)
+              <textarea id="prompt-query" rows="5" required></textarea>
+            </label>
+            <div class="row">
+              <label id="pt-prompt-url-label">Target URL
+                <input type="url" id="prompt-target-url" placeholder="https://example.com" required />
+              </label>
+              <label id="pt-brand-label">Brand Name (optional)
+                <input type="text" id="prompt-brand-name" />
+              </label>
+            </div>
+            <div class="checks">
+              <label><input type="checkbox" name="llm-source" value="gpt" checked /> GPT</label>
+              <label><input type="checkbox" name="llm-source" value="gemini" checked /> Gemini</label>
+              <label><input type="checkbox" name="llm-source" value="perplexity" /> Perplexity</label>
+            </div>
+            <div class="checks">
+              <label><input type="checkbox" name="prompt-engine" value="google" checked /> Google</label>
+              <label><input type="checkbox" name="prompt-engine" value="bing" checked /> Bing</label>
+              <label><input type="checkbox" name="prompt-engine" value="naver" checked /> Naver</label>
+            </div>
+            <p id="pt-policy-note" class="mini-note">Paid policy: 30 included; +$10/month per extra 5 prompts.</p>
+            <button id="pt-prompt-submit" type="submit">Run Prompt Tracking</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2 id="pt-result-title">Result</h2>
+          <pre id="result-output">Run a request to view output.</pre>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="/src/prompt-tracker.js"></script>
+</body>
+
+</html>

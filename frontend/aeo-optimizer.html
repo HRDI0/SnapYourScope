@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapYourScope | AEO Optimizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/tools.css" />
+</head>
+
+<body>
+  <div class="tool-shell">
+    <aside class="tool-rail panel">
+      <div class="brand">
+        <span class="brand-mark">S</span>
+        <div>
+          <h2>SnapYourScope</h2>
+          <p>SEO/GEO/AEO Intelligence</p>
+        </div>
+      </div>
+
+      <nav class="tool-nav">
+        <a id="ao-nav-main" href="/">Main</a>
+        <a id="ao-nav-dashboard" href="/app.html">Dashboard</a>
+        <a id="ao-nav-keyword" href="/keyword-rank.html">Keyword Rank</a>
+        <a id="ao-nav-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
+        <a id="ao-nav-aeo" class="active" href="/aeo-optimizer.html">AEO Optimizer</a>
+      </nav>
+
+      <div class="rail-note">
+        <strong>Tracking mode</strong>
+        <p id="ao-refresh-note">Refresh policy: weekly (LLM/API-intensive).</p>
+      </div>
+    </aside>
+
+    <div class="tool-workspace">
+      <header class="tool-top panel">
+        <div>
+          <p class="eyebrow">Optimization Workflow</p>
+          <h1 id="ao-title">AEO Optimizer</h1>
+        </div>
+
+        <div class="header-controls">
+          <select id="language-select" aria-label="Language">
+            <option value="en">EN</option>
+            <option value="ko">KR</option>
+            <option value="ja">JP</option>
+            <option value="zh">CN</option>
+          </select>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel">
+          <h2 id="ao-paid-title">Paid Recommendation Workflow (Pro / Enterprise)</h2>
+          <p id="ao-paid-desc">Generate optimization recommendations from URL audit outputs and GEO/AEO principles.</p>
+          <form id="aeo-optimizer-form" class="grid">
+            <label id="ao-url-label">Target URL
+              <input type="url" id="optimizer-url" placeholder="https://example.com" required />
+            </label>
+            <button id="ao-submit" type="submit">Generate Recommendations</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2 id="ao-result-title">Result</h2>
+          <pre id="optimizer-output">Submit URL to receive recommendations.</pre>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="/src/aeo-optimizer.js"></script>
+</body>
+
+</html>
