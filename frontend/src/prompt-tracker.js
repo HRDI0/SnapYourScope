@@ -1,4 +1,3 @@
-import './tools.css'
 import { calculatePromptAddOnMonthly, PROMPT_INCLUDED_COUNT, PROMPT_ADDON_BLOCK_SIZE, PROMPT_ADDON_BLOCK_PRICE_USD } from './core/policy'
 import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
 

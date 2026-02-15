@@ -1,213 +1,209 @@
 <!doctype html>
-<html lang="en">
-
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SnapYourScope App</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="theme-color" content="#020617" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
+          keyframes: {
+            fadeUp: { "0%": { opacity: "0", transform: "translateY(10px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+          },
+          animation: { "fade-in": "fadeUp 0.65s ease-out both" },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="min-h-screen bg-slate-950 font-sans text-slate-200 antialiased">
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute inset-0 bg-slate-950"></div>
+    <div class="absolute -top-72 left-1/2 h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 blur-3xl"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.07),transparent_60%)]"></div>
+  </div>
 
-<body>
-  <div id="app" class="app-shell">
-    <aside class="left-rail panel">
-      <div class="brand">
-        <span class="brand-mark">S</span>
-        <div>
-          <h1>SnapYourScope</h1>
-          <p id="brand-tagline">SEO/GEO/AEO Intelligence</p>
-        </div>
-      </div>
-
-      <nav class="tab-links" id="tab-links">
-        <a id="tab-main-link" class="tab-link tab-link-anchor" href="/">Main</a>
-        <button id="tab-analyze-btn" class="tab-link active" data-tab="analyze">Dashboard</button>
-        <a id="tab-keyword-link" class="tab-link tab-link-anchor" href="/keyword-rank.html">Keyword Rank</a>
-        <a id="tab-prompt-link" class="tab-link tab-link-anchor" href="/prompt-tracker.html">Prompt Tracker</a>
-        <a id="tab-aeo-link" class="tab-link tab-link-anchor" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
-        <button id="tab-pricing-btn" class="tab-link" data-tab="pricing">Pricing</button>
-        <button id="tab-enterprise-btn" class="tab-link" data-tab="enterprise">Inquiry</button>
-      </nav>
-
-      <div class="rail-note">
-        <strong>Realtime mode</strong>
-        <p>Single URL analysis with charted diagnostics and ranked issues.</p>
-      </div>
-
-      <div class="rail-note">
-        <strong>Feature pages</strong>
-          <p><a href="/">Main</a> | <a href="/app.html">Dashboard</a> | <a href="/keyword-rank.html">Keyword Rank</a> | <a href="/prompt-tracker.html">Prompt Tracker</a> | <a href="/aeo-optimizer.html">SEO/AEO Optimizer</a></p>
-      </div>
-    </aside>
-
-    <div class="workspace">
-      <header class="top-nav panel">
-        <div class="top-nav-copy">
-          <p id="workspace-eyebrow" class="eyebrow">Analytics Workspace</p>
-          <h2 id="workspace-title">Competitive Visibility Dashboard</h2>
-        </div>
-
-        <nav class="top-gnb" aria-label="Product navigation">
-          <a id="gnb-main" href="/">Main</a>
-          <a id="gnb-keyword" href="/keyword-rank.html">Keyword Rank</a>
-          <a id="gnb-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
-          <a id="gnb-aeo" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
-        </nav>
-
-        <div class="auth-actions">
-          <select id="language-select" class="language-select" aria-label="Language">
-            <option value="en">EN</option>
-            <option value="ko">KR</option>
-            <option value="ja">JP</option>
-            <option value="zh">CN</option>
-          </select>
-          <button id="open-login-btn" class="btn btn-ghost">Log in</button>
-          <button id="open-register-btn" class="btn btn-primary">Get started</button>
-          <button id="logout-btn" class="btn btn-ghost hidden">Logout</button>
-        </div>
-      </header>
-
-      <main class="main-grid">
-      <section id="tab-analyze" class="tab-panel">
-        <div class="panel hero-panel">
-          <div class="hero-copy">
-            <p id="hero-eyebrow" class="eyebrow">URL intelligence</p>
-            <h3 id="hero-title">Run a live audit and view all key signals in one screen</h3>
-            <p id="hero-description">Inspired by enterprise analytics layouts: KPI ribbon, chart board, and prioritized fixes.</p>
+  <div id="app" class="mx-auto max-w-7xl px-4 py-6 lg:py-10 motion-safe:animate-fade-in motion-reduce:animate-none">
+    <div class="flex flex-col gap-6 lg:flex-row">
+      <aside class="lg:sticky lg:top-6 lg:w-80">
+        <div class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-sm font-extrabold text-white">S</span>
+            <div class="leading-tight">
+              <p class="text-base font-bold text-white">SnapYourScope</p>
+              <p id="brand-tagline" class="text-xs text-slate-400">SEO/GEO/AEO Intelligence</p>
+            </div>
           </div>
 
-          <div class="search-row">
-            <input type="url" id="target-url" placeholder="https://example.com" />
-            <button id="analyze-btn" class="btn btn-primary">Analyze URL</button>
+          <nav class="mt-6 grid gap-2" id="tab-links">
+            <a id="tab-main-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/">Main</a>
+            <button id="tab-analyze-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="analyze" type="button">Dashboard</button>
+            <a id="tab-keyword-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/keyword-rank.html">Keyword Rank</a>
+            <a id="tab-prompt-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/prompt-tracker.html">Prompt Tracker</a>
+            <a id="tab-aeo-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
+            <button id="tab-pricing-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="pricing" type="button">Pricing</button>
+            <button id="tab-enterprise-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="enterprise" type="button">Inquiry</button>
+          </nav>
+
+          <div class="mt-6 rounded-2xl border border-slate-800/60 bg-slate-950/35 p-4">
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Realtime mode</p>
+            <p class="mt-2 text-sm text-slate-300">Single URL analysis with charted diagnostics and ranked issues.</p>
           </div>
 
-          <div class="competitor-block">
-            <label id="competitor-label" for="competitor-urls">Competitor URLs (one per line)</label>
-            <textarea id="competitor-urls" rows="3" placeholder="https://competitor-a.com"></textarea>
-            <p id="competitor-policy" class="mini-note">
-              Free: 1 competitor | Paid: 5 included, +$3/month each above 5 | Pro hard cap: 10
+          <div class="mt-3 rounded-2xl border border-slate-800/60 bg-slate-950/35 p-4">
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Feature pages</p>
+            <p class="mt-2 text-sm text-slate-300">
+              <a href="/" class="font-semibold text-slate-200 hover:text-white">Main</a> ·
+              <a href="/app.html" class="font-semibold text-slate-200 hover:text-white">Dashboard</a> ·
+              <a href="/keyword-rank.html" class="font-semibold text-slate-200 hover:text-white">Keyword Rank</a> ·
+              <a href="/prompt-tracker.html" class="font-semibold text-slate-200 hover:text-white">Prompt Tracker</a> ·
+              <a href="/aeo-optimizer.html" class="font-semibold text-slate-200 hover:text-white">SEO/AEO Optimizer</a>
             </p>
           </div>
+        </div>
+      </aside>
 
-          <div class="hero-meta">
-            <span id="hero-meta-guest">Guest: one URL analysis</span>
-            <span id="hero-meta-pro">Pro: full sitemap batch</span>
-            <span id="hero-meta-mode">Mode: realtime snapshot</span>
+      <div class="flex-1 space-y-6">
+        <header class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+          <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p id="workspace-eyebrow" class="text-xs font-semibold uppercase tracking-widest text-slate-400">Analytics Workspace</p>
+              <h2 id="workspace-title" class="mt-2 text-2xl font-bold text-white">Competitive Visibility Dashboard</h2>
+            </div>
+            <nav class="flex flex-wrap gap-2" aria-label="Product navigation">
+              <a id="gnb-main" href="/" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Main</a>
+              <a id="gnb-keyword" href="/keyword-rank.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Keyword Rank</a>
+              <a id="gnb-prompt" href="/prompt-tracker.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Prompt Tracker</a>
+              <a id="gnb-aeo" href="/aeo-optimizer.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">SEO/AEO Optimizer</a>
+            </nav>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="language-select" aria-label="Language" class="rounded-xl border border-slate-700/60 bg-slate-950/60 px-3 py-2 text-xs font-semibold text-slate-200 outline-none transition focus-visible:ring-2 focus-visible:ring-violet-500/70">
+                <option value="en">EN</option>
+                <option value="ko">KR</option>
+                <option value="ja">JP</option>
+                <option value="zh">CN</option>
+              </select>
+              <button id="open-login-btn" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">Log in</button>
+              <button id="open-register-btn" type="button" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.03]">Get started</button>
+              <button id="logout-btn" type="button" class="hidden rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">Logout</button>
+            </div>
           </div>
-        </div>
+        </header>
 
-        <div id="analysis-result" class="panel hidden">
-          <h3 id="analysis-report-title">Analysis report</h3>
-          <div id="report-content"></div>
-        </div>
+        <main class="space-y-6">
+          <section id="tab-analyze" class="tab-panel grid gap-6">
+            <div class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <p id="hero-eyebrow" class="text-xs font-semibold uppercase tracking-widest text-slate-400">URL intelligence</p>
+              <h3 id="hero-title" class="mt-2 text-xl font-bold text-white">Run a live audit and view all key signals in one screen</h3>
+              <p id="hero-description" class="mt-2 text-sm text-slate-300">Inspired by enterprise analytics layouts: KPI ribbon, chart board, and prioritized fixes.</p>
+              <div class="mt-6 grid gap-3 lg:grid-cols-[1fr_auto]">
+                <input type="url" id="target-url" placeholder="https://example.com" class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
+                <button id="analyze-btn" type="button" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">Analyze URL</button>
+              </div>
+              <div class="mt-6">
+                <label id="competitor-label" for="competitor-urls" class="text-sm font-semibold text-slate-200">Competitor URLs (one per line)</label>
+                <textarea id="competitor-urls" rows="3" placeholder="https://competitor-a.com" class="mt-2 w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none"></textarea>
+                <p id="competitor-policy" class="mt-2 text-xs text-slate-400">Free: 1 competitor | Paid: 5 included, +$3/month each above 5 | Pro hard cap: 10</p>
+              </div>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span id="hero-meta-guest" class="rounded-full border border-slate-700/60 bg-slate-950/30 px-3 py-1 text-xs font-semibold text-slate-300">Guest: one URL analysis</span>
+                <span id="hero-meta-pro" class="rounded-full border border-slate-700/60 bg-slate-950/30 px-3 py-1 text-xs font-semibold text-slate-300">Pro: full sitemap batch</span>
+                <span id="hero-meta-mode" class="rounded-full border border-slate-700/60 bg-slate-950/30 px-3 py-1 text-xs font-semibold text-slate-300">Mode: realtime snapshot</span>
+              </div>
+            </div>
 
-        <div id="post-analysis-cta" class="panel cta-panel hidden">
-          <h3 id="post-cta-title">Need full sitemap analysis?</h3>
-          <p id="post-cta-description">Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).</p>
-          <div class="cta-actions">
-            <button id="cta-open-pricing" class="btn btn-primary">View Pricing</button>
-            <button id="cta-open-login" class="btn btn-ghost">Login to upgrade</button>
-          </div>
-        </div>
+            <div id="analysis-result" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <h3 id="analysis-report-title" class="text-xl font-bold text-white">Analysis report</h3>
+              <div id="report-content" class="mt-6 grid gap-6"></div>
+            </div>
 
-        <div class="panel full-batch-panel">
-          <h3 id="batch-title">Full sitemap analysis (paid)</h3>
-          <p id="batch-description">Backend logic is implemented. Frontend API wiring can be connected next.</p>
-          <div class="search-row">
-            <input type="url" id="sitemap-url" placeholder="https://example.com/sitemap.xml" />
-            <button id="sitemap-analyze-btn" class="btn btn-secondary">Start full analysis</button>
-          </div>
-          <p id="sitemap-lock-note" class="mini-note hidden">Paid plan required. URL field remains visible but locked for free tier.</p>
-          <p id="batch-refresh-policy" class="mini-note">Refresh policy: weekly (LLM/API-intensive).</p>
-          <pre id="sitemap-output" class="mini-output">This section requires paid tier.</pre>
-        </div>
-      </section>
+            <div id="post-analysis-cta" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <h3 id="post-cta-title" class="text-xl font-bold text-white">Need full sitemap analysis?</h3>
+              <p id="post-cta-description" class="mt-2 text-sm text-slate-300">Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).</p>
+              <div class="mt-5 flex flex-wrap gap-3">
+                <button id="cta-open-pricing" type="button" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">View Pricing</button>
+                <button id="cta-open-login" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:text-white">Login to upgrade</button>
+              </div>
+            </div>
 
-      <section id="tab-pricing" class="tab-panel hidden">
-        <div class="panel pricing-wrap">
-          <h2 id="pricing-title">Pricing</h2>
-          <p id="pricing-description">Choose a plan based on crawl depth and workflow scale.</p>
-          <div class="pricing-grid">
-            <article class="price-card plan-card" data-plan="free">
-              <h3 id="plan-free-title">Free</h3>
-              <p class="price">$0</p>
-              <ul>
-                <li id="plan-free-f1">Single URL report</li>
-                <li id="plan-free-f2">SEO + GEO + AEO snapshot</li>
-                <li id="plan-free-f3">No sitemap batch</li>
-              </ul>
-            </article>
-            <article class="price-card plan-card" data-plan="pro">
-              <h3 id="plan-pro-title">Pro</h3>
-              <p class="price">$49/mo</p>
-              <ul>
-                <li id="plan-pro-f1">Full sitemap analysis</li>
-                <li id="plan-pro-f2">URL queue + background batch</li>
-                <li id="plan-pro-f3">Batch status tracking</li>
-              </ul>
-            </article>
-            <article class="price-card plan-card" data-plan="enterprise">
-              <h3 id="plan-ent-title">Enterprise</h3>
-              <p id="plan-ent-price-label" class="price">Custom</p>
-              <ul>
-                <li id="plan-ent-f1">Improvement strategy</li>
-                <li id="plan-ent-f2">Managed optimization workflow</li>
-                <li id="plan-ent-f3">Dedicated support</li>
-              </ul>
-            </article>
-          </div>
-          <p id="pricing-click-hint" class="pricing-click-hint">Click Pro to continue checkout. Enterprise opens inquiry.</p>
-        </div>
-      </section>
+            <div class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <h3 id="batch-title" class="text-xl font-bold text-white">Full sitemap analysis (paid)</h3>
+              <p id="batch-description" class="mt-2 text-sm text-slate-300">Backend logic is implemented. Frontend API wiring can be connected next.</p>
+              <div class="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
+                <input type="url" id="sitemap-url" placeholder="https://example.com/sitemap.xml" class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none disabled:cursor-not-allowed disabled:opacity-60" />
+                <button id="sitemap-analyze-btn" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-6 py-3 text-sm font-semibold text-slate-200 transition disabled:cursor-not-allowed disabled:opacity-60">Start full analysis</button>
+              </div>
+              <p id="sitemap-lock-note" class="hidden mt-2 text-xs text-slate-400">Paid plan required. URL field remains visible but locked for free tier.</p>
+              <p id="batch-refresh-policy" class="mt-2 text-xs text-slate-400">Refresh policy: weekly (LLM/API-intensive).</p>
+              <pre id="sitemap-output" class="mt-4 whitespace-pre-wrap break-words rounded-xl border border-slate-800/60 bg-slate-950/35 p-4 text-xs text-slate-200 data-[state=sample]:border-violet-500/25 data-[state=sample]:bg-violet-500/10 data-[state=error]:border-rose-500/30 data-[state=error]:bg-rose-500/10 data-[state=result]:border-emerald-500/30 data-[state=result]:bg-emerald-500/10">This section requires paid tier.</pre>
+            </div>
+          </section>
 
-      <section id="tab-enterprise" class="tab-panel hidden">
-        <div class="panel">
-          <h2 id="enterprise-title">Enterprise Improvement & Management</h2>
-          <p id="enterprise-description">If you want ongoing site improvement and operational management, send an enterprise inquiry.</p>
-          <form id="enterprise-form" class="enterprise-form">
-            <input type="text" id="company-name" placeholder="Company name" required />
-            <input type="email" id="contact-email" placeholder="Work email" required />
-            <textarea id="enterprise-needs" rows="5" placeholder="Tell us your SEO/GEO/AEO goals" required></textarea>
-            <button id="enterprise-submit" type="submit" class="btn btn-primary">Send enterprise inquiry</button>
-          </form>
-        </div>
-      </section>
-      </main>
+          <section id="tab-pricing" class="tab-panel hidden">
+            <div class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <h2 id="pricing-title" class="text-2xl font-bold text-white">Pricing</h2>
+              <p id="pricing-description" class="mt-2 text-sm text-slate-300">Choose a plan based on crawl depth and workflow scale.</p>
+              <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <article class="plan-card rounded-2xl border border-slate-800/60 bg-slate-950/25 p-6" data-plan="free"><h3 id="plan-free-title" class="text-lg font-bold text-white">Free</h3><p class="mt-2 text-3xl font-extrabold text-white">$0</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-free-f1">Single URL report</li><li id="plan-free-f2">SEO + GEO + AEO snapshot</li><li id="plan-free-f3">No sitemap batch</li></ul></article>
+                <article class="plan-card cursor-pointer rounded-2xl border border-violet-500/20 bg-slate-950/25 p-6" data-plan="pro"><h3 id="plan-pro-title" class="text-lg font-bold text-white">Pro</h3><p class="mt-2 text-3xl font-extrabold text-white">$49/mo</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-pro-f1">Full sitemap analysis</li><li id="plan-pro-f2">URL queue + background batch</li><li id="plan-pro-f3">Batch status tracking</li></ul></article>
+                <article class="plan-card cursor-pointer rounded-2xl border border-slate-800/60 bg-slate-950/25 p-6" data-plan="enterprise"><h3 id="plan-ent-title" class="text-lg font-bold text-white">Enterprise</h3><p id="plan-ent-price-label" class="mt-2 text-3xl font-extrabold text-white">Custom</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-ent-f1">Improvement strategy</li><li id="plan-ent-f2">Managed optimization workflow</li><li id="plan-ent-f3">Dedicated support</li></ul></article>
+              </div>
+              <p id="pricing-click-hint" class="mt-4 text-sm text-slate-400">Click Pro to continue checkout. Enterprise opens inquiry.</p>
+            </div>
+          </section>
+
+          <section id="tab-enterprise" class="tab-panel hidden">
+            <div class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <h2 id="enterprise-title" class="text-2xl font-bold text-white">Enterprise Improvement & Management</h2>
+              <p id="enterprise-description" class="mt-2 text-sm text-slate-300">If you want ongoing site improvement and operational management, send an enterprise inquiry.</p>
+              <form id="enterprise-form" class="mt-6 grid gap-3">
+                <input type="text" id="company-name" placeholder="Company name" required class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
+                <input type="email" id="contact-email" placeholder="Work email" required class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
+                <textarea id="enterprise-needs" rows="5" placeholder="Tell us your SEO/GEO/AEO goals" required class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none"></textarea>
+                <button id="enterprise-submit" type="submit" class="mt-2 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">Send enterprise inquiry</button>
+              </form>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   </div>
 
-  <div id="auth-modal" class="modal hidden">
-    <div class="modal-card panel">
-      <button id="close-auth-modal" class="close-btn" aria-label="Close">x</button>
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 grid place-items-center bg-black/55 p-4 backdrop-blur-sm">
+    <div class="relative w-full max-w-md rounded-2xl border border-slate-800/60 bg-slate-900/70 p-6 backdrop-blur-xl">
+      <button id="close-auth-modal" class="absolute right-3 top-3 rounded-xl border border-slate-700/60 bg-slate-950/40 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white" aria-label="Close">x</button>
 
       <div id="login-container">
-        <h2 id="login-title">Log in</h2>
-        <form id="login-form" class="auth-form">
-          <input type="email" id="email" placeholder="Email" required />
-          <input type="password" id="password" placeholder="Password" required />
-          <button id="login-submit" type="submit" class="btn btn-primary">Sign in</button>
+        <h2 id="login-title" class="text-xl font-bold text-white">Log in</h2>
+        <form id="login-form" class="mt-5 grid gap-3">
+          <input type="email" id="email" placeholder="Email" required class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
+          <input type="password" id="password" placeholder="Password" required class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
+          <button id="login-submit" type="submit" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">Sign in</button>
         </form>
-        <button id="google-login-btn" type="button" class="btn btn-ghost">Continue with Google</button>
-        <p class="switch-link"><span id="login-switch-label">No account?</span> <button id="to-register" type="button">Create one</button></p>
+        <button id="google-login-btn" type="button" class="mt-3 w-full rounded-xl border border-slate-700/60 bg-slate-900/35 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:text-white">Continue with Google</button>
+        <p class="mt-4 text-sm text-slate-300"><span id="login-switch-label">No account?</span> <button id="to-register" type="button" class="font-semibold text-violet-300 hover:text-white">Create one</button></p>
       </div>
 
-        <div id="register-container" class="hidden">
-          <h2 id="register-title">Create account</h2>
-          <form id="register-form" class="auth-form">
-            <input type="email" id="reg-email" placeholder="Email" required />
-            <input type="password" id="reg-password" placeholder="Password" required />
-            <button id="register-submit" type="submit" class="btn btn-primary">Sign up</button>
-          </form>
-          <button id="google-register-btn" type="button" class="btn btn-ghost">Continue with Google</button>
-          <p class="switch-link"><span id="register-switch-label">Already registered?</span> <button id="to-login" type="button">Back to login</button></p>
-        </div>
+      <div id="register-container" class="hidden">
+        <h2 id="register-title" class="text-xl font-bold text-white">Create account</h2>
+        <form id="register-form" class="mt-5 grid gap-3">
+          <input type="email" id="reg-email" placeholder="Email" required class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
+          <input type="password" id="reg-password" placeholder="Password" required class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
+          <button id="register-submit" type="submit" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">Sign up</button>
+        </form>
+        <button id="google-register-btn" type="button" class="mt-3 w-full rounded-xl border border-slate-700/60 bg-slate-900/35 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:text-white">Continue with Google</button>
+        <p class="mt-4 text-sm text-slate-300"><span id="register-switch-label">Already registered?</span> <button id="to-login" type="button" class="font-semibold text-violet-300 hover:text-white">Back to login</button></p>
+      </div>
     </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>
 </body>
-
 </html>

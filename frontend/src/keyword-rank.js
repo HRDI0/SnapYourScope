@@ -1,9 +1,9 @@
-import './tools.css'
 import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
 
 const output = document.getElementById('kr-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('kr-submit')
+const multiKeywordInput = document.getElementById('kr-query')
 
 let currentLanguage = getStoredLanguage('en')
 let currentTier = 'free'
@@ -21,7 +21,7 @@ const I18N = {
     freeTitle: 'Free: Single Keyword',
     freeDesc: 'Track one keyword for free. Multi-keyword batch is paid.',
     querySingleLabel: 'Primary Keyword',
-    queryLabel: 'Additional Keywords (optional, one per line)',
+    queryLabel: 'Additional Keywords (Pro/Enterprise only)',
     querySinglePlaceholder: 'best ai seo platform',
     queryMultiPlaceholder: 'seo tool comparison',
     urlLabel: 'Target URL',
@@ -50,7 +50,7 @@ const I18N = {
     freeTitle: '무료: 단일 키워드',
     freeDesc: '키워드 1개는 무료입니다. 다중 키워드 배치는 유료입니다.',
     querySingleLabel: '기본 키워드',
-    queryLabel: '추가 키워드 (선택, 한 줄에 하나)',
+    queryLabel: '추가 키워드 (Pro/Enterprise 전용)',
     querySinglePlaceholder: 'ai seo 플랫폼',
     queryMultiPlaceholder: 'seo 도구 비교',
     urlLabel: '대상 URL',
@@ -99,8 +99,7 @@ function applyLanguage(lang) {
   setText('kr-url-label', 'urlLabel')
   const singleInput = document.getElementById('kr-query-single')
   if (singleInput) singleInput.placeholder = t('querySinglePlaceholder')
-  const multiInput = document.getElementById('kr-query')
-  if (multiInput) multiInput.placeholder = t('queryMultiPlaceholder')
+  if (multiKeywordInput) multiKeywordInput.placeholder = t('queryMultiPlaceholder')
   setText('kr-policy-note', 'policyNote')
   setText('kr-refresh-note', 'refreshNote')
   setText('kr-submit', 'submit')
@@ -110,6 +109,11 @@ function applyLanguage(lang) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
+}
+
+function applyTierUi() {
+  if (!multiKeywordInput) return
+  multiKeywordInput.disabled = !isPaidTier(currentTier)
 }
 
 function checkedValues(name) {
@@ -193,6 +197,8 @@ if (languageSelect) {
 }
 
 applyLanguage(currentLanguage)
+applyTierUi()
 fetchUserTier().then((tier) => {
   currentTier = tier
+  applyTierUi()
 })

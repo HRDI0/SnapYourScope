@@ -1,5 +1,3 @@
-import './landing.css'
-
 const languageSelect = document.getElementById('language-select')
 const planCards = document.querySelectorAll('.landing-plan-card[data-plan]')
 

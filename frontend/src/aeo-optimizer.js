@@ -1,4 +1,3 @@
-import './tools.css'
 import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
 
 const output = document.getElementById('optimizer-output')

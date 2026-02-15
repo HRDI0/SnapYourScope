@@ -1,54 +1,73 @@
 import { groupByPriority } from './components'
 
+const HOVER_GLOW =
+  'transition duration-200 ease-out hover:scale-[1.01] hover:border-violet-500/30 hover:shadow-[0_0_0_1px_rgba(168,85,247,0.25),0_12px_30px_rgba(0,0,0,0.55)]'
+
 export function renderComparisonRows(rows, escapeHtml) {
   return rows
-    .map(
-      (row) =>
-        `<li><strong>${escapeHtml(row.type)}: ${escapeHtml(row.url || '')}</strong><span>SEO ${escapeHtml(String(row.score))}</span></li>`
-    )
+    .map((row) => {
+      const label = escapeHtml(row.type)
+      const url = escapeHtml(row.url || '')
+      const score = escapeHtml(String(row.score))
+      return `
+        <li class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-3 ${HOVER_GLOW}">
+          <div class="min-w-0">
+            <p class="truncate text-sm font-semibold text-white">${label}</p>
+            <p class="mt-0.5 truncate text-xs text-slate-400">${url}</p>
+          </div>
+          <div class="shrink-0 text-xs font-semibold text-slate-300">SEO <span class="ml-1 text-sm font-extrabold text-white">${score}</span></div>
+        </li>
+      `
+    })
     .join('')
 }
 
 export function renderIssueBoard(issues, escapeHtml, labels) {
   const grouped = groupByPriority(issues)
 
-  const renderColumn = (title, key) => {
+  const renderColumn = (title, key, dotClass) => {
     const rows = grouped[key]
     if (!rows.length) {
       return `
-        <article class="issue-priority-column">
-          <h5>${title}</h5>
-          <p class="issue-empty">${labels.empty}</p>
-        </article>
+        <section class="rounded-xl border border-slate-800/60 bg-slate-950/25 p-4">
+          <div class="flex items-center justify-between">
+            <h5 class="text-xs font-semibold uppercase tracking-widest text-slate-400">${title}</h5>
+            <span class="h-2.5 w-2.5 rounded-full ${dotClass}"></span>
+          </div>
+          <p class="mt-3 text-sm text-slate-400">${labels.empty}</p>
+        </section>
       `
     }
 
     return `
-      <article class="issue-priority-column">
-        <h5>${title}</h5>
-        <ul>
+      <section class="rounded-xl border border-slate-800/60 bg-slate-950/25 p-4">
+        <div class="flex items-center justify-between">
+          <h5 class="text-xs font-semibold uppercase tracking-widest text-slate-400">${title}</h5>
+          <span class="h-2.5 w-2.5 rounded-full ${dotClass}"></span>
+        </div>
+        <ul class="mt-4 space-y-3">
           ${rows
             .map(
               (issue) =>
-                `<li>
-                  <strong>${escapeHtml(issue.label)}</strong>
-                  <span><b>Why:</b> ${escapeHtml(issue.why || issue.detail || issue.status)}</span>
-                  <span><b>Fix:</b> ${escapeHtml(issue.fixSteps || 'Review this signal and apply recommended updates.')}</span>
-                  <span><b>Impact:</b> ${escapeHtml(issue.expectedImpact || 'Visibility consistency improvement.')}</span>
-                  <span><b>Refs:</b> ${escapeHtml(issue.references || 'Hybrid Visibility')}</span>
+                `<li class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3 ${HOVER_GLOW}">
+                  <p class="text-sm font-semibold text-white">${escapeHtml(issue.label)}</p>
+                  <p class="mt-2 text-xs text-slate-300"><span class="font-semibold text-slate-200">Why:</span> ${escapeHtml(issue.why || issue.detail || issue.status)}</p>
+                  <p class="mt-1 text-xs text-slate-300"><span class="font-semibold text-slate-200">Fix:</span> ${escapeHtml(issue.fixSteps || 'Review this signal and apply recommended updates.')}</p>
+                  <p class="mt-1 text-xs text-slate-300"><span class="font-semibold text-slate-200">Impact:</span> ${escapeHtml(issue.expectedImpact || 'Visibility consistency improvement.')}</p>
+                  <p class="mt-1 text-xs text-slate-400"><span class="font-semibold text-slate-300">Refs:</span> ${escapeHtml(issue.references || 'Hybrid Visibility')}</p>
                 </li>`
             )
             .join('')}
         </ul>
-      </article>
+      </section>
     `
   }
 
   return `
-    <div class="issue-priority-board">
-      ${renderColumn(labels.p0, 'P0')}
-      ${renderColumn(labels.p1, 'P1')}
-      ${renderColumn(labels.p2, 'P2')}
+    <div class="grid gap-4 lg:grid-cols-3">
+      ${renderColumn(labels.p0, 'P0', 'bg-rose-400')}
+      ${renderColumn(labels.p1, 'P1', 'bg-amber-400')}
+      ${renderColumn(labels.p2, 'P2', 'bg-emerald-400')}
     </div>
   `
 }

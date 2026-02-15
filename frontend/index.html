@@ -1,126 +1,107 @@
 <!doctype html>
-<html lang="en">
-
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SnapYourScope | SEO, AEO, GEO Intelligence</title>
   <meta name="description" content="SnapYourScope helps teams audit URL visibility across SEO, AEO, GEO, and search/LLM surfaces." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/landing.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="theme-color" content="#020617" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
+          keyframes: {
+            fadeUp: { "0%": { opacity: "0", transform: "translateY(10px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+          },
+          animation: { "fade-in": "fadeUp 0.65s ease-out both" },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
-<body>
-  <header class="landing-header">
-    <div class="brand-block">
-      <span class="brand-mark">S</span>
-      <div>
-        <h1>SnapYourScope</h1>
-        <p id="landing-tagline">Lightweight URL-based SEO/AEO intelligence</p>
+<body class="min-h-screen bg-slate-950 font-sans text-slate-200 antialiased">
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute inset-0 bg-slate-950"></div>
+    <div class="absolute -top-72 left-1/2 h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 blur-3xl"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.07),transparent_60%)]"></div>
+  </div>
+  <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/70 backdrop-blur-xl">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+      <a href="/" class="flex items-center gap-3">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-sm font-extrabold text-white">S</span>
+        <div class="leading-tight">
+          <p class="text-sm font-semibold text-white">SnapYourScope</p>
+          <p id="landing-tagline" class="text-xs text-slate-400">Lightweight URL-based SEO/AEO intelligence</p>
+        </div>
+      </a>
+      <div class="flex items-center gap-2">
+        <nav class="hidden items-center gap-3 text-xs font-semibold text-slate-300 lg:flex">
+          <a id="landing-nav-main" href="/" class="rounded-xl px-2 py-2 transition hover:text-white">Main</a>
+          <a id="landing-nav-dashboard" href="/app.html" class="rounded-xl px-2 py-2 transition hover:text-white">Dashboard</a>
+          <a id="landing-nav-keyword" href="/keyword-rank.html" class="rounded-xl px-2 py-2 transition hover:text-white">Keyword Rank</a>
+          <a id="landing-nav-prompt" href="/prompt-tracker.html" class="rounded-xl px-2 py-2 transition hover:text-white">Prompt Tracker</a>
+          <a id="landing-nav-optimizer" href="/aeo-optimizer.html" class="rounded-xl px-2 py-2 transition hover:text-white">SEO/AEO Optimizer</a>
+          <a id="landing-nav-pricing" href="/app.html?tab=pricing" class="rounded-xl px-2 py-2 transition hover:text-white">Pricing</a>
+          <a id="landing-nav-inquiry" href="/app.html?tab=enterprise" class="rounded-xl px-2 py-2 transition hover:text-white">Inquiry</a>
+        </nav>
+        <select id="language-select" aria-label="Language" class="rounded-xl border border-slate-700/60 bg-slate-950/60 px-3 py-2 text-xs font-semibold text-slate-200 outline-none transition focus-visible:ring-2 focus-visible:ring-violet-500/70">
+          <option value="en">EN</option>
+          <option value="ko">KR</option>
+          <option value="ja">JP</option>
+          <option value="zh">CN</option>
+        </select>
       </div>
-    </div>
-    <div class="header-right">
-      <select id="language-select" class="language-select" aria-label="Language">
-        <option value="en">EN</option>
-        <option value="ko">KR</option>
-        <option value="ja">JP</option>
-        <option value="zh">CN</option>
-      </select>
-      <nav class="header-nav">
-        <a id="landing-nav-main" href="/">Main</a>
-        <a id="landing-nav-dashboard" href="/app.html">Dashboard</a>
-        <a id="landing-nav-keyword" href="/keyword-rank.html">Keyword Rank</a>
-        <a id="landing-nav-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
-        <a id="landing-nav-optimizer" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
-        <a id="landing-nav-pricing" href="/app.html?tab=pricing">Pricing</a>
-        <a id="landing-nav-inquiry" href="/app.html?tab=enterprise">Inquiry</a>
-      </nav>
     </div>
   </header>
-
-  <main>
-    <section class="hero">
-      <div>
-        <p id="landing-eyebrow" class="eyebrow">Visibility Operating System</p>
-        <h2 id="landing-hero-title">Track your brand in web search and AI answers from one workflow</h2>
-        <p id="landing-hero-description">Built for teams that need practical SEO + AEO execution: quick URL audits, paid prompt tracking, and recommendation workflows.</p>
-        <div class="hero-actions">
-          <a id="landing-open-dashboard" class="btn btn-primary" href="/app.html">Open Dashboard</a>
-          <a id="landing-open-keyword" class="btn btn-ghost" href="/keyword-rank.html">Open Keyword Rank</a>
-          <a id="landing-try-prompt" class="btn btn-ghost" href="/prompt-tracker.html">Try Prompt Tracker</a>
+  <main class="mx-auto max-w-7xl px-4 py-14 motion-safe:animate-fade-in motion-reduce:animate-none">
+    <section class="grid gap-10 lg:grid-cols-12 lg:items-center">
+      <div class="lg:col-span-7">
+        <p id="landing-eyebrow" class="text-xs font-semibold uppercase tracking-widest text-slate-400">Visibility Operating System</p>
+        <h2 id="landing-hero-title" class="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Track your brand in web search and AI answers from one workflow</h2>
+        <p id="landing-hero-description" class="mt-5 max-w-2xl text-base text-slate-300">Built for teams that need practical SEO + AEO execution: quick URL audits, paid prompt tracking, and recommendation workflows.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a id="landing-open-dashboard" href="/app.html" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">Open Dashboard</a>
+          <a id="landing-open-keyword" href="/keyword-rank.html" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:scale-[1.03] hover:text-white">Open Keyword Rank</a>
+          <a id="landing-try-prompt" href="/prompt-tracker.html" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:scale-[1.03] hover:text-white">Try Prompt Tracker</a>
         </div>
       </div>
-      <article class="hero-card">
-        <h3 id="landing-what-now">What you can run now</h3>
-        <ul>
+      <article class="lg:col-span-5 rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+        <h3 id="landing-what-now" class="text-lg font-bold text-white">What you can run now</h3>
+        <ul class="mt-4 space-y-3 text-sm text-slate-300">
           <li id="landing-li-1">Single URL SEO/AEO/GEO analysis</li>
           <li id="landing-li-2">Free web search rank tracking (Google/Bing/Naver)</li>
           <li id="landing-li-3">Paid prompt tracking with share-of-model scoring</li>
-            <li id="landing-li-4">Paid SEO/AEO optimization recommendations</li>
+          <li id="landing-li-4">Paid SEO/AEO optimization recommendations</li>
         </ul>
       </article>
     </section>
-
-    <section class="features">
-      <article>
-        <h3 id="landing-feature-1-title">SEO & AEO Dashboard</h3>
-        <p id="landing-feature-1-desc">Analyze technical and answer-engine signals with chart-based diagnostics.</p>
-      </article>
-      <article>
-        <h3 id="landing-feature-2-title">Prompt Tracking</h3>
-        <p id="landing-feature-2-desc">Score brand visibility by tier: not mentioned, mentioned, linked, core mention.</p>
-      </article>
-      <article>
-        <h3 id="landing-feature-3-title">Search Rank Monitor</h3>
-        <p id="landing-feature-3-desc">Check the position where your brand URL appears in web search results.</p>
-      </article>
-      <article>
-        <h3 id="landing-feature-4-title">SEO/AEO Optimizer</h3>
-        <p id="landing-feature-4-desc">Generate practical recommendations based on URL audit outputs and SEO/AEO principles.</p>
-      </article>
+    <section class="mt-16 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6"><h3 id="landing-feature-1-title" class="text-lg font-bold text-white">SEO & AEO Dashboard</h3><p id="landing-feature-1-desc" class="mt-2 text-sm text-slate-300">Analyze technical and answer-engine signals with chart-based diagnostics.</p></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6"><h3 id="landing-feature-2-title" class="text-lg font-bold text-white">Prompt Tracking</h3><p id="landing-feature-2-desc" class="mt-2 text-sm text-slate-300">Score brand visibility by tier: not mentioned, mentioned, linked, core mention.</p></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6"><h3 id="landing-feature-3-title" class="text-lg font-bold text-white">Search Rank Monitor</h3><p id="landing-feature-3-desc" class="mt-2 text-sm text-slate-300">Check the position where your brand URL appears in web search results.</p></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6"><h3 id="landing-feature-4-title" class="text-lg font-bold text-white">SEO/AEO Optimizer</h3><p id="landing-feature-4-desc" class="mt-2 text-sm text-slate-300">Generate practical recommendations based on URL audit outputs and SEO/AEO principles.</p></article>
     </section>
-
-    <section class="plans">
-      <h3 id="landing-plans-title">Plans</h3>
-      <div class="plan-grid">
-        <article class="landing-plan-card" data-plan="free">
-          <h4 id="landing-plan-free-title">Free</h4>
-          <p class="price">$0</p>
-          <ul>
-            <li id="landing-plan-free-f1">Single URL dashboard audit</li>
-            <li id="landing-plan-free-f2">Search rank tracking (API-key based)</li>
-          </ul>
-        </article>
-        <article class="landing-plan-card" data-plan="pro">
-          <h4 id="landing-plan-pro-title">Pro</h4>
-          <p class="price">$49/mo</p>
-          <ul>
-            <li id="landing-plan-pro-f1">Sitemap batch analysis</li>
-            <li id="landing-plan-pro-f2">Prompt tracking and scoring</li>
-            <li id="landing-plan-pro-f3">AEO optimization recommendations</li>
-          </ul>
-        </article>
-        <article class="landing-plan-card" data-plan="enterprise">
-          <h4 id="landing-plan-ent-title">Enterprise</h4>
-          <p class="price">Custom</p>
-          <ul>
-            <li id="landing-plan-ent-f1">Workflow and policy customization</li>
-            <li id="landing-plan-ent-f2">Provider strategy and reliability controls</li>
-          </ul>
-        </article>
+    <section class="mt-16">
+      <h3 id="landing-plans-title" class="text-xl font-bold text-white">Plans</h3>
+      <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <article class="landing-plan-card rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6" data-plan="free"><h4 id="landing-plan-free-title" class="text-lg font-bold text-white">Free</h4><p class="mt-2 text-3xl font-extrabold text-white">$0</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="landing-plan-free-f1">Single URL dashboard audit</li><li id="landing-plan-free-f2">Search rank tracking (API-key based)</li></ul></article>
+        <article class="landing-plan-card cursor-pointer rounded-2xl border border-violet-500/20 bg-slate-900/55 p-6" data-plan="pro"><h4 id="landing-plan-pro-title" class="text-lg font-bold text-white">Pro</h4><p class="mt-2 text-3xl font-extrabold text-white">$49/mo</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="landing-plan-pro-f1">Sitemap batch analysis</li><li id="landing-plan-pro-f2">Prompt tracking and scoring</li><li id="landing-plan-pro-f3">AEO optimization recommendations</li></ul></article>
+        <article class="landing-plan-card cursor-pointer rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6" data-plan="enterprise"><h4 id="landing-plan-ent-title" class="text-lg font-bold text-white">Enterprise</h4><p class="mt-2 text-3xl font-extrabold text-white">Custom</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="landing-plan-ent-f1">Workflow and policy customization</li><li id="landing-plan-ent-f2">Provider strategy and reliability controls</li></ul></article>
       </div>
-      <p id="landing-plan-hint" class="plan-hint">Click Pro or Enterprise to continue to checkout.</p>
+      <p id="landing-plan-hint" class="mt-4 text-sm text-slate-400">Click Pro or Enterprise to continue to checkout.</p>
     </section>
   </main>
-
-  <footer class="landing-footer">
-    <p>SnapYourScope</p>
-    <a id="landing-go-product" href="/app.html">Go to product</a>
+  <footer class="border-t border-slate-800/60 bg-slate-950/50">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-8">
+      <p class="text-sm font-semibold text-white">SnapYourScope</p>
+      <a id="landing-go-product" href="/app.html" class="text-sm font-semibold text-slate-300 transition hover:text-white">Go to product</a>
+    </div>
   </footer>
-
   <script type="module" src="/src/landing.js"></script>
 </body>
-
 </html>

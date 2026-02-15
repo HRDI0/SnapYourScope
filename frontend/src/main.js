@@ -1,5 +1,3 @@
-import '../style.css'
-
 import Chart from 'chart.js/auto'
 import { renderComparisonRows, renderIssueBoard } from './ui/renderers'
 
@@ -67,6 +65,13 @@ const appState = {
 }
 
 const stateListeners = new Set()
+const TAB_ACTIVE_CLASSES = [
+  'bg-slate-900/70',
+  'border',
+  'border-violet-500/30',
+  'text-white',
+  'shadow-[0_0_0_1px_rgba(168,85,247,0.25)]',
+]
 
 function setAppState(nextState) {
   Object.assign(appState, nextState)
@@ -956,11 +961,15 @@ function closeAuthModal() {
 
 function switchTab(tabName) {
   tabButtons.forEach((button) => {
-    if (button.dataset.tab === tabName) {
-      button.classList.add('active')
+    if (!button.dataset?.tab) return
+    const isActive = button.dataset.tab === tabName
+    button.classList.toggle('active', isActive)
+    if (isActive) {
+      button.classList.add(...TAB_ACTIVE_CLASSES)
     } else {
-      button.classList.remove('active')
+      button.classList.remove(...TAB_ACTIVE_CLASSES)
     }
+    button.setAttribute('aria-selected', isActive ? 'true' : 'false')
   })
 
   tabPanels.forEach((panel) => {
@@ -1014,10 +1023,32 @@ function normalizeStatus(value) {
 
 function toBadge(status) {
   const kind = normalizeStatus(status)
-  if (kind === 'pass') return { className: 'badge-pass', label: t('statusPass') }
-  if (kind === 'warn') return { className: 'badge-warn', label: t('statusWarn') }
-  if (kind === 'fail') return { className: 'badge-fail', label: t('statusFail') }
-  return { className: 'badge-info', label: t('statusInfo') }
+  if (kind === 'pass') {
+    return {
+      className:
+        'inline-flex items-center rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-200 ring-1 ring-emerald-500/25',
+      label: t('statusPass'),
+    }
+  }
+  if (kind === 'warn') {
+    return {
+      className:
+        'inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-200 ring-1 ring-amber-500/25',
+      label: t('statusWarn'),
+    }
+  }
+  if (kind === 'fail') {
+    return {
+      className:
+        'inline-flex items-center rounded-full bg-rose-500/15 px-2.5 py-1 text-xs font-semibold text-rose-200 ring-1 ring-rose-500/25',
+      label: t('statusFail'),
+    }
+  }
+  return {
+    className:
+      'inline-flex items-center rounded-full bg-slate-500/15 px-2.5 py-1 text-xs font-semibold text-slate-200 ring-1 ring-slate-500/25',
+    label: t('statusInfo'),
+  }
 }
 
 function collectSeoChecks(seoResult) {
@@ -1104,19 +1135,19 @@ function collectAeoChecks(aeoResult) {
 
 function renderStatusRows(checks, emptyText) {
   if (!checks.length) {
-    return `<p class="dashboard-empty">${emptyText}</p>`
+    return `<p class="rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-400">${emptyText}</p>`
   }
 
   return checks
     .map((check) => {
       const badge = toBadge(check.status)
       return `
-        <li class="status-row">
+        <li class="flex items-start justify-between gap-4 rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-3">
           <div>
-            <p class="status-label">${escapeHtml(check.label)}</p>
-            <p class="status-detail">${escapeHtml(check.detail || t('noDetails'))}</p>
+            <p class="text-sm font-semibold text-white">${escapeHtml(check.label)}</p>
+            <p class="mt-1 text-xs text-slate-300">${escapeHtml(check.detail || t('noDetails'))}</p>
           </div>
-          <span class="status-badge ${badge.className}">${badge.label}</span>
+          <span class="${badge.className}">${badge.label}</span>
         </li>
       `
     })
@@ -1125,17 +1156,21 @@ function renderStatusRows(checks, emptyText) {
 
 function renderGeoRows(geoResult) {
   if (!geoResult || typeof geoResult !== 'object') {
-    return `<p class="dashboard-empty">${t('noGeoData')}</p>`
+    return `<p class="rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-400">${t('noGeoData')}</p>`
   }
 
   return Object.entries(geoResult)
     .map(([region, info]) => {
       const ok = Number(info.status) >= 200 && Number(info.status) < 400
       return `
-        <li class="geo-row">
-          <strong>${escapeHtml(region)}</strong>
-          <span class="geo-status ${ok ? 'status-ok' : 'status-bad'}">${ok ? t('reachable') : t('issue')}</span>
-          <span class="geo-latency">${Number(info.load_time_ms) || 0} ms</span>
+        <li class="flex items-center justify-between gap-3 rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-2">
+          <strong class="text-sm text-white">${escapeHtml(region)}</strong>
+          <span class="${
+            ok
+              ? 'inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-200'
+              : 'inline-flex items-center rounded-full bg-rose-500/15 px-2 py-1 text-xs font-semibold text-rose-200'
+          }">${ok ? t('reachable') : t('issue')}</span>
+          <span class="text-xs font-semibold text-slate-300">${Number(info.load_time_ms) || 0} ms</span>
         </li>
       `
     })
@@ -1145,17 +1180,21 @@ function renderGeoRows(geoResult) {
 function renderLiveFeed(checks) {
   const rows = checks.slice(0, 6)
   if (!rows.length) {
-    return `<p class="dashboard-empty">${t('noDetails')}</p>`
+    return `<p class="rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-400">${t('noDetails')}</p>`
   }
 
   return `
-    <ul class="live-feed">
+    <ul class="space-y-3">
       ${rows
         .map(
           (check) => `
-            <li class="${check.domain === 'seo' ? 'seo' : 'aeo'}">
-              <strong>${escapeHtml(check.label)}</strong>
-              <span>${escapeHtml(check.detail || t('noDetails'))}</span>
+            <li class="rounded-xl border px-4 py-3 ${
+              check.domain === 'seo'
+                ? 'border-sky-500/25 bg-sky-500/10'
+                : 'border-fuchsia-500/25 bg-fuchsia-500/10'
+            }">
+              <strong class="block text-sm text-white">${escapeHtml(check.label)}</strong>
+              <span class="mt-1 block text-xs text-slate-200">${escapeHtml(check.detail || t('noDetails'))}</span>
             </li>
           `
         )
@@ -1397,107 +1436,42 @@ function renderReport(data, competitorReports = []) {
   ]
 
   const html = `
-    <section class="summary-zone">
-      <p class="zone-title">${t('zoneSummary')}</p>
-      <section class="dashboard-hero">
+    <section class="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h3>${t('dashboardTitle')}</h3>
-          <p class="dashboard-url">${escapeHtml(data.url || '')}</p>
-          <p class="dashboard-sub">${t('generatedAt')} ${formatTime(new Date())}</p>
+          <h3 class="text-xl font-bold text-white">${t('dashboardTitle')}</h3>
+          <p class="mt-1 text-sm text-slate-300">${escapeHtml(data.url || '')}</p>
+          <p class="mt-1 text-xs text-slate-400">${t('generatedAt')} ${formatTime(new Date())}</p>
         </div>
-        <div class="score-shell">
-          <div class="chart-box chart-score"><canvas id="score-chart"></canvas></div>
-          <div class="score-center">
-            <strong>${seoScore}</strong>
-            <span>${t('seoScoreLabel')}</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="kpi-grid">
-        <article class="kpi-card"><p>${t('kpiSeoChecks')}</p><h4>${seoPass}/${seoChecks.length || 0}</h4></article>
-        <article class="kpi-card"><p>${t('kpiAeoChecks')}</p><h4>${aeoPass}/${aeoChecks.length || 0}</h4></article>
-        <article class="kpi-card"><p>${t('kpiGlobalReach')}</p><h4>${successfulRegions}/${geoEntries.length || 0}</h4></article>
-        <article class="kpi-card"><p>${t('kpiAvgLatency')}</p><h4>${avgLatency}ms</h4></article>
-      </section>
-
-      <section class="risk-legend">
-        <span class="risk-pill critical">Critical ${statusCounts.fail}</span>
-        <span class="risk-pill caution">Caution ${statusCounts.warn}</span>
-        <span class="risk-pill safe">Safe ${statusCounts.pass}</span>
-      </section>
-
-      <section class="dashboard-card">
-        <div class="card-head"><h4>${t('competitorComparisonTitle')}</h4></div>
-        <ul class="issue-list">
-          ${renderComparisonRows(comparisonRows, escapeHtml)}
-        </ul>
-      </section>
-    </section>
-
-    <section class="analysis-zone">
-      <p class="zone-title">${t('zoneAnalysis')}</p>
-      <div class="analysis-zone-grid">
-        <article class="dashboard-card">
-          <div class="card-head"><h4>${t('sectionSeoEssentials')}</h4></div>
-          <ul class="status-list">${renderStatusRows(seoChecks, t('emptySeoChecks'))}</ul>
-        </article>
-
-        <article class="dashboard-card">
-          <div class="card-head"><h4>${t('sectionAeoSignals')}</h4></div>
-          <ul class="status-list">${renderStatusRows(aeoChecks, t('emptyAeoChecks'))}</ul>
-        </article>
-
-        <article class="dashboard-card dashboard-chart-card">
-          <div class="card-head"><h4>${t('sectionStatusMix')}</h4></div>
-          <div class="chart-box chart-medium"><canvas id="status-mix-chart"></canvas></div>
-        </article>
-
-        <article class="dashboard-card dashboard-chart-card">
-          <div class="card-head"><h4>${t('sectionHybridCorrelation')}</h4></div>
-          <div class="chart-box chart-medium"><canvas id="hybrid-correlation-chart"></canvas></div>
-        </article>
-
-        <article class="dashboard-card dashboard-chart-card">
-          <div class="card-head"><h4>${t('sectionRegionalLatency')}</h4></div>
-          <div class="chart-box chart-medium"><canvas id="geo-latency-chart"></canvas></div>
-          <ul class="geo-list">${renderGeoRows(geoResult)}</ul>
-        </article>
-
-        <article class="dashboard-card">
-          <div class="card-head"><h4>${t('sectionContentSnapshot')}</h4></div>
-          <div class="meta-grid">
-            <div class="meta-chip"><span>${t('metaWords')}</span><strong>${words}</strong></div>
-            <div class="meta-chip"><span>${t('metaMissingAlt')}</span><strong>${missingAlt}</strong></div>
-            <div class="meta-chip"><span>${t('metaCurrencies')}</span><strong>${
-              seoResult?.geo_signals?.found_currencies?.length || 0
-            }</strong></div>
-            <div class="meta-chip"><span>${t('metaPhoneFormats')}</span><strong>${
-              seoResult?.geo_signals?.found_phones?.length || 0
-            }</strong></div>
-          </div>
-        </article>
+        <div class="h-36 w-36 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-3"><canvas id="score-chart"></canvas></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiSeoChecks')}</p><h4 class="mt-1 text-lg font-bold text-white">${seoPass}/${seoChecks.length || 0}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiAeoChecks')}</p><h4 class="mt-1 text-lg font-bold text-white">${aeoPass}/${aeoChecks.length || 0}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiGlobalReach')}</p><h4 class="mt-1 text-lg font-bold text-white">${successfulRegions}/${geoEntries.length || 0}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiAvgLatency')}</p><h4 class="mt-1 text-lg font-bold text-white">${avgLatency}ms</h4></article>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <span class="rounded-full border border-rose-500/25 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-200">Critical ${statusCounts.fail}</span>
+        <span class="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200">Caution ${statusCounts.warn}</span>
+        <span class="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">Safe ${statusCounts.pass}</span>
+      </div>
+      <div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-4">
+        <h4 class="text-sm font-bold text-white">${t('competitorComparisonTitle')}</h4>
+        <ul class="mt-3 space-y-2">${renderComparisonRows(comparisonRows, escapeHtml)}</ul>
       </div>
     </section>
-
-    <section class="action-zone">
-      <p class="zone-title">${t('zoneAction')}</p>
-      <div class="action-zone-grid">
-        <article class="dashboard-card">
-          <div class="card-head"><h4>${t('sectionImmediateFixes')}</h4></div>
-          ${renderIssueBoard(issueList, escapeHtml, {
-            p0: t('issuePriorityP0'),
-            p1: t('issuePriorityP1'),
-            p2: t('issuePriorityP2'),
-            empty: t('issuePriorityEmpty'),
-          })}
-        </article>
-
-        <article class="dashboard-card">
-          <div class="card-head"><h4>${t('sectionLiveFeed')}</h4></div>
-          ${renderLiveFeed(allChecks)}
-        </article>
-      </div>
+    <section class="grid gap-4 lg:grid-cols-2">
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionSeoEssentials')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(seoChecks, t('emptySeoChecks'))}</ul></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionAeoSignals')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(aeoChecks, t('emptyAeoChecks'))}</ul></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionStatusMix')}</h4><div class="mt-3 h-56"><canvas id="status-mix-chart"></canvas></div></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionHybridCorrelation')}</h4><div class="mt-3 h-56"><canvas id="hybrid-correlation-chart"></canvas></div></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionRegionalLatency')}</h4><div class="mt-3 h-56"><canvas id="geo-latency-chart"></canvas></div><ul class="mt-3 space-y-2">${renderGeoRows(geoResult)}</ul></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionContentSnapshot')}</h4><div class="mt-3 grid grid-cols-2 gap-3"><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaWords')}</span><strong class="text-lg text-white">${words}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaMissingAlt')}</span><strong class="text-lg text-white">${missingAlt}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaCurrencies')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_currencies?.length || 0}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaPhoneFormats')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_phones?.length || 0}</strong></div></div></article>
+    </section>
+    <section class="grid gap-4 lg:grid-cols-2">
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionImmediateFixes')}</h4><div class="mt-3">${renderIssueBoard(issueList, escapeHtml, { p0: t('issuePriorityP0'), p1: t('issuePriorityP1'), p2: t('issuePriorityP2'), empty: t('issuePriorityEmpty') })}</div></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionLiveFeed')}</h4><div class="mt-3">${renderLiveFeed(allChecks)}</div></article>
     </section>
   `
 
@@ -1606,6 +1580,7 @@ analyzeBtn.addEventListener('click', async () => {
 })
 
 tabButtons.forEach((button) => {
+  if (!button.dataset?.tab) return
   button.addEventListener('click', () => switchTab(button.dataset.tab))
 })
 
