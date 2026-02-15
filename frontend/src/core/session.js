@@ -1,3 +1,5 @@
+import { apiUrl } from './api'
+
 export function getStoredLanguage(defaultLanguage = 'en') {
   return localStorage.getItem('ui_lang') || defaultLanguage
 }
@@ -15,7 +17,7 @@ export async function fetchUserTier() {
   if (!token) return 'free'
 
   try {
-    const response = await fetch('/api/users/me', {
+    const response = await fetch(apiUrl('/api/users/me'), {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!response.ok) return 'free'

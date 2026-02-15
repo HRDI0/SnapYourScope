@@ -1,4 +1,5 @@
 import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
+import { apiUrl } from './core/api'
 
 const output = document.getElementById('kr-output')
 const languageSelect = document.getElementById('language-select')
@@ -66,6 +67,64 @@ const I18N = {
     freeBatchBlocked:
       '다중 키워드 추적은 유료 기능입니다. 무료 티어는 키워드 1개만 가능합니다. 배치 모드 예시를 표시합니다.',
     missingQuery: '키워드를 1개 이상 입력해주세요.',
+  },
+  ja: {
+    title: 'キーワード順位トラッカー',
+    navMain: 'メイン',
+    navDashboard: 'ダッシュボード',
+    navKeyword: 'キーワード順位',
+    navPrompt: 'プロンプト追跡',
+    navOptimizer: 'SEO/AEO 最適化',
+    navPricing: '料金',
+    navInquiry: '問い合わせ',
+    freeTitle: '無料: 単一キーワード',
+    freeDesc: 'キーワード1件は無料です。複数キーワードの一括追跡は有料です。',
+    querySingleLabel: 'メインキーワード',
+    queryLabel: '追加キーワード (Pro/Enterprise 専用)',
+    querySinglePlaceholder: 'ai seo プラットフォーム',
+    queryMultiPlaceholder: 'seo ツール 比較',
+    urlLabel: '対象 URL',
+    policyNote:
+      'ポリシー: 単一キーワードは無料、複数キーワードは Pro/Enterprise が必要です。SEO 基準を確認してからプロンプト/AEO を検証してください。',
+    refreshNote: '更新ポリシー: 毎日 (軽量検索トラッキング)。',
+    submit: '順位追跡を実行',
+    resultTitle: '結果',
+    outputIdle: '実行すると結果が表示されます。',
+    outputError: 'エラー',
+    outputSample:
+      '{\n  "status": "sample",\n  "query": "ai seo プラットフォーム",\n  "results": [{"engine": "google", "rank": 7}]\n}',
+    freeBatchBlocked:
+      '複数キーワード追跡は有料機能です。無料ティアは1キーワードのみ実行できます。バッチモードのサンプルを表示します。',
+    missingQuery: 'キーワードを1件以上入力してください。',
+  },
+  zh: {
+    title: '关键词排名追踪',
+    navMain: '主页',
+    navDashboard: '仪表盘',
+    navKeyword: '关键词排名',
+    navPrompt: '提示词追踪',
+    navOptimizer: 'SEO/AEO 优化',
+    navPricing: '价格',
+    navInquiry: '咨询',
+    freeTitle: '免费: 单关键词',
+    freeDesc: '免费可追踪 1 个关键词。多关键词批量追踪为付费功能。',
+    querySingleLabel: '主关键词',
+    queryLabel: '附加关键词 (仅 Pro/Enterprise)',
+    querySinglePlaceholder: 'ai seo 平台',
+    queryMultiPlaceholder: 'seo 工具 对比',
+    urlLabel: '目标 URL',
+    policyNote:
+      '规则: 单关键词免费，多关键词需要 Pro/Enterprise。建议先完成 SEO 基线，再进行 Prompt/AEO 检查。',
+    refreshNote: '刷新策略: 每日 (轻量搜索追踪)。',
+    submit: '开始排名追踪',
+    resultTitle: '结果',
+    outputIdle: '执行后将在此显示结果。',
+    outputError: '错误',
+    outputSample:
+      '{\n  "status": "sample",\n  "query": "ai seo 平台",\n  "results": [{"engine": "google", "rank": 7}]\n}',
+    freeBatchBlocked:
+      '多关键词追踪为付费功能。免费用户仅可执行 1 个关键词。当前展示批量模式示例。',
+    missingQuery: '请至少输入一个关键词。',
   },
 }
 
@@ -155,7 +214,7 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
     const headers = { 'Content-Type': 'application/json' }
     if (token) headers.Authorization = `Bearer ${token}`
 
-    const response = await fetch('/api/search-rank', {
+    const response = await fetch(apiUrl('/api/search-rank'), {
       method: 'POST',
       headers,
       body: JSON.stringify({

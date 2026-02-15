@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
+import requests
+
 from ..config import (
     R2_ACCESS_KEY_ID,
     R2_BUCKET_NAME,
@@ -164,6 +166,38 @@ class BlobStorageService:
                 "Supabase backend selected but SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY/SUPABASE_BUCKET_NAME are incomplete"
             )
 
-        raise RuntimeError(
-            "Supabase storage scaffold is configured but upload implementation is not connected yet"
+        object_key = f"{namespace}/{blob_name}"
+        body_text = json.dumps(payload, ensure_ascii=False, default=str)
+        body_bytes = body_text.encode("utf-8")
+        base_url = SUPABASE_URL.rstrip("/")
+        upload_url = f"{base_url}/storage/v1/object/{SUPABASE_BUCKET_NAME}/{object_key}"
+
+        response = requests.post(
+            upload_url,
+            headers={
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Content-Type": "application/json",
+                "x-upsert": "true",
+            },
+            data=body_bytes,
+            timeout=30,
         )
+
+        if response.status_code >= 400:
+            detail = response.text.strip()[:500]
+            raise RuntimeError(
+                f"Supabase upload failed ({response.status_code}): {detail}"
+            )
+
+        if STORAGE_PUBLIC_BASE_URL:
+            blob_ref = f"{STORAGE_PUBLIC_BASE_URL.rstrip('/')}/{object_key}"
+        else:
+            blob_ref = f"supabase://{SUPABASE_BUCKET_NAME}/{object_key}"
+
+        return {
+            "storage_backend": "supabase",
+            "blob_ref": blob_ref,
+            "blob_name": blob_name,
+            "blob_size_bytes": str(len(body_bytes)),
+        }

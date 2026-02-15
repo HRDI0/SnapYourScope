@@ -24,6 +24,12 @@ REQUIRED_R2_KEYS = [
     "R2_ENDPOINT",
 ]
 
+REQUIRED_SUPABASE_STORAGE_KEYS = [
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_BUCKET_NAME",
+]
+
 
 def _missing(keys):
     return [key for key in keys if not os.getenv(key, "").strip()]
@@ -34,6 +40,11 @@ def main() -> int:
     core_missing = _missing(REQUIRED_CORE_KEYS)
     billing_missing = _missing(REQUIRED_BILLING_KEYS)
     r2_missing = _missing(REQUIRED_R2_KEYS) if storage_backend == "r2" else []
+    supabase_storage_missing = (
+        _missing(REQUIRED_SUPABASE_STORAGE_KEYS)
+        if storage_backend == "supabase"
+        else []
+    )
 
     llm_ready = any(
         os.getenv(key, "").strip()
@@ -60,7 +71,7 @@ def main() -> int:
     checks = {
         "core_ready": len(core_missing) == 0,
         "billing_ready": len(billing_missing) == 0,
-        "storage_ready": len(r2_missing) == 0,
+        "storage_ready": len(r2_missing) == 0 and len(supabase_storage_missing) == 0,
         "llm_provider_configured": llm_ready,
         "search_provider_configured": search_ready,
     }
@@ -71,6 +82,7 @@ def main() -> int:
         "core_missing": core_missing,
         "billing_missing": billing_missing,
         "r2_missing": r2_missing,
+        "supabase_storage_missing": supabase_storage_missing,
         "checks": checks,
         "note": "No external connection calls were executed by this script.",
     }

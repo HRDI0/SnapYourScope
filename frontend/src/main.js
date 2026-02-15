@@ -1,5 +1,6 @@
 import Chart from 'chart.js/auto'
 import { renderComparisonRows, renderIssueBoard } from './ui/renderers'
+import { apiUrl } from './core/api'
 
 let token = localStorage.getItem('access_token')
 let guestSingleUsed = sessionStorage.getItem('guest_single_used') === '1'
@@ -72,6 +73,64 @@ const TAB_ACTIVE_CLASSES = [
   'text-white',
   'shadow-[0_0_0_1px_rgba(168,85,247,0.25)]',
 ]
+
+const chartValueLabelPlugin = {
+  id: 'valueLabels',
+  afterDatasetsDraw(chart, _args, pluginOptions) {
+    if (!pluginOptions || pluginOptions.enabled === false) return
+
+    const { ctx } = chart
+    const fontSize = Number(pluginOptions.fontSize) || 11
+    const fontWeight = pluginOptions.fontWeight || '700'
+    const defaultColor = pluginOptions.color || '#cbd5e1'
+    const defaultOffsetY = Number(pluginOptions.offsetY) || 10
+
+    ctx.save()
+    ctx.font = `${fontWeight} ${fontSize}px Inter, sans-serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+
+    chart.data.datasets.forEach((dataset, datasetIndex) => {
+      const meta = chart.getDatasetMeta(datasetIndex)
+      if (meta.hidden) return
+
+      meta.data.forEach((element, dataIndex) => {
+        const raw = dataset?.data?.[dataIndex]
+        const numericValue = typeof raw === 'number' ? raw : Number(raw)
+        if (!Number.isFinite(numericValue) || numericValue === 0) return
+
+        let labelText = `${numericValue}`
+        if (typeof pluginOptions.formatter === 'function') {
+          labelText = pluginOptions.formatter(numericValue, {
+            chart,
+            dataset,
+            datasetIndex,
+            dataIndex,
+            raw,
+          })
+        }
+
+        if (!labelText) return
+
+        const point =
+          typeof element.tooltipPosition === 'function'
+            ? element.tooltipPosition()
+            : { x: element.x, y: element.y }
+
+        const isArc = 'innerRadius' in element
+        const x = point.x
+        const y = isArc ? point.y : point.y - defaultOffsetY
+
+        ctx.fillStyle = isArc ? pluginOptions.arcColor || '#f8fafc' : defaultColor
+        ctx.fillText(String(labelText), x, y)
+      })
+    })
+
+    ctx.restore()
+  },
+}
+
+Chart.register(chartValueLabelPlugin)
 
 function setAppState(nextState) {
   Object.assign(appState, nextState)
@@ -425,6 +484,13 @@ const I18N = {
     tabAnalyze: 'ダッシュボード',
     tabPricing: '料金',
     tabEnterprise: '問い合わせ',
+    tabKeyword: 'キーワード順位',
+    tabPrompt: 'プロンプト追跡',
+    tabAeo: 'SEO/AEO 最適化',
+    gnbMain: 'メイン',
+    gnbKeyword: 'キーワード順位',
+    gnbPrompt: 'プロンプト追跡',
+    gnbAeo: 'SEO/AEO 最適化',
     workspaceEyebrow: '分析ワークスペース',
     workspaceTitle: '競合可視性ダッシュボード',
     login: 'ログイン',
@@ -436,6 +502,10 @@ const I18N = {
     heroMetaGuest: 'ゲスト: URL 1回分析',
     heroMetaPro: 'Pro: サイトマップ一括分析',
     heroMetaMode: 'モード: リアルタイムスナップショット',
+    competitorLabel: '競合 URL（1行に1件）',
+    competitorPlaceholder: 'https://competitor-a.com',
+    competitorPolicy:
+      '無料: 1件 | 有料: 5件含む、5件超過はURLごとに月額 $3 | Pro 上限 10件（それ以上は Enterprise）',
     targetUrlPlaceholder: 'https://example.com',
     analyzeButton: 'URL分析',
     analyzingButton: '分析中...',
@@ -446,6 +516,7 @@ const I18N = {
     postCtaLogin: 'ログインしてアップグレード',
     batchTitle: 'サイトマップ全体分析（有料）',
     batchDescription: 'バックエンド実装は完了しています。フロントAPI接続のみ残っています。',
+    batchRefreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
     sitemapPlaceholder: 'https://example.com/sitemap.xml',
     batchButton: '全体分析を開始',
     pricingTitle: '料金',
@@ -470,6 +541,7 @@ const I18N = {
     contactPlaceholder: '業務用メール',
     needsPlaceholder: 'SEO/GEO/AEOの目標を入力してください',
     enterpriseSubmit: '問い合わせを送信',
+    googleContinue: 'Google で続行',
     loginTitle: 'ログイン',
     registerTitle: 'アカウント作成',
     emailPlaceholder: 'メール',
@@ -501,6 +573,11 @@ const I18N = {
     sectionRegionalLatency: '地域別遅延',
     sectionContentSnapshot: 'コンテンツ概要',
     sectionImmediateFixes: '即時修正項目',
+    sectionHybridCorrelation: 'ハイブリッド相関',
+    sectionLiveFeed: 'ライブ回答フィード',
+    zoneSummary: '要約',
+    zoneAnalysis: '分析',
+    zoneAction: '実行',
     emptySeoChecks: 'SEOチェックがありません',
     emptyAeoChecks: 'AEOチェックがありません',
     metaWords: '単語数',
@@ -521,11 +598,23 @@ const I18N = {
     logoutSuccess: 'ログアウトしました。',
     sitemapLoginRequired: 'サイトマップ全体分析にはログインと有料購読が必要です。',
     sitemapNotWired: 'サイトマップ全体分析のフロントAPI接続は次のステップで実装されます。',
+    sitemapPaidOnly: 'このセクションは有料専用です。無料アカウントにはサンプル結果を表示します。',
+    sitemapSampleOutput:
+      '{\n  "status": "sample",\n  "plan_required": ["pro", "enterprise"],\n  "message": "アップグレード後にサイトマップ一括分析を実行できます。"\n}',
     enterpriseMailPrefix: '[エンタープライズ問い合わせ]',
     checkoutFailed: '決済セッション作成失敗',
     checkoutMissingUrl: 'チェックアウトURLが返されませんでした',
     checkoutSuccess: '決済が完了しました。',
     checkoutCancel: '決済はキャンセルされました。',
+    enterpriseContactOnly: 'Enterprise プランは問い合わせタブを開きます。',
+    paidFeatureDisabled: '無料ティアでは有料機能は無効です。サンプル結果を表示します。',
+    competitorLimitExceeded: '無料ティアは競合 URL を1件までサポートします。アップグレードで拡張できます。',
+    competitorProCap: 'Pro プランの競合 URL 上限は 10 件です。超過分は Enterprise を利用してください。',
+    competitorAddOnEstimate: '追加競合 URL の想定追加料金: 月額 $${amount}',
+    comparingCompetitors: '競合比較分析を実行中です...',
+    competitorComparisonTitle: '競合比較 (SEO スコア)',
+    yourUrlLabel: '自社 URL',
+    competitorLabelShort: '競合',
     searchRankTitle: '無料検索順位トラッカー',
     searchRankDescription: 'キーワードに対して対象URLの検索順位を確認します。',
     rankQueryPlaceholder: '例: ai seo platform',
@@ -557,6 +646,13 @@ const I18N = {
     tabAnalyze: '仪表盘',
     tabPricing: '价格',
     tabEnterprise: '咨询',
+    tabKeyword: '关键词排名',
+    tabPrompt: '提示词追踪',
+    tabAeo: 'SEO/AEO 优化',
+    gnbMain: '主页',
+    gnbKeyword: '关键词排名',
+    gnbPrompt: '提示词追踪',
+    gnbAeo: 'SEO/AEO 优化',
     workspaceEyebrow: '分析工作区',
     workspaceTitle: '竞争可见性仪表盘',
     login: '登录',
@@ -568,6 +664,10 @@ const I18N = {
     heroMetaGuest: '访客：可分析 1 个 URL',
     heroMetaPro: 'Pro：完整站点地图批量分析',
     heroMetaMode: '模式：实时快照',
+    competitorLabel: '竞争对手 URL（每行一个）',
+    competitorPlaceholder: 'https://competitor-a.com',
+    competitorPolicy:
+      '免费: 1 个 | 付费: 含 5 个，超过 5 个每个 URL 每月 +$3 | Pro 上限 10 个（更多请用 Enterprise）',
     targetUrlPlaceholder: 'https://example.com',
     analyzeButton: '分析 URL',
     analyzingButton: '分析中...',
@@ -578,6 +678,7 @@ const I18N = {
     postCtaLogin: '登录并升级',
     batchTitle: '完整站点地图分析（付费）',
     batchDescription: '后端逻辑已完成，前端 API 接线可在下一步完成。',
+    batchRefreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
     sitemapPlaceholder: 'https://example.com/sitemap.xml',
     batchButton: '开始完整分析',
     pricingTitle: '价格',
@@ -602,6 +703,7 @@ const I18N = {
     contactPlaceholder: '工作邮箱',
     needsPlaceholder: '请描述你的 SEO/GEO/AEO 目标',
     enterpriseSubmit: '发送企业咨询',
+    googleContinue: '使用 Google 继续',
     loginTitle: '登录',
     registerTitle: '创建账号',
     emailPlaceholder: '邮箱',
@@ -633,6 +735,11 @@ const I18N = {
     sectionRegionalLatency: '区域延迟',
     sectionContentSnapshot: '内容快照',
     sectionImmediateFixes: '立即修复项',
+    sectionHybridCorrelation: '混合相关性',
+    sectionLiveFeed: '实时回答流',
+    zoneSummary: '摘要',
+    zoneAnalysis: '分析',
+    zoneAction: '行动',
     emptySeoChecks: '暂无 SEO 检查数据',
     emptyAeoChecks: '暂无 AEO 检查数据',
     metaWords: '词数',
@@ -653,11 +760,23 @@ const I18N = {
     logoutSuccess: '已退出登录。',
     sitemapLoginRequired: '完整站点地图分析需要登录和付费订阅。',
     sitemapNotWired: '完整站点地图分析的前端 API 接线将在下一步完成，后端已就绪。',
+    sitemapPaidOnly: '此区域仅限付费用户。免费账号将显示示例结果。',
+    sitemapSampleOutput:
+      '{\n  "status": "sample",\n  "plan_required": ["pro", "enterprise"],\n  "message": "升级后可执行站点地图批量分析。"\n}',
     enterpriseMailPrefix: '[企业咨询]',
     checkoutFailed: '创建支付会话失败',
     checkoutMissingUrl: '未返回支付链接',
     checkoutSuccess: '支付已完成。',
     checkoutCancel: '支付已取消。',
+    enterpriseContactOnly: 'Enterprise 方案将打开咨询标签页。',
+    paidFeatureDisabled: '免费层级下付费功能不可用。显示示例结果。',
+    competitorLimitExceeded: '免费层级仅支持 1 个竞争对手 URL。升级后可扩展。',
+    competitorProCap: 'Pro 方案最多支持 10 个竞争对手 URL。超过请使用 Enterprise。',
+    competitorAddOnEstimate: '额外竞争对手 URL 预估附加费用: 每月 $${amount}',
+    comparingCompetitors: '正在执行竞争对手对比分析...',
+    competitorComparisonTitle: '竞争对手对比 (SEO 评分)',
+    yourUrlLabel: '我的 URL',
+    competitorLabelShort: '竞争对手',
     searchRankTitle: '免费搜索排名追踪',
     searchRankDescription: '按关键词查看目标 URL 在搜索结果中的位置。',
     rankQueryPlaceholder: '例如：ai seo platform',
@@ -824,7 +943,7 @@ async function syncCurrentUserTier() {
   }
 
   try {
-    const response = await fetch('/api/users/me', {
+    const response = await fetch(apiUrl('/api/users/me'), {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -879,7 +998,7 @@ async function createCheckoutSession(plan) {
   }
 
   try {
-    const response = await fetch('/api/billing/create-checkout-session', {
+    const response = await fetch(apiUrl('/api/billing/create-checkout-session'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1253,6 +1372,11 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+        valueLabels: {
+          enabled: true,
+          arcColor: '#f8fafc',
+          formatter: (value, context) => (context.dataIndex === 0 ? `${value}%` : ''),
+        },
       },
     },
   })
@@ -1281,6 +1405,12 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+        valueLabels: {
+          enabled: true,
+          color: '#cbd5e1',
+          formatter: (value) => `${value}ms`,
+          offsetY: 12,
+        },
       },
       scales: {
         y: {
@@ -1319,6 +1449,10 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
             boxWidth: 12,
             color: '#4a5a72',
           },
+        },
+        valueLabels: {
+          enabled: true,
+          arcColor: '#f8fafc',
         },
       },
     },
@@ -1367,6 +1501,11 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
               boxWidth: 12,
               color: '#4a5a72',
             },
+          },
+          valueLabels: {
+            enabled: true,
+            color: '#cbd5e1',
+            offsetY: 12,
           },
         },
         scales: {
@@ -1469,9 +1608,8 @@ function renderReport(data, competitorReports = []) {
       <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionRegionalLatency')}</h4><div class="mt-3 h-56"><canvas id="geo-latency-chart"></canvas></div><ul class="mt-3 space-y-2">${renderGeoRows(geoResult)}</ul></article>
       <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionContentSnapshot')}</h4><div class="mt-3 grid grid-cols-2 gap-3"><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaWords')}</span><strong class="text-lg text-white">${words}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaMissingAlt')}</span><strong class="text-lg text-white">${missingAlt}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaCurrencies')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_currencies?.length || 0}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaPhoneFormats')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_phones?.length || 0}</strong></div></div></article>
     </section>
-    <section class="grid gap-4 lg:grid-cols-2">
+    <section>
       <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionImmediateFixes')}</h4><div class="mt-3">${renderIssueBoard(issueList, escapeHtml, { p0: t('issuePriorityP0'), p1: t('issuePriorityP1'), p2: t('issuePriorityP2'), empty: t('issuePriorityEmpty') })}</div></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionLiveFeed')}</h4><div class="mt-3">${renderLiveFeed(allChecks)}</div></article>
     </section>
   `
 
@@ -1516,7 +1654,7 @@ analyzeBtn.addEventListener('click', async () => {
       headers.Authorization = `Bearer ${token}`
     }
 
-    const res = await fetch('/api/analyze', {
+    const res = await fetch(apiUrl('/api/analyze'), {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -1548,7 +1686,7 @@ analyzeBtn.addEventListener('click', async () => {
       }
 
       const competitorRequests = competitorUrls.map(async (competitorUrl) => {
-        const competitorResponse = await fetch('/api/analyze', {
+        const competitorResponse = await fetch(apiUrl('/api/analyze'), {
           method: 'POST',
           headers,
           body: JSON.stringify({
@@ -1603,7 +1741,7 @@ loginForm.addEventListener('submit', async (event) => {
     formData.append('username', email)
     formData.append('password', password)
 
-    const res = await fetch('/api/token', {
+    const res = await fetch(apiUrl('/api/token'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: formData,
@@ -1638,7 +1776,7 @@ registerForm.addEventListener('submit', async (event) => {
   const password = document.getElementById('reg-password').value
 
   try {
-    const res = await fetch('/api/register', {
+    const res = await fetch(apiUrl('/api/register'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -1669,7 +1807,7 @@ ctaOpenLogin.addEventListener('click', () => openAuthModal('login'))
 
 async function startGoogleOAuth() {
   try {
-    const response = await fetch('/api/auth/google/login-url')
+    const response = await fetch(apiUrl('/api/auth/google/login-url'))
     if (!response.ok) {
       const message = await extractErrorMessage(response, 'Google login is unavailable')
       throw new Error(message)

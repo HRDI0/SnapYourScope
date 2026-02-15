@@ -45,16 +45,12 @@ export function renderIssueBoard(issues, escapeHtml, labels) {
           <h5 class="text-xs font-semibold uppercase tracking-widest text-slate-400">${title}</h5>
           <span class="h-2.5 w-2.5 rounded-full ${dotClass}"></span>
         </div>
-        <ul class="mt-4 space-y-3">
+        <ul class="mt-4 space-y-2">
           ${rows
             .map(
               (issue) =>
                 `<li class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3 ${HOVER_GLOW}">
-                  <p class="text-sm font-semibold text-white">${escapeHtml(issue.label)}</p>
-                  <p class="mt-2 text-xs text-slate-300"><span class="font-semibold text-slate-200">Why:</span> ${escapeHtml(issue.why || issue.detail || issue.status)}</p>
-                  <p class="mt-1 text-xs text-slate-300"><span class="font-semibold text-slate-200">Fix:</span> ${escapeHtml(issue.fixSteps || 'Review this signal and apply recommended updates.')}</p>
-                  <p class="mt-1 text-xs text-slate-300"><span class="font-semibold text-slate-200">Impact:</span> ${escapeHtml(issue.expectedImpact || 'Visibility consistency improvement.')}</p>
-                  <p class="mt-1 text-xs text-slate-400"><span class="font-semibold text-slate-300">Refs:</span> ${escapeHtml(issue.references || 'Hybrid Visibility')}</p>
+                  <p class="text-sm font-semibold text-white break-words">${escapeHtml(issue.label)}</p>
                 </li>`
             )
             .join('')}
@@ -64,7 +60,7 @@ export function renderIssueBoard(issues, escapeHtml, labels) {
   }
 
   return `
-    <div class="grid gap-4 lg:grid-cols-3">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       ${renderColumn(labels.p0, 'P0', 'bg-rose-400')}
       ${renderColumn(labels.p1, 'P1', 'bg-amber-400')}
       ${renderColumn(labels.p2, 'P2', 'bg-emerald-400')}

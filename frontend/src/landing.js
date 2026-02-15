@@ -1,3 +1,5 @@
+import { apiUrl } from './core/api'
+
 const languageSelect = document.getElementById('language-select')
 const planCards = document.querySelectorAll('.landing-plan-card[data-plan]')
 
@@ -97,6 +99,7 @@ const I18N = {
     landingTagline: '軽量な URL ベース SEO/AEO インテリジェンス',
     navMain: 'メイン',
     navDashboard: 'ダッシュボード',
+    navKeyword: 'キーワード順位',
     navPrompt: 'プロンプト追跡',
     navOptimizer: 'SEO/AEO 最適化',
     navPricing: '料金',
@@ -105,6 +108,7 @@ const I18N = {
     heroTitle: 'Web 検索と AI 回答でのブランド可視性を一つのワークフローで追跡',
     heroDescription: 'URL 監査、プロンプト追跡、最適化提案を実運用向けに提供します。',
     openDashboard: 'ダッシュボードを開く',
+    openKeyword: 'キーワード順位を開く',
     tryPrompt: 'プロンプト追跡を試す',
     whatNow: '今すぐ実行できる機能',
     li1: '単一 URL SEO/AEO/GEO 分析',
@@ -131,6 +135,7 @@ const I18N = {
     planEntF1: 'ワークフロー/ポリシーのカスタマイズ',
     planEntF2: 'プロバイダー戦略と信頼性制御',
     planHint: 'Pro または Enterprise をクリックすると決済に進みます。',
+    enterpriseContactOnly: 'Enterprise は問い合わせタブを開きます。',
     goProduct: '製品へ移動',
     checkoutFailed: '決済セッション作成に失敗しました',
   },
@@ -138,6 +143,7 @@ const I18N = {
     landingTagline: '轻量级 URL SEO/AEO 智能分析',
     navMain: '主页',
     navDashboard: '仪表盘',
+    navKeyword: '关键词排名',
     navPrompt: '提示词追踪',
     navOptimizer: 'SEO/AEO 优化',
     navPricing: '价格',
@@ -146,6 +152,7 @@ const I18N = {
     heroTitle: '在网页搜索与 AI 回答中统一追踪你的品牌',
     heroDescription: '提供快速 URL 审计、付费提示词追踪和优化建议。',
     openDashboard: '打开仪表盘',
+    openKeyword: '打开关键词排名',
     tryPrompt: '试用提示词追踪',
     whatNow: '当前可用功能',
     li1: '单 URL SEO/AEO/GEO 分析',
@@ -172,6 +179,7 @@ const I18N = {
     planEntF1: '工作流/策略定制',
     planEntF2: '提供方策略与可靠性控制',
     planHint: '点击专业版或企业版进入支付。',
+    enterpriseContactOnly: '企业版将打开咨询标签。',
     goProduct: '进入产品',
     checkoutFailed: '创建支付会话失败',
   },
@@ -243,7 +251,7 @@ async function createCheckout(plan) {
   }
 
   try {
-    const response = await fetch('/api/billing/create-checkout-session', {
+    const response = await fetch(apiUrl('/api/billing/create-checkout-session'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

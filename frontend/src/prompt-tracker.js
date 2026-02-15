@@ -1,10 +1,13 @@
 import { calculatePromptAddOnMonthly, PROMPT_INCLUDED_COUNT, PROMPT_ADDON_BLOCK_SIZE, PROMPT_ADDON_BLOCK_PRICE_USD } from './core/policy'
 import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
+import { apiUrl } from './core/api'
 
 const output = document.getElementById('result-output')
 const languageSelect = document.getElementById('language-select')
 const promptSubmitBtn = document.getElementById('pt-prompt-submit')
+const promptQueryInput = document.getElementById('prompt-query')
 const promptTargetUrlInput = document.getElementById('prompt-target-url')
+const promptBrandNameInput = document.getElementById('prompt-brand-name')
 const lockNote = document.getElementById('pt-lock-note')
 
 let currentLanguage = getStoredLanguage('en')
@@ -65,6 +68,60 @@ const I18N = {
     promptMissing: '프롬프트를 1개 이상 입력해주세요.',
     addOnEstimate: '현재 입력 기준 예상 추가 과금: 월 $${amount}',
   },
+  ja: {
+    title: 'プロンプト追跡',
+    navMain: 'メイン',
+    navKeyword: 'キーワード順位',
+    navDashboard: 'ダッシュボード',
+    navPrompt: 'プロンプト追跡',
+    navOptimizer: 'SEO/AEO 最適化',
+    navPricing: '料金',
+    navInquiry: '問い合わせ',
+    paidTitle: '有料プロンプト追跡 (Pro / Enterprise)',
+    paidDesc: 'LLM 応答の言及ティアと連動する検索順位を評価します。',
+    promptQueryLabel: 'プロンプト / クエリ (1行に1件)',
+    promptUrlLabel: '対象 URL',
+    brandLabel: 'ブランド名 (任意)',
+    promptSubmit: 'プロンプト追跡を実行',
+    resultTitle: '結果',
+    outputIdle: '準備完了。',
+    outputError: 'エラー',
+    paidPolicy: `有料ポリシー: ${PROMPT_INCLUDED_COUNT}件を含み、追加 ${PROMPT_ADDON_BLOCK_SIZE}件ごとに月額 $${PROMPT_ADDON_BLOCK_PRICE_USD}。対象: SEO + AEO/GEO 可視性ワークフロー。`,
+    refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
+    freeDisabled:
+      '無料ティアでは有料プロンプト追跡は無効です。以下にサンプル結果を表示します。',
+    sampleOutput:
+      '{\n  "status": "sample",\n  "policy": "pro_or_enterprise",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
+    promptMissing: 'プロンプトを1件以上入力してください。',
+    addOnEstimate: 'この件数での追加料金見積り: 月額 $${amount}',
+  },
+  zh: {
+    title: '提示词追踪',
+    navMain: '主页',
+    navKeyword: '关键词排名',
+    navDashboard: '仪表盘',
+    navPrompt: '提示词追踪',
+    navOptimizer: 'SEO/AEO 优化',
+    navPricing: '价格',
+    navInquiry: '咨询',
+    paidTitle: '付费提示词追踪 (Pro / Enterprise)',
+    paidDesc: '评估 LLM 回答中的品牌提及层级及其关联搜索排名。',
+    promptQueryLabel: '提示词 / 查询 (每行一个)',
+    promptUrlLabel: '目标 URL',
+    brandLabel: '品牌名 (可选)',
+    promptSubmit: '开始提示词追踪',
+    resultTitle: '结果',
+    outputIdle: '准备就绪。',
+    outputError: '错误',
+    paidPolicy: `付费规则: 含 ${PROMPT_INCLUDED_COUNT} 条，超出后每增加 ${PROMPT_ADDON_BLOCK_SIZE} 条每月 +$${PROMPT_ADDON_BLOCK_PRICE_USD}。范围: SEO + AEO/GEO 可见性工作流。`,
+    refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
+    freeDisabled:
+      '免费层级下付费提示词追踪不可用。下面显示示例结果。',
+    sampleOutput:
+      '{\n  "status": "sample",\n  "policy": "pro_or_enterprise",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
+    promptMissing: '请至少输入一条提示词。',
+    addOnEstimate: '按当前数量预估附加费用: 每月 $${amount}',
+  },
 }
 
 function t(key) {
@@ -122,8 +179,14 @@ function applyPaidGating() {
   if (!promptSubmitBtn) return
 
   promptSubmitBtn.disabled = !isPaid
+  if (promptQueryInput) {
+    promptQueryInput.disabled = !isPaid
+  }
   if (promptTargetUrlInput) {
     promptTargetUrlInput.disabled = !isPaid
+  }
+  if (promptBrandNameInput) {
+    promptBrandNameInput.disabled = !isPaid
   }
   if (lockNote) {
     lockNote.classList.toggle('hidden', isPaid)
@@ -144,7 +207,7 @@ async function postJson(url, payload) {
   const headers = { 'Content-Type': 'application/json' }
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const response = await fetch(url, {
+  const response = await fetch(apiUrl(url), {
     method: 'POST',
     headers,
     body: JSON.stringify(payload),

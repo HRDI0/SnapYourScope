@@ -1,4 +1,5 @@
 import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
+import { apiUrl } from './core/api'
 
 const output = document.getElementById('optimizer-output')
 const languageSelect = document.getElementById('language-select')
@@ -60,8 +61,10 @@ const I18N = {
   ja: {
     title: 'SEO/AEO 最適化',
     navMain: 'メイン',
+    navKeyword: 'キーワード順位',
     navDashboard: 'ダッシュボード',
     navPrompt: 'プロンプト追跡',
+    navAeo: 'SEO/AEO 最適化',
     paidTitle: '有料提案ワークフロー (Pro / Enterprise)',
     navPricing: '料金',
     navInquiry: '問い合わせ',
@@ -71,13 +74,20 @@ const I18N = {
     resultTitle: '結果',
     outputIdle: 'URL を送信すると提案結果が表示されます。',
     loginRequired: 'エラー: 有料最適化機能にはログインが必要です。',
+    paidRequired: 'エラー: Pro または Enterprise の購読が必要です。',
+    freeDisabled: '無料ティアでは SEO/AEO 最適化は無効です。以下にサンプル結果を表示します。',
+    sampleOutput:
+      '{\n  "status": "sample",\n  "recommendations": [\n    "ページ上部に answer-first 段落を追加",\n    "FAQ スキーマに意図キーワードを補強"\n  ]\n}',
+    refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
     outputError: 'エラー',
   },
   zh: {
     title: 'SEO/AEO 优化',
     navMain: '主页',
+    navKeyword: '关键词排名',
     navDashboard: '仪表盘',
     navPrompt: '提示词追踪',
+    navAeo: 'SEO/AEO 优化',
     paidTitle: '付费建议流程 (Pro / Enterprise)',
     navPricing: '价格',
     navInquiry: '咨询',
@@ -87,6 +97,11 @@ const I18N = {
     resultTitle: '结果',
     outputIdle: '提交 URL 后显示建议结果。',
     loginRequired: '错误：付费优化功能需要登录。',
+    paidRequired: '错误：需要 Pro 或 Enterprise 订阅。',
+    freeDisabled: '免费层级下 SEO/AEO 优化不可用。下面显示示例结果。',
+    sampleOutput:
+      '{\n  "status": "sample",\n  "recommendations": [\n    "在内容顶部添加 answer-first 段落",\n    "在 FAQ schema 中补充意图关键词"\n  ]\n}',
+    refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
     outputError: '错误',
   },
 }
@@ -163,7 +178,7 @@ document.getElementById('aeo-optimizer-form').addEventListener('submit', async (
   }
 
   try {
-    const response = await fetch('/api/aeo-optimizer/recommend', {
+    const response = await fetch(apiUrl('/api/aeo-optimizer/recommend'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
