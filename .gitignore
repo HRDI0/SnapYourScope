@@ -64,6 +64,7 @@ yarn-error.log*
 # 런타임/데이터 산출물
 # ------------------------------------------------
 logs/
+storage_blobs/
 *.sqlite
 *.sqlite3
 seo_analysis.db
@@ -99,3 +100,19 @@ coverage/
 # Frontend 로컬 캐시
 # ------------------------------------------------
 frontend/.vite/
+
+# ------------------------------------------------
+# 민감 로컬 운영 스크립트 (계정/검증)
+# ------------------------------------------------
+scripts/seed_admin_account.py
+scripts/primer_admin_smoke.py
+scripts/primer_admin_local_verify.py
+
+# ------------------------------------------------
+# 로컬 시각 검증 산출물
+# ------------------------------------------------
+screenshots/
+app_page.png
+landing_page.png
+keyword_rank.png
+verification_report.txt

@@ -1,0 +1,43 @@
+:root {
+  --seo-50: #eff6ff;
+  --seo-100: #dbeafe;
+  --seo-500: #3b82f6;
+  --seo-600: #2563eb;
+  --seo-900: #1e3a8a;
+
+  --aeo-50: #f5f3ff;
+  --aeo-100: #ede9fe;
+  --aeo-500: #8b5cf6;
+  --aeo-600: #7c3aed;
+  --aeo-900: #4c1d95;
+
+  --color-seo-primary: var(--seo-600);
+  --color-aeo-primary: var(--aeo-600);
+
+  --hybrid-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --hybrid-glow: conic-gradient(from 180deg at 50% 50%, #2563eb 0deg, #7c3aed 180deg, #2563eb 360deg);
+
+  --bg: #f5f7fb;
+  --bg-accent: #ecf1fa;
+  --panel: #ffffff;
+  --panel-soft: #f8fbff;
+  --text: #17233a;
+  --text-soft: #5e6d84;
+  --line: #d9e2f0;
+  --line-strong: #c5d4ea;
+  --primary: var(--color-seo-primary);
+  --primary-strong: var(--seo-900);
+  --secondary: var(--color-aeo-primary);
+  --success: #0f9d58;
+  --danger: #d93025;
+  --warning: #c78707;
+  --info: #5f7497;
+  --shadow: 0 10px 32px rgba(16, 35, 73, 0.08);
+  --radius: 14px;
+  --focus-ring: 0 0 0 3px rgba(44, 78, 185, 0.28);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

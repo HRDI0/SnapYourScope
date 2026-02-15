@@ -1,4 +1,6 @@
 import os
+import time
+from importlib import import_module
 from typing import Dict, Optional, Tuple
 
 import requests
@@ -10,6 +12,19 @@ logger = setup_logger("api.services.llm_service")
 
 
 class LlmService:
+    @staticmethod
+    def _resolve_model_for_provider(provider: str) -> str:
+        if provider == "gpt":
+            gpt = ProviderService.get_gpt_credential()
+            if gpt.mode == "openai_api_key":
+                return os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+            return os.getenv("AZURE_OPENAI_DEPLOYMENT", "azure-deployment")
+        if provider == "gemini":
+            return os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        if provider == "perplexity":
+            return os.getenv("PERPLEXITY_MODEL", "sonar")
+        return "unknown"
+
     @staticmethod
     def _call_openai(prompt: str) -> str:
         api_key = os.getenv("OPENAI_API_KEY", "")
@@ -57,12 +72,13 @@ class LlmService:
             f"?api-version={api_version}"
         )
         headers = {"Content-Type": "application/json"}
-        if os.getenv("AZURE_OPENAI_ACCESS_TOKEN"):
+        if os.getenv("AZURE_OPENAI_ACCESS_TOKEN", ""):
             headers["Authorization"] = (
-                f"Bearer {os.getenv('AZURE_OPENAI_ACCESS_TOKEN')}"
+                f"Bearer {os.getenv('AZURE_OPENAI_ACCESS_TOKEN', '')}"
             )
-        elif os.getenv("AZURE_OPENAI_API_KEY"):
-            headers["api-key"] = os.getenv("AZURE_OPENAI_API_KEY")
+        elif os.getenv("AZURE_OPENAI_API_KEY", ""):
+            azure_key = os.getenv("AZURE_OPENAI_API_KEY") or ""
+            headers["api-key"] = azure_key
         else:
             raise RuntimeError("Azure OpenAI token or api-key missing")
 
@@ -90,14 +106,18 @@ class LlmService:
 
     @staticmethod
     def _call_gemini(prompt: str) -> str:
-        import google.generativeai as genai
+        genai = import_module("google.generativeai")
 
         key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         if not key:
             raise RuntimeError("GEMINI_API_KEY/GOOGLE_API_KEY missing")
-        genai.configure(api_key=key)
-        response = genai.GenerativeModel(model).generate_content(prompt)
+        configure_fn = getattr(genai, "configure", None)
+        model_cls = getattr(genai, "GenerativeModel", None)
+        if not callable(configure_fn) or model_cls is None:
+            raise RuntimeError("google.generativeai does not expose required APIs")
+        configure_fn(api_key=key)
+        response = model_cls(model).generate_content(prompt)
         return (getattr(response, "text", "") or "").strip()
 
     @staticmethod
@@ -131,7 +151,7 @@ class LlmService:
     def call_with_fallback(
         prompt: str,
         preferred_provider: str,
-    ) -> Tuple[str, str]:
+    ) -> Tuple[str, str, str, int]:
         provider = preferred_provider.lower().strip()
         gpt = ProviderService.get_gpt_credential()
         gemini = ProviderService.get_gemini_credential()
@@ -150,20 +170,43 @@ class LlmService:
         last_error: Optional[Exception] = None
         for source in order:
             try:
+                started = time.perf_counter()
                 if source == "gpt" and gpt.available:
                     if gpt.mode == "openai_api_key":
-                        return LlmService._call_openai(prompt), "gpt"
-                    return LlmService._call_azure_openai(prompt), "gpt"
+                        answer = LlmService._call_openai(prompt)
+                    else:
+                        answer = LlmService._call_azure_openai(prompt)
+                    latency_ms = int((time.perf_counter() - started) * 1000)
+                    return (
+                        answer,
+                        "gpt",
+                        LlmService._resolve_model_for_provider("gpt"),
+                        latency_ms,
+                    )
 
                 if source == "gemini" and gemini.available:
                     if gemini.mode == "gemini_api_key":
-                        return LlmService._call_gemini(prompt), "gemini"
+                        answer = LlmService._call_gemini(prompt)
+                        latency_ms = int((time.perf_counter() - started) * 1000)
+                        return (
+                            answer,
+                            "gemini",
+                            LlmService._resolve_model_for_provider("gemini"),
+                            latency_ms,
+                        )
                     raise RuntimeError(
                         "Vertex OAuth mode detected. Set GEMINI_API_KEY/GOOGLE_API_KEY for this build."
                     )
 
                 if source == "perplexity" and perplexity.available:
-                    return LlmService._call_perplexity(prompt), "perplexity"
+                    answer = LlmService._call_perplexity(prompt)
+                    latency_ms = int((time.perf_counter() - started) * 1000)
+                    return (
+                        answer,
+                        "perplexity",
+                        LlmService._resolve_model_for_provider("perplexity"),
+                        latency_ms,
+                    )
             except Exception as e:
                 last_error = e
                 logger.warning(f"LLM call failed on {source}: {e}")

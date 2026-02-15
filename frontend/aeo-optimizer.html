@@ -27,7 +27,9 @@
         <a id="ao-nav-dashboard" href="/app.html">Dashboard</a>
         <a id="ao-nav-keyword" href="/keyword-rank.html">Keyword Rank</a>
         <a id="ao-nav-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
-        <a id="ao-nav-aeo" class="active" href="/aeo-optimizer.html">AEO Optimizer</a>
+        <a id="ao-nav-aeo" class="active" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
+        <a id="ao-nav-pricing" href="/app.html?tab=pricing">Pricing</a>
+        <a id="ao-nav-inquiry" href="/app.html?tab=enterprise">Inquiry</a>
       </nav>
 
       <div class="rail-note">
@@ -39,8 +41,8 @@
     <div class="tool-workspace">
       <header class="tool-top panel">
         <div>
-          <p class="eyebrow">Optimization Workflow</p>
-          <h1 id="ao-title">AEO Optimizer</h1>
+          <p class="eyebrow badge-aeo">Optimization Workflow</p>
+          <h1 id="ao-title">SEO/AEO Optimizer</h1>
         </div>
 
         <div class="header-controls">
@@ -53,21 +55,39 @@
         </div>
       </header>
 
-      <main class="grid">
-        <section class="panel">
-          <h2 id="ao-paid-title">Paid Recommendation Workflow (Pro / Enterprise)</h2>
-          <p id="ao-paid-desc">Generate optimization recommendations from URL audit outputs and GEO/AEO principles.</p>
-          <form id="aeo-optimizer-form" class="grid">
-            <label id="ao-url-label">Target URL
+      <main class="grid tool-grid">
+        <section class="panel primary-panel">
+          <div class="panel-header">
+            <h2 id="ao-paid-title">Paid Recommendation Workflow (Pro / Enterprise)</h2>
+            <span class="status-indicator risk-high">High Risk Fix Queue</span>
+          </div>
+          <p id="ao-paid-desc" class="panel-desc">Generate SEO + AEO optimization recommendations from URL audit outputs.</p>
+          <form id="aeo-optimizer-form" class="tool-form">
+            <label><span id="ao-url-label">Target URL</span>
               <input type="url" id="optimizer-url" placeholder="https://example.com" required />
             </label>
-            <button id="ao-submit" type="submit">Generate Recommendations</button>
+            <p id="ao-lock-note" class="lock-note hidden">Paid plan required. URL field remains visible but locked for free tier.</p>
+            <div class="form-actions">
+              <button id="ao-submit" type="submit">Generate Recommendations</button>
+            </div>
           </form>
         </section>
 
-        <section class="panel">
-          <h2 id="ao-result-title">Result</h2>
-          <pre id="optimizer-output">Submit URL to receive recommendations.</pre>
+        <section class="panel result-panel">
+          <div class="panel-header">
+            <h2 id="ao-result-title">Result</h2>
+            <span class="status-indicator" id="ao-result-status">Ready</span>
+          </div>
+          <pre id="optimizer-output" data-state="idle">Ready.</pre>
+        </section>
+
+        <section class="panel next-actions">
+          <h2>Next Actions</h2>
+          <p>Apply recommendations, then re-check SEO rank and prompt visibility in one cycle.</p>
+          <div class="next-links">
+            <a href="/keyword-rank.html">Go to Keyword Rank</a>
+            <a href="/prompt-tracker.html">Go to Prompt Tracker</a>
+          </div>
         </section>
       </main>
     </div>

@@ -1,4 +1,5 @@
 import os
+import json
 from importlib import import_module
 from datetime import datetime, timezone
 from typing import Optional
@@ -8,8 +9,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from .. import auth, database, models
+from ..logger import setup_logger
 
 router = APIRouter(tags=["Billing"])
+logger = setup_logger("api.billing")
 
 
 class CheckoutSessionRequest(BaseModel):
@@ -55,6 +58,59 @@ def _to_datetime(timestamp: Optional[int]) -> Optional[datetime]:
     if not timestamp:
         return None
     return datetime.fromtimestamp(timestamp, tz=timezone.utc)
+
+
+def _safe_int(value: Optional[str]) -> Optional[int]:
+    try:
+        return int(value) if value is not None else None
+    except Exception:
+        return None
+
+
+def _build_event_payload_summary(event: dict) -> str:
+    data_object = event.get("data", {}).get("object", {})
+    summary = {
+        "id": event.get("id"),
+        "type": event.get("type"),
+        "created": event.get("created"),
+        "object_id": data_object.get("id"),
+        "customer": data_object.get("customer"),
+        "subscription": data_object.get("subscription"),
+    }
+    return json.dumps(summary, default=str)
+
+
+def _start_webhook_event(db: Session, event: dict) -> models.BillingWebhookEvent:
+    event_id = str(event.get("id") or "").strip()
+    event_type = str(event.get("type") or "").strip()
+
+    existing = (
+        db.query(models.BillingWebhookEvent)
+        .filter(models.BillingWebhookEvent.provider == "stripe")
+        .filter(models.BillingWebhookEvent.event_id == event_id)
+        .first()
+    )
+    payload_json = _build_event_payload_summary(event)
+
+    if existing:
+        setattr(existing, "event_type", event_type)
+        setattr(existing, "status", "processing")
+        setattr(existing, "attempts", int(getattr(existing, "attempts", 0) or 0) + 1)
+        setattr(existing, "payload_json", payload_json)
+        setattr(existing, "error_message", None)
+        return existing
+
+    webhook_event = models.BillingWebhookEvent(
+        provider="stripe",
+        event_id=event_id,
+        event_type=event_type,
+        status="processing",
+        attempts=1,
+        payload_json=payload_json,
+        error_message=None,
+    )
+    db.add(webhook_event)
+    return webhook_event
 
 
 def _find_or_create_subscription(
@@ -226,15 +282,40 @@ async def stripe_webhook(request: Request, db: Session = Depends(database.get_db
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid webhook signature: {e}")
 
+    event_id = str(event.get("id") or "").strip()
+    if not event_id:
+        raise HTTPException(status_code=400, detail="Webhook event id is missing")
+
+    existing_processed = (
+        db.query(models.BillingWebhookEvent)
+        .filter(models.BillingWebhookEvent.provider == "stripe")
+        .filter(models.BillingWebhookEvent.event_id == event_id)
+        .filter(models.BillingWebhookEvent.status == "processed")
+        .first()
+    )
+    if existing_processed:
+        return {
+            "received": True,
+            "idempotent": True,
+            "event_id": event_id,
+        }
+
+    webhook_event = _start_webhook_event(db=db, event=event)
+
     event_type = event.get("type", "")
     data_object = event.get("data", {}).get("object", {})
 
     try:
         if event_type == "checkout.session.completed":
-            user_id = int(
-                data_object.get("client_reference_id")
-                or data_object.get("metadata", {}).get("user_id")
+            user_id = _safe_int(
+                str(
+                    data_object.get("client_reference_id")
+                    or data_object.get("metadata", {}).get("user_id")
+                )
             )
+            if not user_id:
+                raise RuntimeError("Unable to resolve user id for checkout completion")
+
             plan = (data_object.get("metadata", {}).get("plan") or "pro").lower()
             customer_id = data_object.get("customer", "")
             subscription_id = data_object.get("subscription", "")
@@ -283,7 +364,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(database.get_db
                     setattr(subscription, "plan", plan)
                 _apply_user_tier(
                     db=db,
-                    user_id=int(getattr(subscription, "user_id")),
+                    user_id=int(getattr(subscription, "user_id") or 0),
                     plan=str(getattr(subscription, "plan")),
                     active=status in {"active", "trialing"},
                 )
@@ -307,14 +388,35 @@ async def stripe_webhook(request: Request, db: Session = Depends(database.get_db
                 setattr(subscription, "status", "canceled")
                 _apply_user_tier(
                     db=db,
-                    user_id=int(getattr(subscription, "user_id")),
+                    user_id=int(getattr(subscription, "user_id") or 0),
                     plan=str(getattr(subscription, "plan")),
                     active=False,
                 )
 
+        setattr(webhook_event, "status", "processed")
+        setattr(webhook_event, "error_message", None)
+        setattr(webhook_event, "processed_at", datetime.now(timezone.utc))
         db.commit()
     except Exception as e:
         db.rollback()
+        try:
+            failed_event = (
+                db.query(models.BillingWebhookEvent)
+                .filter(models.BillingWebhookEvent.provider == "stripe")
+                .filter(models.BillingWebhookEvent.event_id == event_id)
+                .first()
+            )
+            if failed_event:
+                setattr(failed_event, "status", "failed")
+                setattr(failed_event, "error_message", str(e)[:2000])
+            db.commit()
+        except Exception as inner_e:
+            db.rollback()
+            logger.error(f"Failed to update webhook event status: {inner_e}")
         raise HTTPException(status_code=400, detail=f"Webhook processing failed: {e}")
 
-    return {"received": True}
+    return {
+        "received": True,
+        "idempotent": False,
+        "event_id": event_id,
+    }

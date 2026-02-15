@@ -1,5 +1,7 @@
 import '../style.css'
+
 import Chart from 'chart.js/auto'
+import { renderComparisonRows, renderIssueBoard } from './ui/renderers'
 
 let token = localStorage.getItem('access_token')
 let guestSingleUsed = sessionStorage.getItem('guest_single_used') === '1'
@@ -17,6 +19,7 @@ const charts = {
   score: null,
   geoLatency: null,
   statusMix: null,
+  hybridCorrelation: null,
 }
 
 const openLoginBtn = document.getElementById('open-login-btn')
@@ -36,11 +39,15 @@ const closeAuthModalBtn = document.getElementById('close-auth-modal')
 const ctaOpenPricing = document.getElementById('cta-open-pricing')
 const ctaOpenLogin = document.getElementById('cta-open-login')
 const sitemapAnalyzeBtn = document.getElementById('sitemap-analyze-btn')
+const sitemapUrlInput = document.getElementById('sitemap-url')
+const sitemapLockNote = document.getElementById('sitemap-lock-note')
 const enterpriseForm = document.getElementById('enterprise-form')
 const languageSelect = document.getElementById('language-select')
 const planCards = document.querySelectorAll('.plan-card[data-plan]')
 const competitorUrlsInput = document.getElementById('competitor-urls')
 const sitemapOutput = document.getElementById('sitemap-output')
+const googleLoginBtn = document.getElementById('google-login-btn')
+const googleRegisterBtn = document.getElementById('google-register-btn')
 
 const urlParams = new URLSearchParams(window.location.search)
 let pendingCheckoutPlan = urlParams.get('plan') || null
@@ -48,6 +55,28 @@ let pendingCheckoutPlan = urlParams.get('plan') || null
 let latestReportData = null
 let currentLanguage = localStorage.getItem('ui_lang') || 'en'
 let currentUserTier = 'free'
+
+const appState = {
+  currentUrl: null,
+  dateRange: '7d',
+  seoMetrics: {},
+  aeoMetrics: {},
+  geoMetrics: {},
+  isLoading: false,
+  lastError: null,
+}
+
+const stateListeners = new Set()
+
+function setAppState(nextState) {
+  Object.assign(appState, nextState)
+  stateListeners.forEach((listener) => listener(appState))
+}
+
+function subscribeAppState(listener) {
+  stateListeners.add(listener)
+  return () => stateListeners.delete(listener)
+}
 
 const LOCALES = {
   en: 'en-US',
@@ -61,14 +90,14 @@ const I18N = {
     brandTagline: 'SEO/GEO/AEO Intelligence',
     tabAnalyze: 'Dashboard',
     tabPricing: 'Plans',
-    tabEnterprise: 'Enterprise',
+    tabEnterprise: 'Inquiry',
     tabKeyword: 'Keyword Rank',
     tabPrompt: 'Prompt Tracker',
-    tabAeo: 'AEO Optimizer',
+    tabAeo: 'SEO/AEO Optimizer',
     gnbMain: 'Main',
     gnbKeyword: 'Keyword Rank',
     gnbPrompt: 'Prompt Tracker',
-    gnbAeo: 'AEO Optimizer',
+    gnbAeo: 'SEO/AEO Optimizer',
     workspaceEyebrow: 'Analytics Workspace',
     workspaceTitle: 'Competitive Visibility Dashboard',
     login: 'Log in',
@@ -115,13 +144,14 @@ const I18N = {
     planEntF1: 'Improvement strategy',
     planEntF2: 'Managed optimization workflow',
     planEntF3: 'Dedicated support',
-    enterpriseTitle: 'Enterprise Improvement & Management',
+    enterpriseTitle: 'Inquiry for Enterprise Improvement & Management',
     enterpriseDescription:
       'If you want ongoing site improvement and operational management, send an enterprise inquiry.',
     companyPlaceholder: 'Company name',
     contactPlaceholder: 'Work email',
     needsPlaceholder: 'Tell us your SEO/GEO/AEO goals',
-    enterpriseSubmit: 'Send enterprise inquiry',
+    enterpriseSubmit: 'Send inquiry',
+    googleContinue: 'Continue with Google',
     loginTitle: 'Log in',
     registerTitle: 'Create account',
     emailPlaceholder: 'Email',
@@ -153,6 +183,11 @@ const I18N = {
     sectionRegionalLatency: 'Regional Latency',
     sectionContentSnapshot: 'Content Snapshot',
     sectionImmediateFixes: 'Immediate Fixes',
+    sectionHybridCorrelation: 'Hybrid Correlation',
+    sectionLiveFeed: 'Live Answer Feed',
+    zoneSummary: 'Summary',
+    zoneAnalysis: 'Analysis',
+    zoneAction: 'Action',
     emptySeoChecks: 'No SEO checks available',
     emptyAeoChecks: 'No AEO checks available',
     metaWords: 'Words',
@@ -161,6 +196,10 @@ const I18N = {
     metaPhoneFormats: 'Phone Formats',
     noCriticalIssues: 'No critical issues',
     noCriticalIssuesDetail: 'Core checks are passing.',
+    issuePriorityP0: 'P0 - Critical',
+    issuePriorityP1: 'P1 - Important',
+    issuePriorityP2: 'P2 - Monitor',
+    issuePriorityEmpty: 'No issues in this priority.',
     emptyUrlAlert: 'Please enter a URL.',
     guestLimitAlert:
       'Guest mode supports one single URL analysis. Login + paid plan is required for full sitemap analysis.',
@@ -218,14 +257,14 @@ const I18N = {
     brandTagline: 'SEO/GEO/AEO 인텔리전스',
     tabAnalyze: '대시보드',
     tabPricing: '요금제',
-    tabEnterprise: '엔터프라이즈',
+    tabEnterprise: '문의',
     tabKeyword: '키워드 순위',
     tabPrompt: '프롬프트 추적',
-    tabAeo: 'AEO 최적화',
+    tabAeo: 'SEO/AEO 최적화',
     gnbMain: '메인',
     gnbKeyword: '키워드 순위',
     gnbPrompt: '프롬프트 추적',
-    gnbAeo: 'AEO 최적화',
+    gnbAeo: 'SEO/AEO 최적화',
     workspaceEyebrow: '분석 워크스페이스',
     workspaceTitle: '경쟁 가시성 대시보드',
     login: '로그인',
@@ -270,12 +309,13 @@ const I18N = {
     planEntF1: '개선 전략 수립',
     planEntF2: '운영형 최적화 워크플로우',
     planEntF3: '전담 지원',
-    enterpriseTitle: '엔터프라이즈 개선/운영',
+    enterpriseTitle: '엔터프라이즈 개선/운영 문의',
     enterpriseDescription: '지속적인 사이트 개선과 운영 관리를 원하시면 문의를 남겨주세요.',
     companyPlaceholder: '회사명',
     contactPlaceholder: '업무용 이메일',
     needsPlaceholder: 'SEO/GEO/AEO 목표를 알려주세요',
-    enterpriseSubmit: '엔터프라이즈 문의 보내기',
+    enterpriseSubmit: '문의 보내기',
+    googleContinue: 'Google로 계속하기',
     loginTitle: '로그인',
     registerTitle: '계정 만들기',
     emailPlaceholder: '이메일',
@@ -307,6 +347,11 @@ const I18N = {
     sectionRegionalLatency: '지역별 지연시간',
     sectionContentSnapshot: '콘텐츠 스냅샷',
     sectionImmediateFixes: '즉시 수정 항목',
+    sectionHybridCorrelation: '하이브리드 상관 분석',
+    sectionLiveFeed: '실시간 답변 피드',
+    zoneSummary: '요약',
+    zoneAnalysis: '분석',
+    zoneAction: '실행',
     emptySeoChecks: 'SEO 체크 데이터가 없습니다',
     emptyAeoChecks: 'AEO 체크 데이터가 없습니다',
     metaWords: '단어 수',
@@ -315,6 +360,10 @@ const I18N = {
     metaPhoneFormats: '전화 포맷',
     noCriticalIssues: '치명 이슈 없음',
     noCriticalIssuesDetail: '핵심 체크가 정상입니다.',
+    issuePriorityP0: 'P0 - 긴급',
+    issuePriorityP1: 'P1 - 중요',
+    issuePriorityP2: 'P2 - 모니터링',
+    issuePriorityEmpty: '이 우선순위에는 이슈가 없습니다.',
     emptyUrlAlert: 'URL을 입력해주세요.',
     guestLimitAlert: '게스트 모드는 단일 URL 1회 분석만 가능합니다. 전체 사이트맵 분석은 로그인 + 유료 플랜이 필요합니다.',
     analysisFailedPrefix: '분석 실패',
@@ -370,7 +419,7 @@ const I18N = {
     brandTagline: 'SEO/GEO/AEO インテリジェンス',
     tabAnalyze: 'ダッシュボード',
     tabPricing: '料金',
-    tabEnterprise: 'エンタープライズ',
+    tabEnterprise: '問い合わせ',
     workspaceEyebrow: '分析ワークスペース',
     workspaceTitle: '競合可視性ダッシュボード',
     login: 'ログイン',
@@ -455,6 +504,10 @@ const I18N = {
     metaPhoneFormats: '電話形式',
     noCriticalIssues: '重大な問題なし',
     noCriticalIssuesDetail: '主要チェックは正常です。',
+    issuePriorityP0: 'P0 - 緊急',
+    issuePriorityP1: 'P1 - 重要',
+    issuePriorityP2: 'P2 - 監視',
+    issuePriorityEmpty: 'この優先度に問題はありません。',
     emptyUrlAlert: 'URLを入力してください。',
     guestLimitAlert: 'ゲストモードでは単一URL分析は1回のみです。サイトマップ全体分析にはログインと有料プランが必要です。',
     analysisFailedPrefix: '分析失敗',
@@ -498,7 +551,7 @@ const I18N = {
     brandTagline: 'SEO/GEO/AEO 智能分析',
     tabAnalyze: '仪表盘',
     tabPricing: '价格',
-    tabEnterprise: '企业版',
+    tabEnterprise: '咨询',
     workspaceEyebrow: '分析工作区',
     workspaceTitle: '竞争可见性仪表盘',
     login: '登录',
@@ -583,6 +636,10 @@ const I18N = {
     metaPhoneFormats: '电话格式',
     noCriticalIssues: '无关键问题',
     noCriticalIssuesDetail: '核心检查均通过。',
+    issuePriorityP0: 'P0 - 紧急',
+    issuePriorityP1: 'P1 - 重要',
+    issuePriorityP2: 'P2 - 观察',
+    issuePriorityEmpty: '该优先级暂无问题。',
     emptyUrlAlert: '请输入 URL。',
     guestLimitAlert: '访客模式仅支持 1 次单 URL 分析。完整站点地图分析需要登录并订阅付费方案。',
     analysisFailedPrefix: '分析失败',
@@ -645,6 +702,7 @@ function applyLanguage(lang) {
   document.documentElement.lang = currentLanguage === 'zh' ? 'zh-CN' : currentLanguage
 
   setText('brand-tagline', 'brandTagline')
+  setText('tab-main-link', 'gnbMain')
   setText('tab-analyze-btn', 'tabAnalyze')
   setText('tab-pricing-btn', 'tabPricing')
   setText('tab-enterprise-btn', 'tabEnterprise')
@@ -682,6 +740,7 @@ function applyLanguage(lang) {
   setPlaceholder('sitemap-url', 'sitemapPlaceholder')
   setText('sitemap-analyze-btn', 'batchButton')
   if (sitemapOutput && !sitemapOutput.dataset.hasResult) {
+    sitemapOutput.dataset.state = 'idle'
     sitemapOutput.textContent = t('sitemapPaidOnly')
   }
   setText('pricing-title', 'pricingTitle')
@@ -714,6 +773,8 @@ function applyLanguage(lang) {
   setPlaceholder('reg-password', 'passwordPlaceholder')
   setText('login-submit', 'loginSubmit')
   setText('register-submit', 'registerSubmit')
+  setText('google-login-btn', 'googleContinue')
+  setText('google-register-btn', 'googleContinue')
   setText('login-switch-label', 'loginSwitchLabel')
   setText('to-register', 'loginSwitchButton')
   setText('register-switch-label', 'registerSwitchLabel')
@@ -732,6 +793,12 @@ function applyTierUi() {
   if (!sitemapAnalyzeBtn) return
   const disabled = !isPaidTier()
   sitemapAnalyzeBtn.disabled = disabled
+  if (sitemapUrlInput) {
+    sitemapUrlInput.disabled = disabled
+  }
+  if (sitemapLockNote) {
+    sitemapLockNote.classList.toggle('hidden', !disabled)
+  }
   if (disabled) {
     renderSitemapSample()
   }
@@ -740,6 +807,7 @@ function applyTierUi() {
 function renderSitemapSample() {
   if (!sitemapOutput) return
   sitemapOutput.dataset.hasResult = '1'
+  sitemapOutput.dataset.state = 'sample'
   sitemapOutput.textContent = `${t('paidFeatureDisabled')}\n\n${t('sitemapSampleOutput')}`
 }
 
@@ -968,12 +1036,32 @@ function collectSeoChecks(seoResult) {
     { label: t('labelContentLength'), data: seoResult.content_length },
   ]
     .filter((item) => item.data && typeof item.data === 'object')
-    .map((item) => ({
-      ...item,
-      status: item.data.status || t('statusInfo'),
-      statusType: normalizeStatus(item.data.status || ''),
-      detail: item.data.details || '',
-    }))
+    .map((item) => {
+      const status = item.data.status || t('statusInfo')
+      const statusType = normalizeStatus(item.data.status || '')
+      const detail = item.data.details || ''
+      return {
+        ...item,
+        domain: 'seo',
+        status,
+        statusType,
+        detail,
+        why: detail || t('noDetails'),
+        fixSteps:
+          statusType === 'fail'
+            ? 'Apply technical fix immediately and re-run crawl verification.'
+            : statusType === 'warn'
+            ? 'Tune this SEO signal and validate in next analysis run.'
+            : 'Keep current SEO setting and monitor regressions.',
+        expectedImpact:
+          statusType === 'fail'
+            ? 'High impact on crawlability/ranking confidence.'
+            : statusType === 'warn'
+            ? 'Medium impact on consistency and discoverability.'
+            : 'Low immediate risk; maintain baseline quality.',
+        references: 'SEO Foundation',
+      }
+    })
 }
 
 function collectAeoChecks(aeoResult) {
@@ -986,12 +1074,32 @@ function collectAeoChecks(aeoResult) {
     { label: t('labelEeAtSignals'), data: aeoResult.e_e_a_t_signals },
   ]
     .filter((item) => item.data && typeof item.data === 'object')
-    .map((item) => ({
-      ...item,
-      status: item.data.status || t('statusInfo'),
-      statusType: normalizeStatus(item.data.status || ''),
-      detail: item.data.details || '',
-    }))
+    .map((item) => {
+      const status = item.data.status || t('statusInfo')
+      const statusType = normalizeStatus(item.data.status || '')
+      const detail = item.data.details || ''
+      return {
+        ...item,
+        domain: 'aeo',
+        status,
+        statusType,
+        detail,
+        why: detail || t('noDetails'),
+        fixSteps:
+          statusType === 'fail'
+            ? 'Update answer-first structure/schema and retest model responses.'
+            : statusType === 'warn'
+            ? 'Strengthen entity clarity and content framing for AI summaries.'
+            : 'Maintain current AEO/GEO structure and monitor mention drift.',
+        expectedImpact:
+          statusType === 'fail'
+            ? 'High impact on AI mention/share visibility.'
+            : statusType === 'warn'
+            ? 'Medium impact on answer quality and citation rate.'
+            : 'Low immediate risk; preserve current mention quality.',
+        references: 'AEO/GEO Intelligence',
+      }
+    })
 }
 
 function renderStatusRows(checks, emptyText) {
@@ -1034,6 +1142,28 @@ function renderGeoRows(geoResult) {
     .join('')
 }
 
+function renderLiveFeed(checks) {
+  const rows = checks.slice(0, 6)
+  if (!rows.length) {
+    return `<p class="dashboard-empty">${t('noDetails')}</p>`
+  }
+
+  return `
+    <ul class="live-feed">
+      ${rows
+        .map(
+          (check) => `
+            <li class="${check.domain === 'seo' ? 'seo' : 'aeo'}">
+              <strong>${escapeHtml(check.label)}</strong>
+              <span>${escapeHtml(check.detail || t('noDetails'))}</span>
+            </li>
+          `
+        )
+        .join('')}
+    </ul>
+  `
+}
+
 function summarizeStatusCounts(checks) {
   return checks.reduce(
     (acc, check) => {
@@ -1060,8 +1190,11 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
   const scoreCanvas = document.getElementById('score-chart')
   const geoCanvas = document.getElementById('geo-latency-chart')
   const statusCanvas = document.getElementById('status-mix-chart')
+  const hybridCanvas = document.getElementById('hybrid-correlation-chart')
 
   if (!scoreCanvas || !geoCanvas || !statusCanvas) return
+
+  const scoreColor = seoScore >= 80 ? '#16a34a' : seoScore >= 60 ? '#f59e0b' : '#dc2626'
 
   charts.score = new Chart(scoreCanvas, {
     type: 'doughnut',
@@ -1070,7 +1203,7 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
       datasets: [
         {
           data: [seoScore, Math.max(0, 100 - seoScore)],
-          backgroundColor: ['#2d9cdb', '#e6edf6'],
+          backgroundColor: [scoreColor, '#e5e7eb'],
           borderWidth: 0,
           cutout: '72%',
         },
@@ -1094,7 +1227,12 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
         {
           label: t('latencyMs'),
           data: geoEntries.map(([, info]) => Number(info.load_time_ms) || 0),
-          backgroundColor: '#4c7cf0',
+          backgroundColor: geoEntries.map(([, info]) => {
+            const latency = Number(info.load_time_ms) || 0
+            if (latency <= 900) return '#16a34a'
+            if (latency <= 1600) return '#f59e0b'
+            return '#dc2626'
+          }),
           borderRadius: 8,
         },
       ],
@@ -1126,7 +1264,7 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
       datasets: [
         {
           data: [statusCounts.pass, statusCounts.warn, statusCounts.fail, statusCounts.info],
-          backgroundColor: ['#11a36a', '#f2b736', '#e94f37', '#8ea2c1'],
+          backgroundColor: ['#16a34a', '#f59e0b', '#dc2626', '#64748b'],
           borderWidth: 0,
           cutout: '66%',
         },
@@ -1146,6 +1284,76 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
       },
     },
   })
+
+  if (hybridCanvas) {
+    const seoRankEquivalent = Math.max(1, 101 - seoScore)
+    const mentionSignal = statusCounts.pass + statusCounts.warn
+
+    charts.hybridCorrelation = new Chart(hybridCanvas, {
+      type: 'bar',
+      data: {
+        labels: ['Current'],
+        datasets: [
+          {
+            type: 'line',
+            label: 'SEO Rank Signal',
+            data: [seoRankEquivalent],
+            yAxisID: 'y',
+            borderColor: '#0f172a',
+            backgroundColor: '#0f172a',
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#0f172a',
+          },
+          {
+            label: 'AEO Mention Signal',
+            data: [mentionSignal],
+            yAxisID: 'y1',
+            backgroundColor: 'rgba(30, 64, 175, 0.75)',
+            borderRadius: 8,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              color: '#4a5a72',
+            },
+          },
+        },
+        scales: {
+          y: {
+            type: 'linear',
+            position: 'left',
+            reverse: true,
+            beginAtZero: false,
+            ticks: { color: '#5f6f86' },
+            grid: { color: '#edf2fa' },
+          },
+          y1: {
+            type: 'linear',
+            position: 'right',
+            beginAtZero: true,
+            ticks: { color: '#5f6f86' },
+            grid: { drawOnChartArea: false },
+          },
+          x: {
+            ticks: { color: '#5f6f86' },
+            grid: { display: false },
+          },
+        },
+      },
+    })
+  }
 }
 
 function renderReport(data, competitorReports = []) {
@@ -1189,90 +1397,107 @@ function renderReport(data, competitorReports = []) {
   ]
 
   const html = `
-    <section class="dashboard-hero">
-      <div>
-        <h3>${t('dashboardTitle')}</h3>
-        <p class="dashboard-url">${escapeHtml(data.url || '')}</p>
-        <p class="dashboard-sub">${t('generatedAt')} ${formatTime(new Date())}</p>
-      </div>
-      <div class="score-shell">
-        <div class="chart-box chart-score"><canvas id="score-chart"></canvas></div>
-        <div class="score-center">
-          <strong>${seoScore}</strong>
-          <span>${t('seoScoreLabel')}</span>
+    <section class="summary-zone">
+      <p class="zone-title">${t('zoneSummary')}</p>
+      <section class="dashboard-hero">
+        <div>
+          <h3>${t('dashboardTitle')}</h3>
+          <p class="dashboard-url">${escapeHtml(data.url || '')}</p>
+          <p class="dashboard-sub">${t('generatedAt')} ${formatTime(new Date())}</p>
         </div>
-      </div>
-    </section>
-
-    <section class="kpi-grid">
-      <article class="kpi-card"><p>${t('kpiSeoChecks')}</p><h4>${seoPass}/${seoChecks.length || 0}</h4></article>
-      <article class="kpi-card"><p>${t('kpiAeoChecks')}</p><h4>${aeoPass}/${aeoChecks.length || 0}</h4></article>
-      <article class="kpi-card"><p>${t('kpiGlobalReach')}</p><h4>${successfulRegions}/${geoEntries.length || 0}</h4></article>
-      <article class="kpi-card"><p>${t('kpiAvgLatency')}</p><h4>${avgLatency}ms</h4></article>
-    </section>
-
-    <section class="dashboard-card">
-      <div class="card-head"><h4>${t('competitorComparisonTitle')}</h4></div>
-      <ul class="issue-list">
-        ${comparisonRows
-          .map(
-            (row) =>
-              `<li><strong>${escapeHtml(row.type)}: ${escapeHtml(row.url || '')}</strong><span>SEO ${escapeHtml(String(row.score))}</span></li>`
-          )
-          .join('')}
-      </ul>
-    </section>
-
-    <section class="dashboard-grid">
-      <article class="dashboard-card">
-        <div class="card-head"><h4>${t('sectionSeoEssentials')}</h4></div>
-        <ul class="status-list">${renderStatusRows(seoChecks, t('emptySeoChecks'))}</ul>
-      </article>
-
-      <article class="dashboard-card">
-        <div class="card-head"><h4>${t('sectionAeoSignals')}</h4></div>
-        <ul class="status-list">${renderStatusRows(aeoChecks, t('emptyAeoChecks'))}</ul>
-      </article>
-
-      <article class="dashboard-card dashboard-chart-card">
-        <div class="card-head"><h4>${t('sectionStatusMix')}</h4></div>
-        <div class="chart-box chart-medium"><canvas id="status-mix-chart"></canvas></div>
-      </article>
-
-      <article class="dashboard-card dashboard-chart-card">
-        <div class="card-head"><h4>${t('sectionRegionalLatency')}</h4></div>
-        <div class="chart-box chart-medium"><canvas id="geo-latency-chart"></canvas></div>
-        <ul class="geo-list">${renderGeoRows(geoResult)}</ul>
-      </article>
-
-      <article class="dashboard-card">
-        <div class="card-head"><h4>${t('sectionContentSnapshot')}</h4></div>
-        <div class="meta-grid">
-          <div class="meta-chip"><span>${t('metaWords')}</span><strong>${words}</strong></div>
-          <div class="meta-chip"><span>${t('metaMissingAlt')}</span><strong>${missingAlt}</strong></div>
-          <div class="meta-chip"><span>${t('metaCurrencies')}</span><strong>${
-            seoResult?.geo_signals?.found_currencies?.length || 0
-          }</strong></div>
-          <div class="meta-chip"><span>${t('metaPhoneFormats')}</span><strong>${
-            seoResult?.geo_signals?.found_phones?.length || 0
-          }</strong></div>
+        <div class="score-shell">
+          <div class="chart-box chart-score"><canvas id="score-chart"></canvas></div>
+          <div class="score-center">
+            <strong>${seoScore}</strong>
+            <span>${t('seoScoreLabel')}</span>
+          </div>
         </div>
-      </article>
+      </section>
 
-      <article class="dashboard-card">
-        <div class="card-head"><h4>${t('sectionImmediateFixes')}</h4></div>
+      <section class="kpi-grid">
+        <article class="kpi-card"><p>${t('kpiSeoChecks')}</p><h4>${seoPass}/${seoChecks.length || 0}</h4></article>
+        <article class="kpi-card"><p>${t('kpiAeoChecks')}</p><h4>${aeoPass}/${aeoChecks.length || 0}</h4></article>
+        <article class="kpi-card"><p>${t('kpiGlobalReach')}</p><h4>${successfulRegions}/${geoEntries.length || 0}</h4></article>
+        <article class="kpi-card"><p>${t('kpiAvgLatency')}</p><h4>${avgLatency}ms</h4></article>
+      </section>
+
+      <section class="risk-legend">
+        <span class="risk-pill critical">Critical ${statusCounts.fail}</span>
+        <span class="risk-pill caution">Caution ${statusCounts.warn}</span>
+        <span class="risk-pill safe">Safe ${statusCounts.pass}</span>
+      </section>
+
+      <section class="dashboard-card">
+        <div class="card-head"><h4>${t('competitorComparisonTitle')}</h4></div>
         <ul class="issue-list">
-          ${
-            issueList.length
-              ? issueList
-                  .map(
-                    (issue) => `<li><strong>${escapeHtml(issue.label)}</strong><span>${escapeHtml(issue.detail || issue.status)}</span></li>`
-                  )
-                  .join('')
-              : `<li><strong>${t('noCriticalIssues')}</strong><span>${t('noCriticalIssuesDetail')}</span></li>`
-          }
+          ${renderComparisonRows(comparisonRows, escapeHtml)}
         </ul>
-      </article>
+      </section>
+    </section>
+
+    <section class="analysis-zone">
+      <p class="zone-title">${t('zoneAnalysis')}</p>
+      <div class="analysis-zone-grid">
+        <article class="dashboard-card">
+          <div class="card-head"><h4>${t('sectionSeoEssentials')}</h4></div>
+          <ul class="status-list">${renderStatusRows(seoChecks, t('emptySeoChecks'))}</ul>
+        </article>
+
+        <article class="dashboard-card">
+          <div class="card-head"><h4>${t('sectionAeoSignals')}</h4></div>
+          <ul class="status-list">${renderStatusRows(aeoChecks, t('emptyAeoChecks'))}</ul>
+        </article>
+
+        <article class="dashboard-card dashboard-chart-card">
+          <div class="card-head"><h4>${t('sectionStatusMix')}</h4></div>
+          <div class="chart-box chart-medium"><canvas id="status-mix-chart"></canvas></div>
+        </article>
+
+        <article class="dashboard-card dashboard-chart-card">
+          <div class="card-head"><h4>${t('sectionHybridCorrelation')}</h4></div>
+          <div class="chart-box chart-medium"><canvas id="hybrid-correlation-chart"></canvas></div>
+        </article>
+
+        <article class="dashboard-card dashboard-chart-card">
+          <div class="card-head"><h4>${t('sectionRegionalLatency')}</h4></div>
+          <div class="chart-box chart-medium"><canvas id="geo-latency-chart"></canvas></div>
+          <ul class="geo-list">${renderGeoRows(geoResult)}</ul>
+        </article>
+
+        <article class="dashboard-card">
+          <div class="card-head"><h4>${t('sectionContentSnapshot')}</h4></div>
+          <div class="meta-grid">
+            <div class="meta-chip"><span>${t('metaWords')}</span><strong>${words}</strong></div>
+            <div class="meta-chip"><span>${t('metaMissingAlt')}</span><strong>${missingAlt}</strong></div>
+            <div class="meta-chip"><span>${t('metaCurrencies')}</span><strong>${
+              seoResult?.geo_signals?.found_currencies?.length || 0
+            }</strong></div>
+            <div class="meta-chip"><span>${t('metaPhoneFormats')}</span><strong>${
+              seoResult?.geo_signals?.found_phones?.length || 0
+            }</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="action-zone">
+      <p class="zone-title">${t('zoneAction')}</p>
+      <div class="action-zone-grid">
+        <article class="dashboard-card">
+          <div class="card-head"><h4>${t('sectionImmediateFixes')}</h4></div>
+          ${renderIssueBoard(issueList, escapeHtml, {
+            p0: t('issuePriorityP0'),
+            p1: t('issuePriorityP1'),
+            p2: t('issuePriorityP2'),
+            empty: t('issuePriorityEmpty'),
+          })}
+        </article>
+
+        <article class="dashboard-card">
+          <div class="card-head"><h4>${t('sectionLiveFeed')}</h4></div>
+          ${renderLiveFeed(allChecks)}
+        </article>
+      </div>
     </section>
   `
 
@@ -1297,8 +1522,11 @@ analyzeBtn.addEventListener('click', async () => {
     return
   }
 
-  analyzeBtn.disabled = true
-  analyzeBtn.innerText = t('analyzingButton')
+  setAppState({
+    isLoading: true,
+    currentUrl: url,
+    lastError: null,
+  })
 
   try {
     const competitorUrls = parseCompetitorUrls()
@@ -1330,6 +1558,10 @@ analyzeBtn.addEventListener('click', async () => {
     }
 
     const data = await res.json()
+    const seoMetrics = data?.seo_result || {}
+    const aeoMetrics = data?.aeo_result || {}
+    const geoMetrics = data?.geo_result || {}
+
     let competitorReports = []
     if (competitorUrls.length) {
       if (competitorValidation.addOnAmount > 0) {
@@ -1357,6 +1589,7 @@ analyzeBtn.addEventListener('click', async () => {
       competitorReports = (await Promise.all(competitorRequests)).filter(Boolean)
     }
 
+    setAppState({ seoMetrics, aeoMetrics, geoMetrics })
     renderReport(data, competitorReports)
     postAnalysisCta.classList.remove('hidden')
 
@@ -1365,10 +1598,10 @@ analyzeBtn.addEventListener('click', async () => {
       sessionStorage.setItem('guest_single_used', '1')
     }
   } catch (err) {
+    setAppState({ lastError: err.message })
     alert(`${t('analysisFailedPrefix')}: ${err.message}`)
   } finally {
-    analyzeBtn.disabled = false
-    analyzeBtn.innerText = t('analyzeButton')
+    setAppState({ isLoading: false })
   }
 })
 
@@ -1459,6 +1692,31 @@ logoutBtn.addEventListener('click', () => {
 ctaOpenPricing.addEventListener('click', () => switchTab('pricing'))
 ctaOpenLogin.addEventListener('click', () => openAuthModal('login'))
 
+async function startGoogleOAuth() {
+  try {
+    const response = await fetch('/api/auth/google/login-url')
+    if (!response.ok) {
+      const message = await extractErrorMessage(response, 'Google login is unavailable')
+      throw new Error(message)
+    }
+    const data = await response.json()
+    if (!data?.login_url) {
+      throw new Error('Google login URL is unavailable')
+    }
+    window.location.href = data.login_url
+  } catch (error) {
+    alert(error.message)
+  }
+}
+
+if (googleLoginBtn) {
+  googleLoginBtn.addEventListener('click', startGoogleOAuth)
+}
+
+if (googleRegisterBtn) {
+  googleRegisterBtn.addEventListener('click', startGoogleOAuth)
+}
+
 planCards.forEach((card) => {
   card.addEventListener('click', () => {
     const plan = card.dataset.plan || ''
@@ -1494,6 +1752,12 @@ if (languageSelect) {
   })
 }
 
+subscribeAppState((state) => {
+  if (!analyzeBtn) return
+  analyzeBtn.disabled = state.isLoading
+  analyzeBtn.innerText = state.isLoading ? t('analyzingButton') : t('analyzeButton')
+})
+
 setAuthButtons()
 
 const initialTab = urlParams.get('tab') || 'analyze'
@@ -1509,6 +1773,18 @@ if (checkoutState === 'success') {
 }
 if (checkoutState === 'cancel') {
   alert(t('checkoutCancel'))
+}
+
+const oauthToken = urlParams.get('oauth_token')
+if (oauthToken) {
+  token = oauthToken
+  localStorage.setItem('access_token', oauthToken)
+  syncCurrentUserTier()
+  setAuthButtons()
+  const cleanUrl = new URL(window.location.href)
+  cleanUrl.searchParams.delete('oauth_token')
+  cleanUrl.searchParams.set('auth', 'google-success')
+  window.history.replaceState({}, '', cleanUrl.toString())
 }
 
 applyLanguage(currentLanguage)

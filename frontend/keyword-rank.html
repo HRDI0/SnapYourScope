@@ -27,7 +27,9 @@
         <a id="kr-nav-dashboard" href="/app.html">Dashboard</a>
         <a id="kr-nav-keyword" class="active" href="/keyword-rank.html">Keyword Rank</a>
         <a id="kr-nav-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
-        <a id="kr-nav-optimizer" href="/aeo-optimizer.html">AEO Optimizer</a>
+        <a id="kr-nav-optimizer" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
+        <a id="kr-nav-pricing" href="/app.html?tab=pricing">Pricing</a>
+        <a id="kr-nav-inquiry" href="/app.html?tab=enterprise">Inquiry</a>
       </nav>
 
       <div class="rail-note">
@@ -39,7 +41,7 @@
     <div class="tool-workspace">
       <header class="tool-top panel">
         <div>
-          <p class="eyebrow">Search Visibility</p>
+          <p class="eyebrow badge-seo">Search Visibility</p>
           <h1 id="kr-title">Keyword Rank Tracker</h1>
         </div>
 
@@ -53,30 +55,56 @@
         </div>
       </header>
 
-      <main class="grid">
-        <section class="panel">
-          <h2 id="kr-free-title">Free: Single Keyword</h2>
-          <p id="kr-free-desc">Track one keyword for free. Multi-keyword batch is paid.</p>
-          <form id="rank-track-form" class="grid">
-            <label id="kr-query-label">Keywords (one per line)
-              <textarea id="kr-query" rows="4" required placeholder="best ai seo platform"></textarea>
+      <main class="grid tool-grid">
+        <section class="panel primary-panel">
+          <div class="panel-header">
+            <h2 id="kr-free-title">Free: Single Keyword</h2>
+            <span class="status-indicator risk-low">Low Risk Baseline</span>
+          </div>
+          <p id="kr-free-desc" class="panel-desc">Track one keyword for free. Multi-keyword batch is paid.</p>
+          <form id="rank-track-form" class="tool-form">
+            <label>
+              <span id="kr-query-single-label">Primary Keyword</span>
+              <input type="text" id="kr-query-single" placeholder="best ai seo platform" required />
             </label>
-            <label id="kr-url-label">Target URL
+            <label>
+              <span id="kr-query-label">Additional Keywords (optional, one per line)</span>
+              <textarea id="kr-query" rows="3" placeholder="seo tool comparison"></textarea>
+            </label>
+            <label>
+              <span id="kr-url-label">Target URL</span>
               <input type="url" id="kr-target-url" placeholder="https://example.com" required />
             </label>
-            <div class="checks">
-              <label><input type="checkbox" name="rank-engine" value="google" checked /> Google</label>
-              <label><input type="checkbox" name="rank-engine" value="bing" checked /> Bing</label>
-              <label><input type="checkbox" name="rank-engine" value="naver" checked /> Naver</label>
-            </div>
+            <details class="advanced-toggle">
+              <summary>Engine Sources</summary>
+              <div class="checks compact-checks">
+                <label><input type="checkbox" name="rank-engine" value="google" checked /> Google</label>
+                <label><input type="checkbox" name="rank-engine" value="bing" checked /> Bing</label>
+                <label><input type="checkbox" name="rank-engine" value="naver" checked /> Naver</label>
+              </div>
+            </details>
             <p id="kr-policy-note" class="mini-note">Policy: single keyword is free. Multi-keyword requires Pro/Enterprise.</p>
-            <button id="kr-submit" type="submit">Run Rank Tracking</button>
+            <div class="form-actions">
+              <button id="kr-submit" type="submit">Run Rank Tracking</button>
+            </div>
           </form>
         </section>
 
-        <section class="panel">
-          <h2 id="kr-result-title">Result</h2>
-          <pre id="kr-output">Run a request to view output.</pre>
+        <section class="panel result-panel">
+          <div class="panel-header">
+            <h2 id="kr-result-title">Result</h2>
+            <span class="status-indicator" id="kr-result-status">Ready</span>
+          </div>
+          <pre id="kr-output" data-state="idle">Ready.</pre>
+        </section>
+
+        <section class="panel next-actions">
+          <h2>Next Actions</h2>
+          <p>Use this SEO rank result as foundation, then continue with AI visibility checks.</p>
+          <div class="next-links">
+            <a href="/prompt-tracker.html">Go to Prompt Tracker</a>
+            <a href="/aeo-optimizer.html">Go to SEO/AEO Optimizer</a>
+          </div>
         </section>
       </main>
     </div>

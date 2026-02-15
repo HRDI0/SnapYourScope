@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
@@ -22,12 +23,13 @@
       </div>
 
       <nav class="tab-links" id="tab-links">
+        <a id="tab-main-link" class="tab-link tab-link-anchor" href="/">Main</a>
         <button id="tab-analyze-btn" class="tab-link active" data-tab="analyze">Dashboard</button>
-        <button id="tab-pricing-btn" class="tab-link" data-tab="pricing">Plans</button>
-        <button id="tab-enterprise-btn" class="tab-link" data-tab="enterprise">Enterprise</button>
         <a id="tab-keyword-link" class="tab-link tab-link-anchor" href="/keyword-rank.html">Keyword Rank</a>
         <a id="tab-prompt-link" class="tab-link tab-link-anchor" href="/prompt-tracker.html">Prompt Tracker</a>
-        <a id="tab-aeo-link" class="tab-link tab-link-anchor" href="/aeo-optimizer.html">AEO Optimizer</a>
+        <a id="tab-aeo-link" class="tab-link tab-link-anchor" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
+        <button id="tab-pricing-btn" class="tab-link" data-tab="pricing">Pricing</button>
+        <button id="tab-enterprise-btn" class="tab-link" data-tab="enterprise">Inquiry</button>
       </nav>
 
       <div class="rail-note">
@@ -37,7 +39,7 @@
 
       <div class="rail-note">
         <strong>Feature pages</strong>
-        <p><a href="/">Main</a> | <a href="/keyword-rank.html">Keyword Rank</a> | <a href="/prompt-tracker.html">Prompt Tracker</a> | <a href="/aeo-optimizer.html">AEO Optimizer</a></p>
+          <p><a href="/">Main</a> | <a href="/app.html">Dashboard</a> | <a href="/keyword-rank.html">Keyword Rank</a> | <a href="/prompt-tracker.html">Prompt Tracker</a> | <a href="/aeo-optimizer.html">SEO/AEO Optimizer</a></p>
       </div>
     </aside>
 
@@ -52,7 +54,7 @@
           <a id="gnb-main" href="/">Main</a>
           <a id="gnb-keyword" href="/keyword-rank.html">Keyword Rank</a>
           <a id="gnb-prompt" href="/prompt-tracker.html">Prompt Tracker</a>
-          <a id="gnb-aeo" href="/aeo-optimizer.html">AEO Optimizer</a>
+          <a id="gnb-aeo" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
         </nav>
 
         <div class="auth-actions">
@@ -118,6 +120,7 @@
             <input type="url" id="sitemap-url" placeholder="https://example.com/sitemap.xml" />
             <button id="sitemap-analyze-btn" class="btn btn-secondary">Start full analysis</button>
           </div>
+          <p id="sitemap-lock-note" class="mini-note hidden">Paid plan required. URL field remains visible but locked for free tier.</p>
           <p id="batch-refresh-policy" class="mini-note">Refresh policy: weekly (LLM/API-intensive).</p>
           <pre id="sitemap-output" class="mini-output">This section requires paid tier.</pre>
         </div>
@@ -187,18 +190,20 @@
           <input type="password" id="password" placeholder="Password" required />
           <button id="login-submit" type="submit" class="btn btn-primary">Sign in</button>
         </form>
+        <button id="google-login-btn" type="button" class="btn btn-ghost">Continue with Google</button>
         <p class="switch-link"><span id="login-switch-label">No account?</span> <button id="to-register" type="button">Create one</button></p>
       </div>
 
-      <div id="register-container" class="hidden">
-        <h2 id="register-title">Create account</h2>
-        <form id="register-form" class="auth-form">
-          <input type="email" id="reg-email" placeholder="Email" required />
-          <input type="password" id="reg-password" placeholder="Password" required />
-          <button id="register-submit" type="submit" class="btn btn-primary">Sign up</button>
-        </form>
-        <p class="switch-link"><span id="register-switch-label">Already registered?</span> <button id="to-login" type="button">Back to login</button></p>
-      </div>
+        <div id="register-container" class="hidden">
+          <h2 id="register-title">Create account</h2>
+          <form id="register-form" class="auth-form">
+            <input type="email" id="reg-email" placeholder="Email" required />
+            <input type="password" id="reg-password" placeholder="Password" required />
+            <button id="register-submit" type="submit" class="btn btn-primary">Sign up</button>
+          </form>
+          <button id="google-register-btn" type="button" class="btn btn-ghost">Continue with Google</button>
+          <p class="switch-link"><span id="register-switch-label">Already registered?</span> <button id="to-login" type="button">Back to login</button></p>
+        </div>
     </div>
   </div>
 

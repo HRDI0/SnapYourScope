@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from .. import database, models
 from ..logger import setup_logger
 from .analysis_service import AnalysisService
+from .blob_storage_service import BlobStorageService
 
 logger = setup_logger("api.services.sitemap_batch")
 
@@ -254,9 +255,27 @@ class SitemapBatchService:
                         include_aeo=bool(job.include_aeo),
                         include_pagespeed=False,
                     )
+                    blob_meta = BlobStorageService.save_json_blob(
+                        namespace="sitemap_batch_item",
+                        payload={
+                            "job_id": job.id,
+                            "item_id": item.id,
+                            "url": item.target_url,
+                            "result": result,
+                        },
+                    )
                     item.status = "completed"
                     item.error_message = None
-                    item.report_json = json.dumps(result, default=str)
+                    item.report_json = json.dumps(
+                        {
+                            "storage_policy": "full_result_blob_with_db_summary",
+                            "blob_meta": blob_meta,
+                            "seo_score": (result.get("seo_result") or {}).get(
+                                "score", 0
+                            ),
+                        },
+                        default=str,
+                    )
                 except Exception as e:
                     item.status = "failed"
                     item.error_message = str(e)

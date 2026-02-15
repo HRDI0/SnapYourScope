@@ -4,60 +4,68 @@ import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, se
 const output = document.getElementById('optimizer-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('ao-submit')
+const optimizerUrlInput = document.getElementById('optimizer-url')
+const lockNote = document.getElementById('ao-lock-note')
 
 let currentLanguage = getStoredLanguage('en')
 let currentTier = 'free'
 
 const I18N = {
   en: {
-    title: 'AEO Optimizer',
+    title: 'SEO/AEO Optimizer',
     navMain: 'Main',
     navKeyword: 'Keyword Rank',
     navDashboard: 'Dashboard',
     navPrompt: 'Prompt Tracker',
-    navAeo: 'AEO Optimizer',
+    navAeo: 'SEO/AEO Optimizer',
+    navPricing: 'Pricing',
+    navInquiry: 'Inquiry',
     paidTitle: 'Paid Recommendation Workflow (Pro / Enterprise)',
-    paidDesc: 'Generate optimization recommendations from URL audit outputs and GEO/AEO principles.',
+    paidDesc: 'Generate optimization recommendations from URL audit outputs with SEO foundation and GEO/AEO principles.',
     urlLabel: 'Target URL',
     submit: 'Generate Recommendations',
     resultTitle: 'Result',
-    outputIdle: 'Submit URL to receive recommendations.',
+    outputIdle: 'Ready.',
     loginRequired: 'Error: Login required for paid optimizer feature.',
     paidRequired: 'Error: Pro or Enterprise subscription is required.',
     freeDisabled:
-      'AEO optimizer is disabled on free tier. Sample output is shown below.',
+      'SEO/AEO optimizer is disabled on free tier. Sample output is shown below.',
     sampleOutput:
       '{\n  "status": "sample",\n  "recommendations": [\n    "Add answer-first paragraph near top of content",\n    "Expand FAQ schema with target intent terms"\n  ]\n}',
     refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
     outputError: 'Error',
   },
   ko: {
-    title: 'AEO 최적화',
+    title: 'SEO/AEO 최적화',
     navMain: '메인',
     navKeyword: '키워드 순위',
     navDashboard: '대시보드',
     navPrompt: '프롬프트 추적',
-    navAeo: 'AEO 최적화',
+    navAeo: 'SEO/AEO 최적화',
+    navPricing: '요금제',
+    navInquiry: '문의',
     paidTitle: '유료 추천 워크플로우 (Pro / Enterprise)',
-    paidDesc: 'URL 진단 결과와 GEO/AEO 원칙을 바탕으로 최적화 추천을 생성합니다.',
+    paidDesc: 'URL 진단 결과의 SEO 기반 점검과 GEO/AEO 원칙을 바탕으로 최적화 추천을 생성합니다.',
     urlLabel: '대상 URL',
     submit: '추천 생성',
     resultTitle: '결과',
     outputIdle: 'URL을 제출하면 추천 결과가 표시됩니다.',
     loginRequired: '오류: 유료 최적화 기능은 로그인이 필요합니다.',
     paidRequired: '오류: Pro 또는 Enterprise 구독이 필요합니다.',
-    freeDisabled: '무료 티어에서는 AEO 최적화가 비활성화됩니다. 아래 예시 결과를 확인하세요.',
+    freeDisabled: '무료 티어에서는 SEO/AEO 최적화가 비활성화됩니다. 아래 예시 결과를 확인하세요.',
     sampleOutput:
       '{\n  "status": "sample",\n  "recommendations": [\n    "문서 상단에 answer-first 단락 추가",\n    "FAQ 스키마에 핵심 의도 키워드 보강"\n  ]\n}',
     refreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
     outputError: '오류',
   },
   ja: {
-    title: 'AEO 最適化',
+    title: 'SEO/AEO 最適化',
     navMain: 'メイン',
     navDashboard: 'ダッシュボード',
     navPrompt: 'プロンプト追跡',
     paidTitle: '有料提案ワークフロー (Pro / Enterprise)',
+    navPricing: '料金',
+    navInquiry: '問い合わせ',
     paidDesc: 'URL 監査結果と GEO/AEO 原則に基づいて最適化提案を生成します。',
     urlLabel: '対象 URL',
     submit: '提案を生成',
@@ -67,11 +75,13 @@ const I18N = {
     outputError: 'エラー',
   },
   zh: {
-    title: 'AEO 优化',
+    title: 'SEO/AEO 优化',
     navMain: '主页',
     navDashboard: '仪表盘',
     navPrompt: '提示词追踪',
     paidTitle: '付费建议流程 (Pro / Enterprise)',
+    navPricing: '价格',
+    navInquiry: '咨询',
     paidDesc: '基于 URL 审计结果与 GEO/AEO 原则生成优化建议。',
     urlLabel: '目标 URL',
     submit: '生成建议',
@@ -103,6 +113,8 @@ function applyLanguage(lang) {
   setText('ao-nav-dashboard', 'navDashboard')
   setText('ao-nav-prompt', 'navPrompt')
   setText('ao-nav-aeo', 'navAeo')
+  setText('ao-nav-pricing', 'navPricing')
+  setText('ao-nav-inquiry', 'navInquiry')
   setText('ao-paid-title', 'paidTitle')
   setText('ao-paid-desc', 'paidDesc')
   setText('ao-url-label', 'urlLabel')
@@ -111,6 +123,7 @@ function applyLanguage(lang) {
   setText('ao-result-title', 'resultTitle')
 
   if (!output.dataset.hasResult) {
+    output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
 }
@@ -118,8 +131,16 @@ function applyLanguage(lang) {
 function applyPaidGating() {
   const isPaid = isPaidTier(currentTier)
   submitBtn.disabled = !isPaid
+  if (optimizerUrlInput) {
+    optimizerUrlInput.disabled = !isPaid
+  }
+  if (lockNote) {
+    lockNote.classList.toggle('hidden', isPaid)
+  }
+
   if (!isPaid) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'sample'
     output.textContent = `${t('freeDisabled')}\n\n${t('sampleOutput')}`
   }
 }
@@ -130,12 +151,14 @@ document.getElementById('aeo-optimizer-form').addEventListener('submit', async (
   const token = localStorage.getItem('access_token')
   if (!token) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'error'
     output.textContent = t('loginRequired')
     return
   }
 
   if (currentTier !== 'pro' && currentTier !== 'enterprise') {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'error'
     output.textContent = t('paidRequired')
     return
   }
@@ -165,9 +188,11 @@ document.getElementById('aeo-optimizer-form').addEventListener('submit', async (
     }
 
     output.dataset.hasResult = '1'
+    output.dataset.state = 'result'
     output.textContent = JSON.stringify(data, null, 2)
   } catch (error) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
   }
 })

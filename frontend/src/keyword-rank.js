@@ -15,16 +15,22 @@ const I18N = {
     navDashboard: 'Dashboard',
     navKeyword: 'Keyword Rank',
     navPrompt: 'Prompt Tracker',
-    navOptimizer: 'AEO Optimizer',
+    navOptimizer: 'SEO/AEO Optimizer',
+    navPricing: 'Pricing',
+    navInquiry: 'Inquiry',
     freeTitle: 'Free: Single Keyword',
     freeDesc: 'Track one keyword for free. Multi-keyword batch is paid.',
-    queryLabel: 'Keywords (one per line)',
+    querySingleLabel: 'Primary Keyword',
+    queryLabel: 'Additional Keywords (optional, one per line)',
+    querySinglePlaceholder: 'best ai seo platform',
+    queryMultiPlaceholder: 'seo tool comparison',
     urlLabel: 'Target URL',
-    policyNote: 'Policy: single keyword is free. Multi-keyword requires Pro/Enterprise.',
+    policyNote:
+      'Policy: single keyword is free. Multi-keyword requires Pro/Enterprise. Use this SEO baseline before prompt/AEO checks.',
     refreshNote: 'Refresh policy: daily (lightweight search tracking).',
     submit: 'Run Rank Tracking',
     resultTitle: 'Result',
-    outputIdle: 'Run a request to view output.',
+    outputIdle: 'Ready.',
     outputError: 'Error',
     outputSample:
       '{\n  "status": "sample",\n  "query": "best ai seo platform",\n  "results": [{"engine": "google", "rank": 7}]\n}',
@@ -38,12 +44,18 @@ const I18N = {
     navDashboard: '대시보드',
     navKeyword: '키워드 순위',
     navPrompt: '프롬프트 추적',
-    navOptimizer: 'AEO 최적화',
+    navOptimizer: 'SEO/AEO 최적화',
+    navPricing: '요금제',
+    navInquiry: '문의',
     freeTitle: '무료: 단일 키워드',
     freeDesc: '키워드 1개는 무료입니다. 다중 키워드 배치는 유료입니다.',
-    queryLabel: '키워드 (한 줄에 하나)',
+    querySingleLabel: '기본 키워드',
+    queryLabel: '추가 키워드 (선택, 한 줄에 하나)',
+    querySinglePlaceholder: 'ai seo 플랫폼',
+    queryMultiPlaceholder: 'seo 도구 비교',
     urlLabel: '대상 URL',
-    policyNote: '정책: 단일 키워드는 무료, 다중 키워드는 Pro/Enterprise 필요.',
+    policyNote:
+      '정책: 단일 키워드는 무료, 다중 키워드는 Pro/Enterprise 필요. SEO 기준 확인 후 프롬프트/AEO 점검으로 이어가세요.',
     refreshNote: '갱신 주기: 매일 (경량 검색 추적).',
     submit: '순위 추적 실행',
     resultTitle: '결과',
@@ -78,16 +90,24 @@ function applyLanguage(lang) {
   setText('kr-nav-keyword', 'navKeyword')
   setText('kr-nav-prompt', 'navPrompt')
   setText('kr-nav-optimizer', 'navOptimizer')
+  setText('kr-nav-pricing', 'navPricing')
+  setText('kr-nav-inquiry', 'navInquiry')
   setText('kr-free-title', 'freeTitle')
   setText('kr-free-desc', 'freeDesc')
+  setText('kr-query-single-label', 'querySingleLabel')
   setText('kr-query-label', 'queryLabel')
   setText('kr-url-label', 'urlLabel')
+  const singleInput = document.getElementById('kr-query-single')
+  if (singleInput) singleInput.placeholder = t('querySinglePlaceholder')
+  const multiInput = document.getElementById('kr-query')
+  if (multiInput) multiInput.placeholder = t('queryMultiPlaceholder')
   setText('kr-policy-note', 'policyNote')
   setText('kr-refresh-note', 'refreshNote')
   setText('kr-submit', 'submit')
   setText('kr-result-title', 'resultTitle')
 
   if (!output.dataset.hasResult) {
+    output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
 }
@@ -106,9 +126,12 @@ function parseQueries(raw) {
 document.getElementById('rank-track-form').addEventListener('submit', async (event) => {
   event.preventDefault()
 
-  const queries = parseQueries(document.getElementById('kr-query').value)
+  const primaryKeyword = (document.getElementById('kr-query-single').value || '').trim()
+  const extraQueries = parseQueries(document.getElementById('kr-query').value)
+  const queries = primaryKeyword ? [primaryKeyword, ...extraQueries] : extraQueries
   if (!queries.length) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${t('missingQuery')}`
     return
   }
@@ -117,6 +140,7 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
   const isPaid = isPaidTier(currentTier)
   if (isBatch && !isPaid) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'sample'
     output.textContent = `${t('freeBatchBlocked')}\n\n${t('outputSample')}`
     return
   }
@@ -151,9 +175,11 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
     }
 
     output.dataset.hasResult = '1'
+    output.dataset.state = 'result'
     output.textContent = JSON.stringify(data, null, 2)
   } catch (error) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
   } finally {
     submitBtn.disabled = false

@@ -8,10 +8,13 @@ let currentLanguage = localStorage.getItem('ui_lang') || 'en'
 const I18N = {
   en: {
     landingTagline: 'Lightweight URL-based SEO/AEO intelligence',
+    navMain: 'Main',
     navDashboard: 'Dashboard',
     navKeyword: 'Keyword Rank',
     navPrompt: 'Prompt Tracker',
-    navOptimizer: 'AEO Optimizer',
+    navOptimizer: 'SEO/AEO Optimizer',
+    navPricing: 'Pricing',
+    navInquiry: 'Inquiry',
     eyebrow: 'Visibility Operating System',
     heroTitle: 'Track your brand in web search and AI answers from one workflow',
     heroDescription:
@@ -23,15 +26,15 @@ const I18N = {
     li1: 'Single URL SEO/AEO/GEO analysis',
     li2: 'Free web search rank tracking (Google/Bing/Naver)',
     li3: 'Paid prompt tracking with share-of-model scoring',
-    li4: 'Paid AEO optimization recommendations',
+    li4: 'Paid SEO/AEO optimization recommendations',
     feature1Title: 'SEO & AEO Dashboard',
     feature1Desc: 'Analyze technical and answer-engine signals with chart-based diagnostics.',
     feature2Title: 'Prompt Tracking',
     feature2Desc: 'Score brand visibility by tier: not mentioned, mentioned, linked, core mention.',
     feature3Title: 'Search Rank Monitor',
     feature3Desc: 'Check the position where your brand URL appears in web search results.',
-    feature4Title: 'AEO Optimizer',
-    feature4Desc: 'Generate practical recommendations based on URL audit outputs and GEO/AEO principles.',
+    feature4Title: 'SEO/AEO Optimizer',
+    feature4Desc: 'Generate practical recommendations based on URL audit outputs and SEO/AEO principles.',
     plansTitle: 'Plans',
     planFreeTitle: 'Free',
     planFreeF1: 'Single URL dashboard audit',
@@ -50,10 +53,13 @@ const I18N = {
   },
   ko: {
     landingTagline: '가벼운 URL 기반 SEO/AEO 인텔리전스',
+    navMain: '메인',
     navDashboard: '대시보드',
     navKeyword: '키워드 순위',
     navPrompt: '프롬프트 추적',
-    navOptimizer: 'AEO 최적화',
+    navOptimizer: 'SEO/AEO 최적화',
+    navPricing: '요금제',
+    navInquiry: '문의',
     eyebrow: '가시성 운영 시스템',
     heroTitle: '웹 검색과 AI 답변에서 브랜드 노출을 한 워크플로우로 추적',
     heroDescription: '빠른 URL 진단, 유료 프롬프트 추적, 추천 워크플로우를 위한 실전형 분석 도구입니다.',
@@ -64,14 +70,14 @@ const I18N = {
     li1: '단일 URL SEO/AEO/GEO 분석',
     li2: '무료 웹 검색 순위 추적 (Google/Bing/Naver)',
     li3: '유료 share-of-model 점수 기반 프롬프트 추적',
-    li4: '유료 AEO 최적화 추천',
+    li4: '유료 SEO/AEO 최적화 추천',
     feature1Title: 'SEO & AEO 대시보드',
     feature1Desc: '기술/답변엔진 신호를 차트 중심으로 분석합니다.',
     feature2Title: '프롬프트 추적',
     feature2Desc: '미언급/언급/링크 언급/핵심 언급 티어로 브랜드 가시성을 점수화합니다.',
     feature3Title: '검색 순위 모니터',
     feature3Desc: '검색 결과에서 브랜드 URL이 몇 위에 노출되는지 확인합니다.',
-    feature4Title: 'AEO 최적화',
+    feature4Title: 'SEO/AEO 최적화',
     feature4Desc: 'URL 진단 결과 기반의 실전형 개선안을 제공합니다.',
     plansTitle: '요금제',
     planFreeTitle: '무료',
@@ -91,9 +97,12 @@ const I18N = {
   },
   ja: {
     landingTagline: '軽量な URL ベース SEO/AEO インテリジェンス',
+    navMain: 'メイン',
     navDashboard: 'ダッシュボード',
     navPrompt: 'プロンプト追跡',
-    navOptimizer: 'AEO 最適化',
+    navOptimizer: 'SEO/AEO 最適化',
+    navPricing: '料金',
+    navInquiry: '問い合わせ',
     eyebrow: '可視性オペレーティングシステム',
     heroTitle: 'Web 検索と AI 回答でのブランド可視性を一つのワークフローで追跡',
     heroDescription: 'URL 監査、プロンプト追跡、最適化提案を実運用向けに提供します。',
@@ -103,14 +112,14 @@ const I18N = {
     li1: '単一 URL SEO/AEO/GEO 分析',
     li2: '無料の検索順位追跡 (Google/Bing/Naver)',
     li3: '有料の share-of-model スコア追跡',
-    li4: '有料 AEO 最適化提案',
+    li4: '有料 SEO/AEO 最適化提案',
     feature1Title: 'SEO & AEO ダッシュボード',
     feature1Desc: '技術シグナルと回答エンジンシグナルを可視化します。',
     feature2Title: 'プロンプト追跡',
     feature2Desc: '未言及/言及/リンク言及/コア言及でスコア化します。',
     feature3Title: '検索順位モニター',
     feature3Desc: '検索結果でのブランド URL の順位を確認します。',
-    feature4Title: 'AEO 最適化',
+    feature4Title: 'SEO/AEO 最適化',
     feature4Desc: 'URL 監査結果に基づく改善案を提示します。',
     plansTitle: 'プラン',
     planFreeTitle: '無料',
@@ -129,9 +138,12 @@ const I18N = {
   },
   zh: {
     landingTagline: '轻量级 URL SEO/AEO 智能分析',
+    navMain: '主页',
     navDashboard: '仪表盘',
     navPrompt: '提示词追踪',
-    navOptimizer: 'AEO 优化',
+    navOptimizer: 'SEO/AEO 优化',
+    navPricing: '价格',
+    navInquiry: '咨询',
     eyebrow: '可见性操作系统',
     heroTitle: '在网页搜索与 AI 回答中统一追踪你的品牌',
     heroDescription: '提供快速 URL 审计、付费提示词追踪和优化建议。',
@@ -141,14 +153,14 @@ const I18N = {
     li1: '单 URL SEO/AEO/GEO 分析',
     li2: '免费搜索排名追踪 (Google/Bing/Naver)',
     li3: '付费 share-of-model 评分追踪',
-    li4: '付费 AEO 优化建议',
+    li4: '付费 SEO/AEO 优化建议',
     feature1Title: 'SEO & AEO 仪表盘',
     feature1Desc: '用图表分析技术信号与回答引擎信号。',
     feature2Title: '提示词追踪',
     feature2Desc: '按未提及/提及/带链接提及/核心提及进行评分。',
     feature3Title: '搜索排名监控',
     feature3Desc: '查看品牌 URL 在搜索结果中的位置。',
-    feature4Title: 'AEO 优化',
+    feature4Title: 'SEO/AEO 优化',
     feature4Desc: '基于 URL 审计输出生成可执行建议。',
     plansTitle: '方案',
     planFreeTitle: '免费',
@@ -183,10 +195,13 @@ function applyLanguage(lang) {
   if (languageSelect) languageSelect.value = currentLanguage
 
   setText('landing-tagline', 'landingTagline')
+  setText('landing-nav-main', 'navMain')
   setText('landing-nav-dashboard', 'navDashboard')
   setText('landing-nav-keyword', 'navKeyword')
   setText('landing-nav-prompt', 'navPrompt')
   setText('landing-nav-optimizer', 'navOptimizer')
+  setText('landing-nav-pricing', 'navPricing')
+  setText('landing-nav-inquiry', 'navInquiry')
   setText('landing-eyebrow', 'eyebrow')
   setText('landing-hero-title', 'heroTitle')
   setText('landing-hero-description', 'heroDescription')

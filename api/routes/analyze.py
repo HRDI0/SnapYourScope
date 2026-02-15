@@ -8,10 +8,29 @@ from sqlalchemy.orm import Session
 from .. import auth, database, models
 from ..logger import setup_logger
 from ..services.analysis_service import AnalysisService
+from ..services.blob_storage_service import BlobStorageService
 from ..services.sitemap_batch_service import sitemap_batch_service
 
 router = APIRouter(tags=["Analysis"])
 logger = setup_logger("api.analyze")
+
+
+def _build_report_summary(results: Dict[str, Any]) -> Dict[str, Any]:
+    seo_result = results.get("seo_result", {}) if isinstance(results, dict) else {}
+    aeo_result = results.get("aeo_result") if isinstance(results, dict) else None
+    geo_result = results.get("geo_result") if isinstance(results, dict) else None
+
+    summary = {
+        "seo_score": seo_result.get("score", 0),
+        "seo_checks_total": len(seo_result.get("checks", []) or []),
+        "aeo_score": (aeo_result or {}).get("score", 0)
+        if isinstance(aeo_result, dict)
+        else 0,
+        "geo_regions": list((geo_result or {}).keys())
+        if isinstance(geo_result, dict)
+        else [],
+    }
+    return summary
 
 
 class AnalyzeRequest(BaseModel):
@@ -64,6 +83,14 @@ async def analyze_url(
     if current_user:
         seo_results = results.get("seo_result", {})
         pagespeed_results = results.get("pagespeed_result", {})
+        blob_meta = BlobStorageService.save_json_blob(
+            namespace="analysis_report",
+            payload={
+                "url": request.url,
+                "user_id": current_user.id,
+                "result": results,
+            },
+        )
         report = models.AnalysisReport(
             user_id=current_user.id,
             target_url=request.url,
@@ -71,7 +98,14 @@ async def analyze_url(
             performance_score=pagespeed_results.get("performance_score", 0)
             if isinstance(pagespeed_results, dict)
             else 0,
-            report_json=json.dumps(results, default=str),
+            report_json=json.dumps(
+                {
+                    "storage_policy": "full_result_blob_with_db_summary",
+                    "blob_meta": blob_meta,
+                    "summary": _build_report_summary(results),
+                },
+                default=str,
+            ),
         )
         db.add(report)
         db.commit()

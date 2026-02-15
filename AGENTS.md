@@ -13,6 +13,7 @@ Use this as the default execution playbook for coding agents in this repository.
 ## Environment Assumptions
 - Primary environment is Windows.
 - Python virtual environment exists at `venv/` (Python 3.10 in `venv/pyvenv.cfg`).
+- Frontend tooling is Vite 7.x; use Node.js 20.19+ or 22.12+ for compatibility.
 - Prefer direct venv executables over shell activation when automating:
   - `venv\Scripts\python.exe`
   - `venv\Scripts\pip.exe`
@@ -25,12 +26,16 @@ Use this as the default execution playbook for coding agents in this repository.
   - `venv\Scripts\python.exe run_backend.py`
 - Alternative direct startup:
   - `venv\Scripts\uvicorn.exe api.main:app --host 127.0.0.1 --port 8000 --reload`
+- `--reload` is development-only; do not use `--reload` in production.
+- For production-style Uvicorn runs, use workers and omit reload (they are mutually exclusive):
+  - `venv\Scripts\uvicorn.exe api.main:app --host 0.0.0.0 --port 8000 --workers 2`
 - API docs URL:
   - `http://127.0.0.1:8000/docs`
 
 ### Frontend
 - Install dependencies (from `frontend/`):
-  - `npm install`
+  - Preferred (clean/reproducible with existing lockfile): `npm ci`
+  - Use `npm install` only when intentionally changing dependencies/lockfile
 - Dev server (from `frontend/`):
   - `npm run dev`
 - Production build (from `frontend/`):
@@ -45,6 +50,8 @@ Use this as the default execution playbook for coding agents in this repository.
 ### Browser Runtime Dependency
 - Install Playwright Chromium once per environment:
   - `venv\Scripts\playwright.exe install chromium`
+- For Linux CI images that need OS packages, use Playwright deps install flow:
+  - `npx playwright install --with-deps chromium`
 
 ### Test and Verification
 - Script-based API test:
@@ -73,6 +80,12 @@ Use this as the default execution playbook for coding agents in this repository.
 - Use lightweight safety checks when needed:
   - `venv\Scripts\python.exe -m compileall api *.py`
   - `npm run build` in `frontend/`
+
+### Web-Validated Command Notes (2026-02)
+- `npm ci` requires an existing lockfile, removes `node_modules` first, and does not modify lockfiles.
+- `npm ci` fails when `package.json` and lockfile disagree; use it for reproducible CI/local verification.
+- `npm install` may update lockfile/dependency tree and is intended for dependency updates.
+- If using `uvicorn.run(..., reload=True or workers=N)` programmatically, keep it under `if __name__ == "__main__":`.
 
 ## Python Code Style Conventions
 These conventions are inferred from current source and should be followed unless surrounding code clearly differs.

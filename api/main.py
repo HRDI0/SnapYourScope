@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .database import engine, Base
+from .database import engine, Base, SessionLocal
 from . import database
+from .config import CORS_ORIGINS
 from .routes import auth, analyze
 import sys
 import asyncio
@@ -19,8 +20,10 @@ if sys.platform.startswith("win"):
 
 # Create Database Tables
 Base.metadata.create_all(bind=engine)
+database.ensure_sqlite_compat_columns()
 
 from .logger import setup_logger
+from .services.admin_seed_service import seed_admin_account
 from .services.sitemap_batch_service import sitemap_batch_service
 
 logger = setup_logger("api.main")
@@ -33,16 +36,9 @@ app = FastAPI(
 
 from fastapi.middleware.cors import CORSMiddleware
 
-# CORE FIX: Enable CORS for Frontend
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,6 +48,18 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     logger.info("Application starting up...")
+    db = SessionLocal()
+    try:
+        seed_result = seed_admin_account(db)
+        if seed_result.get("executed"):
+            logger.info(
+                f"Admin seed {seed_result.get('status')} for {seed_result.get('email')}"
+            )
+        else:
+            logger.info(f"Admin seed skipped: {seed_result.get('reason')}")
+    finally:
+        db.close()
+
     await sitemap_batch_service.start_workers(worker_count=2)
 
 

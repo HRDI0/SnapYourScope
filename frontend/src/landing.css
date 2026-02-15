@@ -1,11 +1,11 @@
 :root {
-  --bg: #f4f7fd;
-  --ink: #1a2740;
-  --ink-soft: #5f6f89;
-  --line: #d9e3f3;
+  --bg: #f3f4f6;
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --line: #d7dde8;
   --panel: #ffffff;
-  --primary: #2f52be;
-  --primary-strong: #243f93;
+  --primary: #2563eb;
+  --primary-strong: #1d4ed8;
 }
 
 * {
@@ -16,8 +16,7 @@ body {
   margin: 0;
   color: var(--ink);
   font-family: "Manrope", sans-serif;
-  background: radial-gradient(1300px 500px at -20% -20%, #dce8ff 0%, transparent 60%),
-    linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+  background: var(--bg);
 }
 
 .landing-header,
@@ -86,6 +85,7 @@ main,
 .header-nav {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .header-nav a,
@@ -94,7 +94,7 @@ main,
   color: var(--ink);
   font-weight: 700;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 8px 12px;
   background: #fff;
 }
@@ -102,7 +102,7 @@ main,
 .hero {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
-  gap: 16px;
+  gap: 18px;
   align-items: stretch;
 }
 
@@ -156,8 +156,9 @@ main,
 .plans,
 .plan-grid article {
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 12px;
   background: var(--panel);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
 }
 
 .hero-card {
@@ -223,9 +224,9 @@ main,
 .landing-plan-card[data-plan="pro"]:hover,
 .landing-plan-card[data-plan="enterprise"]:hover {
   transform: translateY(-2px);
-  border-color: #b8c8e4;
-  background: #f6f9ff;
-  box-shadow: 0 9px 22px rgba(20, 44, 93, 0.1);
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
 }
 
 .plan-hint {

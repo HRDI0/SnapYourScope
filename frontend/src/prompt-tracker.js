@@ -5,6 +5,8 @@ import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, se
 const output = document.getElementById('result-output')
 const languageSelect = document.getElementById('language-select')
 const promptSubmitBtn = document.getElementById('pt-prompt-submit')
+const promptTargetUrlInput = document.getElementById('prompt-target-url')
+const lockNote = document.getElementById('pt-lock-note')
 
 let currentLanguage = getStoredLanguage('en')
 let currentTier = 'free'
@@ -16,7 +18,9 @@ const I18N = {
     navKeyword: 'Keyword Rank',
     navDashboard: 'Dashboard',
     navPrompt: 'Prompt Tracker',
-    navOptimizer: 'AEO Optimizer',
+    navOptimizer: 'SEO/AEO Optimizer',
+    navPricing: 'Pricing',
+    navInquiry: 'Inquiry',
     paidTitle: 'Paid Prompt Tracking (Pro / Enterprise)',
     paidDesc: 'Score mention tier in LLM answers plus linked web search ranking.',
     promptQueryLabel: 'Prompt / Query (one per line)',
@@ -24,9 +28,9 @@ const I18N = {
     brandLabel: 'Brand Name (optional)',
     promptSubmit: 'Run Prompt Tracking',
     resultTitle: 'Result',
-    outputIdle: 'Run a request to view output.',
+    outputIdle: 'Ready.',
     outputError: 'Error',
-    paidPolicy: `Paid policy: ${PROMPT_INCLUDED_COUNT} included; +$${PROMPT_ADDON_BLOCK_PRICE_USD}/month per extra ${PROMPT_ADDON_BLOCK_SIZE} prompts.`,
+    paidPolicy: `Paid policy: ${PROMPT_INCLUDED_COUNT} included; +$${PROMPT_ADDON_BLOCK_PRICE_USD}/month per extra ${PROMPT_ADDON_BLOCK_SIZE} prompts. Scope: SEO + AEO/GEO visibility workflow.`,
     refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
     freeDisabled:
       'Paid prompt tracking is disabled on free tier. Sample output is shown below.',
@@ -41,7 +45,9 @@ const I18N = {
     navKeyword: '키워드 순위',
     navDashboard: '대시보드',
     navPrompt: '프롬프트 추적',
-    navOptimizer: 'AEO 최적화',
+    navOptimizer: 'SEO/AEO 최적화',
+    navPricing: '요금제',
+    navInquiry: '문의',
     paidTitle: '유료 프롬프트 추적 (Pro / Enterprise)',
     paidDesc: 'LLM 응답 티어 점수와 웹 검색 순위를 함께 제공합니다.',
     promptQueryLabel: '프롬프트 / 질의 (한 줄에 하나)',
@@ -51,7 +57,7 @@ const I18N = {
     resultTitle: '결과',
     outputIdle: '요청을 실행하면 결과가 표시됩니다.',
     outputError: '오류',
-    paidPolicy: `유료 정책: 기본 ${PROMPT_INCLUDED_COUNT}개 포함, ${PROMPT_ADDON_BLOCK_SIZE}개 추가마다 월 $${PROMPT_ADDON_BLOCK_PRICE_USD}.`,
+    paidPolicy: `유료 정책: 기본 ${PROMPT_INCLUDED_COUNT}개 포함, ${PROMPT_ADDON_BLOCK_SIZE}개 추가마다 월 $${PROMPT_ADDON_BLOCK_PRICE_USD}. 범위: SEO + AEO/GEO 통합 가시성 워크플로우.`,
     refreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
     freeDisabled:
       '무료 티어에서는 유료 프롬프트 추적이 비활성화됩니다. 아래 예시 결과를 확인하세요.',
@@ -83,6 +89,8 @@ function applyLanguage(lang) {
   setText('pt-nav-dashboard', 'navDashboard')
   setText('pt-nav-prompt', 'navPrompt')
   setText('pt-nav-optimizer', 'navOptimizer')
+  setText('pt-nav-pricing', 'navPricing')
+  setText('pt-nav-inquiry', 'navInquiry')
   setText('pt-paid-title', 'paidTitle')
   setText('pt-paid-desc', 'paidDesc')
   setText('pt-prompt-query-label', 'promptQueryLabel')
@@ -94,6 +102,7 @@ function applyLanguage(lang) {
   setText('pt-result-title', 'resultTitle')
 
   if (!output.dataset.hasResult) {
+    output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
 }
@@ -114,10 +123,19 @@ function applyPaidGating() {
   if (!promptSubmitBtn) return
 
   promptSubmitBtn.disabled = !isPaid
+  if (promptTargetUrlInput) {
+    promptTargetUrlInput.disabled = !isPaid
+  }
+  if (lockNote) {
+    lockNote.classList.toggle('hidden', isPaid)
+  }
+
   if (!isPaid) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'sample'
     output.textContent = `${t('freeDisabled')}\n\n${t('sampleOutput')}`
   } else if (!output.dataset.hasResult) {
+    output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
 }
@@ -153,6 +171,7 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
   const prompts = parsePrompts(document.getElementById('prompt-query').value)
   if (!prompts.length) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${t('promptMissing')}`
     return
   }
@@ -173,9 +192,11 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
     }
 
     output.dataset.hasResult = '1'
+    output.dataset.state = 'result'
     output.textContent = JSON.stringify(data, null, 2)
   } catch (error) {
     output.dataset.hasResult = '1'
+    output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
   }
 })

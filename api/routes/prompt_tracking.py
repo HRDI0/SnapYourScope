@@ -1,5 +1,6 @@
 import json
 import math
+import hashlib
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -47,6 +48,44 @@ def _normalize_queries(query: Optional[str], queries: Optional[List[str]]) -> Li
             deduped.append(item)
             seen.add(item)
     return deduped
+
+
+def _summarize_prompt_result(result: dict) -> dict:
+    llm_results = result.get("llm_results", []) if isinstance(result, dict) else []
+    compact_llm = []
+    for item in llm_results:
+        compact_llm.append(
+            {
+                "source": item.get("source"),
+                "provider_used": item.get("provider_used"),
+                "model": item.get("model"),
+                "tier": item.get("tier"),
+                "score": item.get("score"),
+                "reason": item.get("reason"),
+                "latency_ms": item.get("latency_ms", 0),
+                "error_type": item.get("error_type"),
+                "estimated_cost_usd": item.get("estimated_cost_usd", 0.0),
+                "response_share_url": item.get("response_share_url"),
+            }
+        )
+
+    return {
+        "query": result.get("query"),
+        "target_url": result.get("target_url"),
+        "brand": result.get("brand"),
+        "share_of_model_score": result.get("share_of_model_score", 0),
+        "llm_results": compact_llm,
+        "search_rank_results": result.get("search_rank_results", {}),
+        "tracking_meta": result.get("tracking_meta", {}),
+    }
+
+
+def _primary_llm_result(summary: dict) -> dict:
+    llm_results = summary.get("llm_results", [])
+    for item in llm_results:
+        if item.get("tier") != "not_available":
+            return item
+    return llm_results[0] if llm_results else {}
 
 
 @router.post("/search-rank")
@@ -121,12 +160,30 @@ async def prompt_track(
                 llm_sources=request.llm_sources,
                 search_engines=request.search_engines,
             )
+            summary = _summarize_prompt_result(result)
+            primary = _primary_llm_result(summary)
+            is_failed = primary.get("tier") == "not_available"
             run = models.PromptTrackRun(
                 user_id=current_user.id,
                 target_url=request.target_url,
-                query_text=query,
-                status="completed",
-                result_json=json.dumps(result, default=str),
+                query_text="[not_stored]",
+                query_hash=hashlib.sha256(query.encode("utf-8")).hexdigest(),
+                status="failed" if is_failed else "completed",
+                provider_used=primary.get("provider_used"),
+                model_name=primary.get("model"),
+                mention_tier=primary.get("tier"),
+                share_of_model_score=int(summary.get("share_of_model_score", 0) or 0),
+                latency_ms=int(primary.get("latency_ms", 0) or 0),
+                error_message=primary.get("reason") if is_failed else None,
+                response_share_url=primary.get("response_share_url"),
+                result_summary_json=json.dumps(summary, default=str),
+                result_json=json.dumps(
+                    {
+                        "storage_policy": "no_raw_prompt_or_llm_response",
+                        "query": "[not_stored]",
+                    },
+                    default=str,
+                ),
             )
             db.add(run)
             results.append(result)

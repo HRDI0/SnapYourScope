@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
+from .ai_ops_service import AiOpsService
 from .llm_service import LlmService
 from .search_tracking_service import SearchTrackingService
 
@@ -87,34 +89,53 @@ class PromptTrackingService:
         for source in llm_sources:
             normalized = source.lower().strip()
             try:
-                answer, used = LlmService.call_with_fallback(
+                llm_result = LlmService.call_with_fallback(
                     prompt=request_prompt,
                     preferred_provider=normalized,
                 )
+                answer_text = llm_result[0]
+                used_provider = llm_result[1]
+                used_model = llm_result[2]
+                latency_ms = llm_result[3]
                 mention = PromptTrackingService.evaluate_mention(
-                    response_text=answer,
+                    response_text=answer_text,
                     target_url=target_url,
                     brand=brand,
                 )
                 llm_outputs.append(
                     {
                         "source": normalized,
-                        "provider_used": used,
+                        "provider_used": used_provider,
+                        "model": used_model,
                         "tier": mention.tier,
                         "score": mention.score,
                         "reason": mention.reason,
-                        "response_excerpt": answer[:1500],
+                        "latency_ms": latency_ms,
+                        "error_type": None,
+                        "estimated_cost_usd": AiOpsService.estimate_cost_usd(
+                            provider=used_provider,
+                            prompt_text=request_prompt,
+                            response_text=answer_text,
+                        ),
+                        "response_excerpt": answer_text[:1500],
+                        "response_share_url": None,
                     }
                 )
             except Exception as e:
+                error_message = str(e)
                 llm_outputs.append(
                     {
                         "source": normalized,
                         "provider_used": None,
+                        "model": None,
                         "tier": "not_available",
                         "score": 0,
-                        "reason": str(e),
+                        "reason": error_message,
+                        "latency_ms": 0,
+                        "error_type": AiOpsService.classify_error(error_message),
+                        "estimated_cost_usd": 0.0,
                         "response_excerpt": "",
+                        "response_share_url": None,
                     }
                 )
 
@@ -138,4 +159,17 @@ class PromptTrackingService:
             "share_of_model_score": share_of_model_score,
             "llm_results": llm_outputs,
             "search_rank_results": ranking,
+            "tracking_meta": {
+                "captured_at": datetime.now(timezone.utc).isoformat(),
+                "storage_policy": "no_raw_prompt_or_llm_response",
+                "retry_policy": {
+                    "provider_fallback": "enabled",
+                    "max_attempts_per_source": 1,
+                },
+                "quality": {
+                    "tier_score_weights": PromptTrackingService.TIER_SCORES,
+                    "share_of_model_score_method": "average_of_available_llm_scores",
+                },
+                "ops": AiOpsService.summarize_llm_runs(llm_outputs),
+            },
         }

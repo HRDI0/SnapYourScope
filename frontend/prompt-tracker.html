@@ -27,7 +27,9 @@
         <a id="pt-nav-dashboard" href="/app.html">Dashboard</a>
         <a id="pt-nav-keyword" href="/keyword-rank.html">Keyword Rank</a>
         <a id="pt-nav-prompt" class="active" href="/prompt-tracker.html">Prompt Tracker</a>
-        <a id="pt-nav-optimizer" href="/aeo-optimizer.html">AEO Optimizer</a>
+        <a id="pt-nav-optimizer" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
+        <a id="pt-nav-pricing" href="/app.html?tab=pricing">Pricing</a>
+        <a id="pt-nav-inquiry" href="/app.html?tab=enterprise">Inquiry</a>
       </nav>
 
       <div class="rail-note">
@@ -39,7 +41,7 @@
     <div class="tool-workspace">
       <header class="tool-top panel">
         <div>
-          <p class="eyebrow">AI Visibility</p>
+          <p class="eyebrow badge-aeo">AI Visibility</p>
           <h1 id="pt-title">Prompt Tracker</h1>
         </div>
 
@@ -53,40 +55,61 @@
         </div>
       </header>
 
-      <main class="grid">
-        <section class="panel">
-          <h2 id="pt-paid-title">Paid Prompt Tracking (Pro / Enterprise)</h2>
-          <p id="pt-paid-desc">Score mention tier in LLM answers plus linked web search ranking.</p>
-          <form id="prompt-track-form" class="grid">
-            <label id="pt-prompt-query-label">Prompt / Query (one per line)
+      <main class="grid tool-grid">
+        <section class="panel primary-panel">
+          <div class="panel-header">
+            <h2 id="pt-paid-title">Paid Prompt Tracking (Pro / Enterprise)</h2>
+            <span class="status-indicator risk-medium">Medium Risk Surface</span>
+          </div>
+          <p id="pt-paid-desc" class="panel-desc">Score mention tier in LLM answers plus linked web search ranking.</p>
+          <form id="prompt-track-form" class="tool-form">
+            <label><span id="pt-prompt-query-label">Prompt / Query (one per line)</span>
               <textarea id="prompt-query" rows="5" required></textarea>
             </label>
             <div class="row">
-              <label id="pt-prompt-url-label">Target URL
+              <label><span id="pt-prompt-url-label">Target URL</span>
                 <input type="url" id="prompt-target-url" placeholder="https://example.com" required />
               </label>
-              <label id="pt-brand-label">Brand Name (optional)
+              <label><span id="pt-brand-label">Brand Name (optional)</span>
                 <input type="text" id="prompt-brand-name" />
               </label>
             </div>
-            <div class="checks">
-              <label><input type="checkbox" name="llm-source" value="gpt" checked /> GPT</label>
-              <label><input type="checkbox" name="llm-source" value="gemini" checked /> Gemini</label>
-              <label><input type="checkbox" name="llm-source" value="perplexity" /> Perplexity</label>
-            </div>
-            <div class="checks">
-              <label><input type="checkbox" name="prompt-engine" value="google" checked /> Google</label>
-              <label><input type="checkbox" name="prompt-engine" value="bing" checked /> Bing</label>
-              <label><input type="checkbox" name="prompt-engine" value="naver" checked /> Naver</label>
-            </div>
+            <p id="pt-lock-note" class="lock-note hidden">Paid plan required. URL fields are visible but locked for free tier.</p>
+            <details class="advanced-toggle">
+              <summary>Source Options</summary>
+              <div class="checks compact-checks">
+                <label><input type="checkbox" name="llm-source" value="gpt" checked /> GPT</label>
+                <label><input type="checkbox" name="llm-source" value="gemini" checked /> Gemini</label>
+                <label><input type="checkbox" name="llm-source" value="perplexity" /> Perplexity</label>
+              </div>
+              <div class="checks compact-checks">
+                <label><input type="checkbox" name="prompt-engine" value="google" checked /> Google</label>
+                <label><input type="checkbox" name="prompt-engine" value="bing" checked /> Bing</label>
+                <label><input type="checkbox" name="prompt-engine" value="naver" checked /> Naver</label>
+              </div>
+            </details>
             <p id="pt-policy-note" class="mini-note">Paid policy: 30 included; +$10/month per extra 5 prompts.</p>
-            <button id="pt-prompt-submit" type="submit">Run Prompt Tracking</button>
+            <div class="form-actions">
+              <button id="pt-prompt-submit" type="submit">Run Prompt Tracking</button>
+            </div>
           </form>
         </section>
 
-        <section class="panel">
-          <h2 id="pt-result-title">Result</h2>
-          <pre id="result-output">Run a request to view output.</pre>
+        <section class="panel result-panel">
+          <div class="panel-header">
+            <h2 id="pt-result-title">Result</h2>
+            <span class="status-indicator" id="pt-result-status">Ready</span>
+          </div>
+          <pre id="result-output" data-state="idle">Ready.</pre>
+        </section>
+
+        <section class="panel next-actions">
+          <h2>Next Actions</h2>
+          <p>After prompt visibility checks, validate SEO rank movement and optimization tasks.</p>
+          <div class="next-links">
+            <a href="/keyword-rank.html">Go to Keyword Rank</a>
+            <a href="/aeo-optimizer.html">Go to SEO/AEO Optimizer</a>
+          </div>
         </section>
       </main>
     </div>
