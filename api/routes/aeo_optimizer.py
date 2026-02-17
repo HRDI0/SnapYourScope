@@ -18,16 +18,9 @@ class AeoRecommendationRequest(BaseModel):
 @router.post("/aeo-optimizer/recommend")
 async def recommend_aeo_optimization(
     request: AeoRecommendationRequest,
-    current_user: models.User = Depends(auth.get_current_user),
+    current_user: models.User | None = Depends(auth.get_current_user_optional),
     db: Session = Depends(database.get_db),
 ):
-    tier = (getattr(current_user, "tier", "free") or "free").lower()
-    if tier not in {"pro", "enterprise"}:
-        raise HTTPException(
-            status_code=403,
-            detail="AEO optimization recommendation is a paid feature (pro or enterprise).",
-        )
-
     try:
         analysis = await AnalysisService.analyze_url(
             url=request.url,
@@ -42,7 +35,7 @@ async def recommend_aeo_optimization(
         raise HTTPException(status_code=400, detail=str(e))
 
     run = models.AeoRecommendationRun(
-        user_id=current_user.id,
+        user_id=current_user.id if current_user is not None else 0,
         target_url=request.url,
         status="completed",
         result_json=json.dumps(recommendation, default=str),

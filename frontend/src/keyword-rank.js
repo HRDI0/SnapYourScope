@@ -1,139 +1,145 @@
-import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
+import { applyDocumentLanguage, getStoredLanguage, setStoredLanguage } from './core/session'
 import { apiUrl } from './core/api'
 
 const output = document.getElementById('kr-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('kr-submit')
-const multiKeywordInput = document.getElementById('kr-query')
 const loginBtn = document.getElementById('kr-login-btn')
 
 let currentLanguage = getStoredLanguage('en')
-let currentTier = 'free'
 
 const I18N = {
   en: {
-    title: 'Keyword Rank Tracker',
+    title: 'Search Rank Dashboard',
     navMain: 'Main',
     navDashboard: 'Dashboard',
-    navKeyword: 'Keyword Rank',
+    navKeyword: 'Search Rank',
     navPrompt: 'Prompt Tracker',
     navOptimizer: 'SEO/AEO Optimizer',
     navPricing: 'Pricing',
     navInquiry: 'Inquiry',
-    freeTitle: 'Free: Single Keyword',
-    freeDesc: 'Track one keyword for free. Multi-keyword batch is paid.',
-    querySingleLabel: 'Primary Keyword',
-    queryLabel: 'Additional Keywords (Pro/Enterprise only)',
+    freeTitle: 'Open Beta: Search Rank',
+    freeDesc: 'Track your URL position for one search query in dashboard format.',
+    querySingleLabel: 'Search Query',
+    queryLabel: 'Additional Queries (Coming Soon)',
     querySinglePlaceholder: 'best ai seo platform',
-    queryMultiPlaceholder: 'seo tool comparison',
     urlLabel: 'Target URL',
-    policyNote:
-      'Policy: single keyword is free. Multi-keyword requires Pro/Enterprise. Use this SEO baseline before prompt/AEO checks.',
+    policyNote: 'Open beta: single query dashboard tracking. Multi-query is coming soon.',
     refreshNote: 'Refresh policy: daily (lightweight search tracking).',
-    submit: 'Run Rank Tracking',
-    resultTitle: 'Result',
-    outputIdle: 'Ready.',
+    submit: 'Run Search Rank',
+    resultTitle: 'Search Rank Dashboard',
+    outputIdle: 'Run search rank tracking to view dashboard.',
     outputError: 'Error',
-    outputSample:
-      '{\n  "status": "sample",\n  "query": "best ai seo platform",\n  "results": [{"engine": "google", "rank": 7}]\n}',
-    freeBatchBlocked:
-      'Multi-keyword tracking is paid. Free tier can run one keyword only. Showing sample for batch mode.',
-    missingQuery: 'Enter at least one keyword.',
-    loginButton: 'Login (Paused)',
-    loginPaused: 'Login is temporarily paused during open beta. Guest demo mode is active.',
+    missingQuery: 'Enter a search query.',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: 'Login is paused during open beta. Guest mode is active.',
+    engine: 'Engine',
+    rank: 'Rank',
+    status: 'Status',
+    resultCount: 'Result Count',
+    query: 'Query',
+    targetUrl: 'Target URL',
+    found: 'Found',
+    notFound: 'Not Found',
   },
   ko: {
-    title: '키워드 순위 추적',
+    title: '검색 순위 추적 대시보드',
     navMain: '메인',
     navDashboard: '대시보드',
-    navKeyword: '키워드 순위',
+    navKeyword: '검색 순위 추적',
     navPrompt: '프롬프트 추적',
     navOptimizer: 'SEO/AEO 최적화',
     navPricing: '요금제',
     navInquiry: '문의',
-    freeTitle: '무료: 단일 키워드',
-    freeDesc: '키워드 1개는 무료입니다. 다중 키워드 배치는 유료입니다.',
-    querySingleLabel: '기본 키워드',
-    queryLabel: '추가 키워드 (Pro/Enterprise 전용)',
+    freeTitle: '오픈 베타: 검색 순위 추적',
+    freeDesc: '입력한 검색어 기준으로 내 URL 노출 순위를 대시보드 형태로 확인합니다.',
+    querySingleLabel: '검색어',
+    queryLabel: '추가 검색어 (Coming Soon)',
     querySinglePlaceholder: 'ai seo 플랫폼',
-    queryMultiPlaceholder: 'seo 도구 비교',
     urlLabel: '대상 URL',
-    policyNote:
-      '정책: 단일 키워드는 무료, 다중 키워드는 Pro/Enterprise 필요. SEO 기준 확인 후 프롬프트/AEO 점검으로 이어가세요.',
+    policyNote: '오픈 베타: 단일 검색어 추적만 제공하며 다중 검색어는 오픈 예정입니다.',
     refreshNote: '갱신 주기: 매일 (경량 검색 추적).',
-    submit: '순위 추적 실행',
-    resultTitle: '결과',
-    outputIdle: '요청을 실행하면 결과가 표시됩니다.',
+    submit: '검색 순위 실행',
+    resultTitle: '검색 순위 추적 대시보드',
+    outputIdle: '검색 순위를 실행하면 대시보드가 표시됩니다.',
     outputError: '오류',
-    outputSample:
-      '{\n  "status": "sample",\n  "query": "ai seo 플랫폼",\n  "results": [{"engine": "google", "rank": 7}]\n}',
-    freeBatchBlocked:
-      '다중 키워드 추적은 유료 기능입니다. 무료 티어는 키워드 1개만 가능합니다. 배치 모드 예시를 표시합니다.',
-    missingQuery: '키워드를 1개 이상 입력해주세요.',
-    loginButton: '로그인 (일시중단)',
-    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단됩니다. 현재 게스트 데모 모드가 활성화되어 있습니다.',
+    missingQuery: '검색어를 입력해주세요.',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단되며 게스트 모드가 활성화됩니다.',
+    engine: '엔진',
+    rank: '순위',
+    status: '상태',
+    resultCount: '결과 수',
+    query: '검색어',
+    targetUrl: '대상 URL',
+    found: '노출됨',
+    notFound: '미노출',
   },
   ja: {
-    title: 'キーワード順位トラッカー',
+    title: '検索順位トラッキング ダッシュボード',
     navMain: 'メイン',
     navDashboard: 'ダッシュボード',
-    navKeyword: 'キーワード順位',
+    navKeyword: '検索順位トラッキング',
     navPrompt: 'プロンプト追跡',
     navOptimizer: 'SEO/AEO 最適化',
     navPricing: '料金',
     navInquiry: '問い合わせ',
-    freeTitle: '無料: 単一キーワード',
-    freeDesc: 'キーワード1件は無料です。複数キーワードの一括追跡は有料です。',
-    querySingleLabel: 'メインキーワード',
-    queryLabel: '追加キーワード (Pro/Enterprise 専用)',
-    querySinglePlaceholder: 'ai seo プラットフォーム',
-    queryMultiPlaceholder: 'seo ツール 比較',
+    freeTitle: 'オープンベータ: 検索順位トラッキング',
+    freeDesc: '入力した検索語で対象 URL の表示順位をダッシュボードで確認します。',
+    querySingleLabel: '検索クエリ',
+    queryLabel: '追加クエリ (Coming Soon)',
+    querySinglePlaceholder: 'ai seo platform',
     urlLabel: '対象 URL',
-    policyNote:
-      'ポリシー: 単一キーワードは無料、複数キーワードは Pro/Enterprise が必要です。SEO 基準を確認してからプロンプト/AEO を検証してください。',
-    refreshNote: '更新ポリシー: 毎日 (軽量検索トラッキング)。',
-    submit: '順位追跡を実行',
-    resultTitle: '結果',
-    outputIdle: '実行すると結果が表示されます。',
+    policyNote: 'オープンベータ: 単一クエリのみ提供。複数クエリは近日公開。',
+    refreshNote: '更新ポリシー: 毎日 (軽量トラッキング)。',
+    submit: '検索順位を実行',
+    resultTitle: '検索順位トラッキング ダッシュボード',
+    outputIdle: '実行するとダッシュボードが表示されます。',
     outputError: 'エラー',
-    outputSample:
-      '{\n  "status": "sample",\n  "query": "ai seo プラットフォーム",\n  "results": [{"engine": "google", "rank": 7}]\n}',
-    freeBatchBlocked:
-      '複数キーワード追跡は有料機能です。無料ティアは1キーワードのみ実行できます。バッチモードのサンプルを表示します。',
-    missingQuery: 'キーワードを1件以上入力してください。',
-    loginButton: 'ログイン (一時停止)',
-    loginPaused: 'オープンベータ期間中はログインを一時停止しています。現在はゲストデモモードをご利用ください。',
+    missingQuery: '検索クエリを入力してください。',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: 'オープンベータ期間中はログインを一時停止しています。',
+    engine: 'エンジン',
+    rank: '順位',
+    status: '状態',
+    resultCount: '結果数',
+    query: 'クエリ',
+    targetUrl: '対象 URL',
+    found: '表示',
+    notFound: '未表示',
   },
   zh: {
-    title: '关键词排名追踪',
+    title: '搜索排名追踪仪表盘',
     navMain: '主页',
     navDashboard: '仪表盘',
-    navKeyword: '关键词排名',
+    navKeyword: '搜索排名追踪',
     navPrompt: '提示词追踪',
     navOptimizer: 'SEO/AEO 优化',
     navPricing: '价格',
     navInquiry: '咨询',
-    freeTitle: '免费: 单关键词',
-    freeDesc: '免费可追踪 1 个关键词。多关键词批量追踪为付费功能。',
-    querySingleLabel: '主关键词',
-    queryLabel: '附加关键词 (仅 Pro/Enterprise)',
+    freeTitle: '开放测试: 搜索排名追踪',
+    freeDesc: '按输入搜索词查看目标 URL 的排名位置。',
+    querySingleLabel: '搜索词',
+    queryLabel: '附加搜索词 (Coming Soon)',
     querySinglePlaceholder: 'ai seo 平台',
-    queryMultiPlaceholder: 'seo 工具 对比',
     urlLabel: '目标 URL',
-    policyNote:
-      '规则: 单关键词免费，多关键词需要 Pro/Enterprise。建议先完成 SEO 基线，再进行 Prompt/AEO 检查。',
-    refreshNote: '刷新策略: 每日 (轻量搜索追踪)。',
-    submit: '开始排名追踪',
-    resultTitle: '结果',
-    outputIdle: '执行后将在此显示结果。',
+    policyNote: '开放测试: 当前仅支持单搜索词追踪，多搜索词即将开放。',
+    refreshNote: '刷新策略: 每日 (轻量追踪)。',
+    submit: '执行搜索排名',
+    resultTitle: '搜索排名追踪仪表盘',
+    outputIdle: '执行后将显示仪表盘。',
     outputError: '错误',
-    outputSample:
-      '{\n  "status": "sample",\n  "query": "ai seo 平台",\n  "results": [{"engine": "google", "rank": 7}]\n}',
-    freeBatchBlocked:
-      '多关键词追踪为付费功能。免费用户仅可执行 1 个关键词。当前展示批量模式示例。',
-    missingQuery: '请至少输入一个关键词。',
-    loginButton: '登录 (暂停)',
-    loginPaused: '开放测试期间登录功能暂时停用。当前可使用访客演示模式。',
+    missingQuery: '请输入搜索词。',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: '开放测试期间登录已暂停，访客模式可用。',
+    engine: '引擎',
+    rank: '排名',
+    status: '状态',
+    resultCount: '结果数',
+    query: '搜索词',
+    targetUrl: '目标 URL',
+    found: '已出现',
+    notFound: '未出现',
   },
 }
 
@@ -160,19 +166,19 @@ function applyLanguage(lang) {
   setText('kr-nav-optimizer', 'navOptimizer')
   setText('kr-nav-pricing', 'navPricing')
   setText('kr-nav-inquiry', 'navInquiry')
-  setText('kr-login-btn', 'loginButton')
   setText('kr-free-title', 'freeTitle')
   setText('kr-free-desc', 'freeDesc')
   setText('kr-query-single-label', 'querySingleLabel')
   setText('kr-query-label', 'queryLabel')
   setText('kr-url-label', 'urlLabel')
-  const singleInput = document.getElementById('kr-query-single')
-  if (singleInput) singleInput.placeholder = t('querySinglePlaceholder')
-  if (multiKeywordInput) multiKeywordInput.placeholder = t('queryMultiPlaceholder')
   setText('kr-policy-note', 'policyNote')
   setText('kr-refresh-note', 'refreshNote')
   setText('kr-submit', 'submit')
   setText('kr-result-title', 'resultTitle')
+  setText('kr-login-btn', 'loginButton')
+
+  const singleInput = document.getElementById('kr-query-single')
+  if (singleInput) singleInput.placeholder = t('querySinglePlaceholder')
 
   if (!output.dataset.hasResult) {
     output.dataset.state = 'idle'
@@ -180,58 +186,77 @@ function applyLanguage(lang) {
   }
 }
 
-function applyTierUi() {
-  if (!multiKeywordInput) return
-  multiKeywordInput.disabled = !isPaidTier(currentTier)
-}
+function renderDashboard(response) {
+  const query = response?.query || '-'
+  const targetUrl = response?.target_url || '-'
+  const byQuery = response?.results?.[query] || {}
+  const rows = Object.entries(byQuery)
+  const rankedRows = rows.filter(([, info]) => Number.isInteger(info?.rank))
+  const bestRank = rankedRows.length
+    ? Math.min(...rankedRows.map(([, info]) => Number(info.rank)))
+    : null
 
-function checkedValues(name) {
-  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((el) => el.value)
-}
+  const tableRows = rows
+    .map(([engine, info]) => {
+      const rank = Number.isInteger(info?.rank) ? `#${info.rank}` : '-'
+      const status = info?.status || 'unknown'
+      const resultCount = Number(info?.result_count || 0)
+      const found = Number.isInteger(info?.rank) ? t('found') : t('notFound')
+      return `<tr class="border-t border-slate-800/60"><td class="px-3 py-2 text-slate-200">${engine}</td><td class="px-3 py-2 text-white font-semibold">${rank}</td><td class="px-3 py-2 text-slate-300">${status}</td><td class="px-3 py-2 text-slate-300">${resultCount}</td><td class="px-3 py-2 text-slate-300">${found}</td></tr>`
+    })
+    .join('')
 
-function parseQueries(raw) {
-  return raw
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
+  output.innerHTML = `
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('engine')}</p><h4 class="mt-1 text-lg font-bold text-white">${rows.length}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('rank')}</p><h4 class="mt-1 text-lg font-bold text-white">${bestRank ? `#${bestRank}` : '-'}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('found')}</p><h4 class="mt-1 text-lg font-bold text-emerald-300">${rankedRows.length}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('notFound')}</p><h4 class="mt-1 text-lg font-bold text-rose-300">${rows.length - rankedRows.length}</h4></article>
+      </div>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('query')}</p><h4 class="mt-1 text-sm font-semibold text-white">${query}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('targetUrl')}</p><h4 class="mt-1 text-sm font-semibold text-white break-all">${targetUrl}</h4></article>
+      </div>
+      <div class="overflow-hidden rounded-xl border border-slate-800/60 bg-slate-950/35">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/60 text-slate-300">
+            <tr>
+              <th class="px-3 py-2">${t('engine')}</th>
+              <th class="px-3 py-2">${t('rank')}</th>
+              <th class="px-3 py-2">${t('status')}</th>
+              <th class="px-3 py-2">${t('resultCount')}</th>
+              <th class="px-3 py-2">Match</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows || `<tr><td colspan="5" class="px-3 py-3 text-slate-400">No data</td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>
+  `
 }
 
 document.getElementById('rank-track-form').addEventListener('submit', async (event) => {
   event.preventDefault()
 
-  const primaryKeyword = (document.getElementById('kr-query-single').value || '').trim()
-  const extraQueries = parseQueries(document.getElementById('kr-query').value)
-  const queries = primaryKeyword ? [primaryKeyword, ...extraQueries] : extraQueries
-  if (!queries.length) {
+  const query = (document.getElementById('kr-query-single').value || '').trim()
+  if (!query) {
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${t('missingQuery')}`
     return
   }
 
-  const isBatch = queries.length > 1
-  const isPaid = isPaidTier(currentTier)
-  if (isBatch && !isPaid) {
-    output.dataset.hasResult = '1'
-    output.dataset.state = 'sample'
-    output.textContent = `${t('freeBatchBlocked')}\n\n${t('outputSample')}`
-    return
-  }
-
   submitBtn.disabled = true
   try {
-    const token = localStorage.getItem('access_token')
-    const headers = { 'Content-Type': 'application/json' }
-    if (token) headers.Authorization = `Bearer ${token}`
-
     const response = await fetch(apiUrl('/api/search-rank'), {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query: queries[0],
-        queries,
+        query,
+        queries: [query],
         target_url: document.getElementById('kr-target-url').value.trim(),
-        engines: checkedValues('rank-engine'),
+        engines: ['google'],
       }),
     })
 
@@ -249,7 +274,7 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
 
     output.dataset.hasResult = '1'
     output.dataset.state = 'result'
-    output.textContent = JSON.stringify(data, null, 2)
+    renderDashboard(data)
   } catch (error) {
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
@@ -272,8 +297,3 @@ if (loginBtn) {
 }
 
 applyLanguage(currentLanguage)
-applyTierUi()
-fetchUserTier().then((tier) => {
-  currentTier = tier
-  applyTierUi()
-})

@@ -45,7 +45,7 @@
           <nav class="mt-6 grid gap-2" id="tab-links">
             <a id="tab-main-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/">Main</a>
             <button id="tab-analyze-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="analyze" type="button">Dashboard</button>
-            <a id="tab-keyword-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/keyword-rank.html">Keyword Rank</a>
+            <a id="tab-keyword-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/keyword-rank.html">Search Rank</a>
             <a id="tab-prompt-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/prompt-tracker.html">Prompt Tracker</a>
             <a id="tab-aeo-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
             <button id="tab-pricing-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="pricing" type="button">Pricing</button>
@@ -62,7 +62,7 @@
             <p class="mt-2 text-sm text-slate-300">
               <a href="/" class="font-semibold text-slate-200 hover:text-white">Main</a> ·
               <a href="/app.html" class="font-semibold text-slate-200 hover:text-white">Dashboard</a> ·
-              <a href="/keyword-rank.html" class="font-semibold text-slate-200 hover:text-white">Keyword Rank</a> ·
+              <a href="/keyword-rank.html" class="font-semibold text-slate-200 hover:text-white">Search Rank</a> ·
               <a href="/prompt-tracker.html" class="font-semibold text-slate-200 hover:text-white">Prompt Tracker</a> ·
               <a href="/aeo-optimizer.html" class="font-semibold text-slate-200 hover:text-white">SEO/AEO Optimizer</a>
             </p>
@@ -79,7 +79,7 @@
             </div>
             <nav class="flex flex-wrap gap-2" aria-label="Product navigation">
               <a id="gnb-main" href="/" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Main</a>
-              <a id="gnb-keyword" href="/keyword-rank.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Keyword Rank</a>
+              <a id="gnb-keyword" href="/keyword-rank.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Search Rank</a>
               <a id="gnb-prompt" href="/prompt-tracker.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Prompt Tracker</a>
               <a id="gnb-aeo" href="/aeo-optimizer.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">SEO/AEO Optimizer</a>
             </nav>
@@ -90,7 +90,7 @@
                 <option value="ja">JP</option>
                 <option value="zh">CN</option>
               </select>
-              <button id="open-login-btn" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">Log in</button>
+              <button id="open-login-btn" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">로그인(오픈베타)</button>
               <button id="open-register-btn" type="button" class="hidden rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.03]">Get started</button>
               <button id="logout-btn" type="button" class="hidden rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">Logout</button>
             </div>
@@ -110,7 +110,7 @@
               <div class="mt-6">
                 <label id="competitor-label" for="competitor-urls" class="text-sm font-semibold text-slate-200">Competitor URLs (one per line)</label>
                 <textarea id="competitor-urls" rows="3" placeholder="https://competitor-a.com" class="mt-2 w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none"></textarea>
-                <p id="competitor-policy" class="mt-2 text-xs text-slate-400">Free: 1 competitor | Paid: 5 included, +$3/month each above 5 | Pro hard cap: 10</p>
+                <p id="competitor-policy" class="mt-2 text-xs text-slate-400">Open beta: multiple competitor URLs are analyzed and shown as average comparison.</p>
               </div>
               <div class="mt-5 flex flex-wrap gap-2">
                 <span id="hero-meta-guest" class="rounded-full border border-slate-700/60 bg-slate-950/30 px-3 py-1 text-xs font-semibold text-slate-300">Guest: one URL analysis</span>
@@ -124,12 +124,17 @@
               <div id="report-content" class="mt-6 grid gap-6"></div>
             </div>
 
+            <div id="comparison-dashboard" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <h3 id="comparison-dashboard-title" class="text-xl font-bold text-white">Competitor Comparison Dashboard</h3>
+              <div id="comparison-dashboard-content" class="mt-6"></div>
+            </div>
+
             <div id="post-analysis-cta" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
               <h3 id="post-cta-title" class="text-xl font-bold text-white">Need full sitemap analysis?</h3>
               <p id="post-cta-description" class="mt-2 text-sm text-slate-300">Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).</p>
               <div class="mt-5 flex flex-wrap gap-3">
                 <button id="cta-open-pricing" type="button" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">View Pricing</button>
-                <button id="cta-open-login" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:text-white">Login to upgrade</button>
+                <button id="cta-open-login" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:text-white">로그인(오픈베타)</button>
               </div>
             </div>
 

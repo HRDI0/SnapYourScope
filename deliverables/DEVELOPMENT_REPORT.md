@@ -1,6 +1,6 @@
 # Development Report
 
-Last updated: 2026-02-15
+Last updated: 2026-02-18
 
 ## 1) 프로젝트 개요
 
@@ -90,6 +90,11 @@ Last updated: 2026-02-15
 - `Enterprise` 탭을 `Inquiry`로 변경하고 `SEO/AEO Optimizer` 명칭 표준화 완료
 - 로그인/회원가입 모달 모두 Google continue 버튼 노출 완료
 - 이메일/구글 계정 중복 가입 방지 로직 및 DB uniqueness 보강 완료
+- 전 페이지 대시보드 레이아웃을 GA4 스타일(상단 KPI + 하단 넓은 리포트 존)로 재정렬
+- 메인 대시보드에 경쟁사 다중 URL 평균 점수/점수차 KPI 반영
+- Search Rank/Prompt Tracking/SEO-AEO Optimizer 결과를 우측 패널형에서 하단 풀폭 대시보드형으로 변경
+- Prompt Tracking 티어 1~4 기준 및 공유 링크 중심 표 대시보드 정렬 완료
+- `deliverables/FULL_FEATURE_INFRA_SETUP_GUIDE.md`에 Google/Bing/Naver/OpenAI/Gemini 발급 및 환경변수 연결 절차를 클릭 단위로 보강
 
 ## 5) 남은 운영 단계 (개발 외)
 

@@ -17,10 +17,10 @@ class MentionScore:
 
 class PromptTrackingService:
     TIER_SCORES = {
-        "not_mentioned": 0,
-        "mentioned": 35,
-        "mentioned_and_linked": 70,
-        "core_mentioned": 100,
+        "tier4_not_mentioned": 0,
+        "tier3_minor_mention": 35,
+        "tier2_competitive_mention": 70,
+        "tier1_core_mention": 100,
     }
 
     @staticmethod
@@ -40,33 +40,53 @@ class PromptTrackingService:
         text = (response_text or "").lower()
         domain = SearchTrackingService.normalize_domain(target_url)
 
-        has_domain = domain and domain in text
-        has_brand = brand and brand in text
-        has_link = ("http://" in text or "https://" in text) and has_domain
-        is_core = has_brand and text[:350].find(brand) >= 0
+        has_domain = bool(domain and domain in text)
+        has_brand = bool(brand and brand in text)
+        has_mention = has_domain or has_brand
 
-        if is_core:
+        if not has_mention:
             return MentionScore(
-                tier="core_mentioned",
-                score=PromptTrackingService.TIER_SCORES["core_mentioned"],
-                reason="Brand appears in the core answer section.",
+                tier="tier4_not_mentioned",
+                score=PromptTrackingService.TIER_SCORES["tier4_not_mentioned"],
+                reason="Tier 4: Brand is not mentioned in the response.",
             )
-        if has_link:
+
+        mention_index = -1
+        if has_brand and has_domain:
+            mention_index = min(text.find(brand), text.find(domain))
+        elif has_brand:
+            mention_index = text.find(brand)
+        else:
+            mention_index = text.find(domain)
+
+        competitor_cues = [
+            " versus ",
+            " vs ",
+            "compared",
+            "alternative",
+            "other options",
+            "competitor",
+        ]
+        has_competitor_context = any(cue in text for cue in competitor_cues)
+
+        if mention_index >= 0 and mention_index <= 350 and not has_competitor_context:
             return MentionScore(
-                tier="mentioned_and_linked",
-                score=PromptTrackingService.TIER_SCORES["mentioned_and_linked"],
-                reason="Brand/domain is mentioned with link context.",
+                tier="tier1_core_mention",
+                score=PromptTrackingService.TIER_SCORES["tier1_core_mention"],
+                reason="Tier 1: Brand is mentioned as a core answer element.",
             )
-        if has_brand or has_domain:
+
+        if has_competitor_context:
             return MentionScore(
-                tier="mentioned",
-                score=PromptTrackingService.TIER_SCORES["mentioned"],
-                reason="Brand/domain appears in the answer.",
+                tier="tier2_competitive_mention",
+                score=PromptTrackingService.TIER_SCORES["tier2_competitive_mention"],
+                reason="Tier 2: Brand is mentioned with competing alternatives.",
             )
+
         return MentionScore(
-            tier="not_mentioned",
-            score=PromptTrackingService.TIER_SCORES["not_mentioned"],
-            reason="No brand/domain mention detected.",
+            tier="tier3_minor_mention",
+            score=PromptTrackingService.TIER_SCORES["tier3_minor_mention"],
+            reason="Tier 3: Brand is mentioned late or as low-priority reference.",
         )
 
     @staticmethod
@@ -76,14 +96,11 @@ class PromptTrackingService:
         brand_name: Optional[str],
         llm_sources: List[str],
         search_engines: List[str],
-    ) -> Dict:
+    ) -> Dict[str, object]:
         brand = PromptTrackingService.extract_brand(
             target_url=target_url, brand_name=brand_name
         )
-        request_prompt = LlmService.build_prompt_tracking_request(
-            query=query,
-            brand_url=target_url,
-        )
+        request_prompt = LlmService.build_prompt_tracking_request(query=query)
 
         llm_outputs = []
         for source in llm_sources:
@@ -97,6 +114,7 @@ class PromptTrackingService:
                 used_provider = llm_result[1]
                 used_model = llm_result[2]
                 latency_ms = llm_result[3]
+                response_share_url = llm_result[4]
                 mention = PromptTrackingService.evaluate_mention(
                     response_text=answer_text,
                     target_url=target_url,
@@ -118,7 +136,7 @@ class PromptTrackingService:
                             response_text=answer_text,
                         ),
                         "response_excerpt": answer_text[:1500],
-                        "response_share_url": None,
+                        "response_share_url": response_share_url,
                     }
                 )
             except Exception as e:

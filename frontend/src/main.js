@@ -3,7 +3,6 @@ import { renderComparisonRows, renderIssueBoard } from './ui/renderers'
 import { apiUrl } from './core/api'
 
 let token = localStorage.getItem('access_token')
-let guestSingleUsed = sessionStorage.getItem('guest_single_used') === '1'
 
 const tabButtons = document.querySelectorAll('.tab-link')
 const tabPanels = document.querySelectorAll('.tab-panel')
@@ -13,6 +12,8 @@ const targetUrlInput = document.getElementById('target-url')
 const analysisResult = document.getElementById('analysis-result')
 const reportContent = document.getElementById('report-content')
 const postAnalysisCta = document.getElementById('post-analysis-cta')
+const comparisonDashboard = document.getElementById('comparison-dashboard')
+const comparisonDashboardContent = document.getElementById('comparison-dashboard-content')
 
 const charts = {
   score: null,
@@ -155,16 +156,16 @@ const I18N = {
     tabAnalyze: 'Dashboard',
     tabPricing: 'Plans',
     tabEnterprise: 'Inquiry',
-    tabKeyword: 'Keyword Rank',
+    tabKeyword: 'Search Rank',
     tabPrompt: 'Prompt Tracker',
     tabAeo: 'SEO/AEO Optimizer',
     gnbMain: 'Main',
-    gnbKeyword: 'Keyword Rank',
+    gnbKeyword: 'Search Rank',
     gnbPrompt: 'Prompt Tracker',
     gnbAeo: 'SEO/AEO Optimizer',
     workspaceEyebrow: 'Analytics Workspace',
     workspaceTitle: 'Competitive Visibility Dashboard',
-    login: 'Log in',
+    login: '로그인(오픈베타)',
     register: 'Google sign-in',
     logout: 'Logout',
     heroEyebrow: 'URL intelligence',
@@ -177,7 +178,7 @@ const I18N = {
     competitorLabel: 'Competitor URLs (one per line)',
     competitorPlaceholder: 'https://competitor-a.com',
     competitorPolicy:
-      'Free: 1 competitor | Paid: 5 included, +$3/month each above 5 | Pro hard cap: 10 (Enterprise for more)',
+      'Open beta: multiple competitor URLs are analyzed and shown as average comparison.',
     targetUrlPlaceholder: 'https://example.com',
     analyzeButton: 'Analyze URL',
     analyzingButton: 'Analyzing...',
@@ -186,7 +187,7 @@ const I18N = {
     postCtaDescription:
       'Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).',
     postCtaPricing: 'View Pricing',
-    postCtaLogin: 'Login (Paused)',
+    postCtaLogin: '로그인(오픈베타)',
     batchTitle: 'Full sitemap analysis (paid)',
     batchDescription: 'Backend logic is implemented. Frontend API wiring can be connected next.',
     batchRefreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
@@ -252,6 +253,11 @@ const I18N = {
     sectionContentSnapshot: 'Content Snapshot',
     sectionImmediateFixes: 'Immediate Fixes',
     sectionHybridCorrelation: 'Hybrid Correlation',
+    sectionExecutiveOverview: 'Executive Overview',
+    kpiMyScore: 'My SEO Score',
+    kpiCompetitorAvg: 'Competitor Avg',
+    kpiScoreGap: 'Score Gap',
+    kpiCompetitorCount: 'Competitors',
     sectionLiveFeed: 'Live Answer Feed',
     zoneSummary: 'Summary',
     zoneAnalysis: 'Analysis',
@@ -294,7 +300,8 @@ const I18N = {
     competitorProCap: 'Pro plan supports up to 10 competitor URLs. Use Enterprise for more.',
     competitorAddOnEstimate: 'Estimated add-on: $${amount}/month for extra competitor URLs.',
     comparingCompetitors: 'Running competitor comparison analyses...',
-    competitorComparisonTitle: 'Competitor Comparison (SEO Score)',
+    competitorComparisonTitle: 'Competitor Comparison Dashboard',
+    competitorAverageLabel: 'Average competitor score',
     yourUrlLabel: 'Your URL',
     competitorLabelShort: 'Competitor',
     searchRankTitle: 'Free Search Rank Tracker',
@@ -328,16 +335,16 @@ const I18N = {
     tabAnalyze: '대시보드',
     tabPricing: '요금제',
     tabEnterprise: '문의',
-    tabKeyword: '키워드 순위',
+    tabKeyword: '검색 순위 추적',
     tabPrompt: '프롬프트 추적',
     tabAeo: 'SEO/AEO 최적화',
     gnbMain: '메인',
-    gnbKeyword: '키워드 순위',
+    gnbKeyword: '검색 순위 추적',
     gnbPrompt: '프롬프트 추적',
     gnbAeo: 'SEO/AEO 최적화',
     workspaceEyebrow: '분석 워크스페이스',
     workspaceTitle: '경쟁 가시성 대시보드',
-    login: '로그인',
+    login: '로그인(오픈베타)',
     register: 'Google 로그인',
     logout: '로그아웃',
     heroEyebrow: 'URL 인텔리전스',
@@ -349,7 +356,7 @@ const I18N = {
     competitorLabel: '경쟁사 URL (한 줄에 하나)',
     competitorPlaceholder: 'https://competitor-a.com',
     competitorPolicy:
-      '무료: 1개 | 유료: 5개 포함, 5개 초과 시 URL당 월 $3 | Pro 최대 10개 (그 이상 Enterprise)',
+      '오픈 베타: 경쟁사 URL 여러 개를 분석하고 평균 비교까지 제공합니다.',
     targetUrlPlaceholder: 'https://example.com',
     analyzeButton: 'URL 분석',
     analyzingButton: '분석 중...',
@@ -357,7 +364,7 @@ const I18N = {
     postCtaTitle: '전체 사이트맵 분석이 필요하신가요?',
     postCtaDescription: '로그인 후 구독하면 전체 사이트 배치 분석(사이트맵 파싱 + URL 큐 + 백그라운드 실행)이 가능합니다.',
     postCtaPricing: '요금제 보기',
-    postCtaLogin: '로그인 (일시중단)',
+    postCtaLogin: '로그인(오픈베타)',
     batchTitle: '전체 사이트맵 분석 (유료)',
     batchDescription: '백엔드 로직은 구현 완료되었습니다. 프론트 API 연동만 남았습니다.',
     batchRefreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
@@ -421,6 +428,11 @@ const I18N = {
     sectionContentSnapshot: '콘텐츠 스냅샷',
     sectionImmediateFixes: '즉시 수정 항목',
     sectionHybridCorrelation: '하이브리드 상관 분석',
+    sectionExecutiveOverview: '요약 개요',
+    kpiMyScore: '내 SEO 점수',
+    kpiCompetitorAvg: '경쟁사 평균',
+    kpiScoreGap: '점수 차이',
+    kpiCompetitorCount: '경쟁사 수',
     sectionLiveFeed: '실시간 답변 피드',
     zoneSummary: '요약',
     zoneAnalysis: '분석',
@@ -461,7 +473,8 @@ const I18N = {
     competitorProCap: 'Pro 플랜의 경쟁사 URL 최대치는 10개입니다. 그 이상은 Enterprise를 이용하세요.',
     competitorAddOnEstimate: '예상 추가 과금: 추가 경쟁사 URL에 대해 월 $${amount}',
     comparingCompetitors: '경쟁사 비교 분석을 실행 중입니다...',
-    competitorComparisonTitle: '경쟁사 비교 (SEO 점수)',
+    competitorComparisonTitle: '경쟁사 비교 대시보드',
+    competitorAverageLabel: '경쟁사 평균 점수',
     yourUrlLabel: '내 URL',
     competitorLabelShort: '경쟁사',
     searchRankTitle: '무료 검색 순위 추적',
@@ -495,16 +508,16 @@ const I18N = {
     tabAnalyze: 'ダッシュボード',
     tabPricing: '料金',
     tabEnterprise: '問い合わせ',
-    tabKeyword: 'キーワード順位',
+    tabKeyword: '検索順位トラッキング',
     tabPrompt: 'プロンプト追跡',
     tabAeo: 'SEO/AEO 最適化',
     gnbMain: 'メイン',
-    gnbKeyword: 'キーワード順位',
+    gnbKeyword: '検索順位トラッキング',
     gnbPrompt: 'プロンプト追跡',
     gnbAeo: 'SEO/AEO 最適化',
     workspaceEyebrow: '分析ワークスペース',
     workspaceTitle: '競合可視性ダッシュボード',
-    login: 'ログイン',
+    login: '로그인(오픈베타)',
     register: 'Google ログイン',
     logout: 'ログアウト',
     heroEyebrow: 'URL インテリジェンス',
@@ -516,7 +529,7 @@ const I18N = {
     competitorLabel: '競合 URL（1行に1件）',
     competitorPlaceholder: 'https://competitor-a.com',
     competitorPolicy:
-      '無料: 1件 | 有料: 5件含む、5件超過はURLごとに月額 $3 | Pro 上限 10件（それ以上は Enterprise）',
+      'オープンベータ: 複数の競合URLを分析し、平均比較を表示します。',
     targetUrlPlaceholder: 'https://example.com',
     analyzeButton: 'URL分析',
     analyzingButton: '分析中...',
@@ -524,7 +537,7 @@ const I18N = {
     postCtaTitle: 'サイトマップ全体分析が必要ですか？',
     postCtaDescription: 'ログインして購読すると、サイト全体のバッチ分析を実行できます。',
     postCtaPricing: '料金を見る',
-    postCtaLogin: 'ログイン (一時停止)',
+    postCtaLogin: '로그인(오픈베타)',
     batchTitle: 'サイトマップ全体分析（有料）',
     batchDescription: 'バックエンド実装は完了しています。フロントAPI接続のみ残っています。',
     batchRefreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
@@ -589,6 +602,11 @@ const I18N = {
     sectionContentSnapshot: 'コンテンツ概要',
     sectionImmediateFixes: '即時修正項目',
     sectionHybridCorrelation: 'ハイブリッド相関',
+    sectionExecutiveOverview: 'エグゼクティブ概要',
+    kpiMyScore: '自社 SEO スコア',
+    kpiCompetitorAvg: '競合平均',
+    kpiScoreGap: 'スコア差',
+    kpiCompetitorCount: '競合数',
     sectionLiveFeed: 'ライブ回答フィード',
     zoneSummary: '要約',
     zoneAnalysis: '分析',
@@ -629,7 +647,8 @@ const I18N = {
     competitorProCap: 'Pro プランの競合 URL 上限は 10 件です。超過分は Enterprise を利用してください。',
     competitorAddOnEstimate: '追加競合 URL の想定追加料金: 月額 $${amount}',
     comparingCompetitors: '競合比較分析を実行中です...',
-    competitorComparisonTitle: '競合比較 (SEO スコア)',
+    competitorComparisonTitle: '競合比較ダッシュボード',
+    competitorAverageLabel: '競合平均スコア',
     yourUrlLabel: '自社 URL',
     competitorLabelShort: '競合',
     searchRankTitle: '無料検索順位トラッカー',
@@ -663,16 +682,16 @@ const I18N = {
     tabAnalyze: '仪表盘',
     tabPricing: '价格',
     tabEnterprise: '咨询',
-    tabKeyword: '关键词排名',
+    tabKeyword: '搜索排名追踪',
     tabPrompt: '提示词追踪',
     tabAeo: 'SEO/AEO 优化',
     gnbMain: '主页',
-    gnbKeyword: '关键词排名',
+    gnbKeyword: '搜索排名追踪',
     gnbPrompt: '提示词追踪',
     gnbAeo: 'SEO/AEO 优化',
     workspaceEyebrow: '分析工作区',
     workspaceTitle: '竞争可见性仪表盘',
-    login: '登录',
+    login: '로그인(오픈베타)',
     register: 'Google 登录',
     logout: '退出登录',
     heroEyebrow: 'URL 智能分析',
@@ -684,7 +703,7 @@ const I18N = {
     competitorLabel: '竞争对手 URL（每行一个）',
     competitorPlaceholder: 'https://competitor-a.com',
     competitorPolicy:
-      '免费: 1 个 | 付费: 含 5 个，超过 5 个每个 URL 每月 +$3 | Pro 上限 10 个（更多请用 Enterprise）',
+      '开放测试: 支持分析多个竞争对手 URL 并显示平均对比。',
     targetUrlPlaceholder: 'https://example.com',
     analyzeButton: '分析 URL',
     analyzingButton: '分析中...',
@@ -692,7 +711,7 @@ const I18N = {
     postCtaTitle: '需要完整站点地图分析吗？',
     postCtaDescription: '登录并订阅后，可运行全站批量分析。',
     postCtaPricing: '查看价格',
-    postCtaLogin: '登录 (暂停)',
+    postCtaLogin: '로그인(오픈베타)',
     batchTitle: '完整站点地图分析（付费）',
     batchDescription: '后端逻辑已完成，前端 API 接线可在下一步完成。',
     batchRefreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
@@ -756,6 +775,11 @@ const I18N = {
     sectionContentSnapshot: '内容快照',
     sectionImmediateFixes: '立即修复项',
     sectionHybridCorrelation: '混合相关性',
+    sectionExecutiveOverview: '总览摘要',
+    kpiMyScore: '我的 SEO 分数',
+    kpiCompetitorAvg: '竞品平均',
+    kpiScoreGap: '分数差',
+    kpiCompetitorCount: '竞品数量',
     sectionLiveFeed: '实时回答流',
     zoneSummary: '摘要',
     zoneAnalysis: '分析',
@@ -796,7 +820,8 @@ const I18N = {
     competitorProCap: 'Pro 方案最多支持 10 个竞争对手 URL。超过请使用 Enterprise。',
     competitorAddOnEstimate: '额外竞争对手 URL 预估附加费用: 每月 $${amount}',
     comparingCompetitors: '正在执行竞争对手对比分析...',
-    competitorComparisonTitle: '竞争对手对比 (SEO 评分)',
+    competitorComparisonTitle: '竞争对手对比仪表盘',
+    competitorAverageLabel: '竞争对手平均分',
     yourUrlLabel: '我的 URL',
     competitorLabelShort: '竞争对手',
     searchRankTitle: '免费搜索排名追踪',
@@ -876,6 +901,7 @@ function applyLanguage(lang) {
   setPlaceholder('competitor-urls', 'competitorPlaceholder')
   setText('analyze-btn', 'analyzeButton')
   setText('analysis-report-title', 'analysisReportTitle')
+  setText('comparison-dashboard-title', 'competitorComparisonTitle')
   setText('post-cta-title', 'postCtaTitle')
   setText('post-cta-description', 'postCtaDescription')
   setText('cta-open-pricing', 'postCtaPricing')
@@ -1000,19 +1026,6 @@ function validateCompetitorLimit(competitorUrls) {
   if (!competitorUrls.length) {
     return { valid: true, addOnAmount: 0 }
   }
-
-  if (!isPaidTier() && competitorUrls.length > 1) {
-    return { valid: false, message: t('competitorLimitExceeded') }
-  }
-
-  if (currentUserTier === 'pro' && competitorUrls.length > 10) {
-    return { valid: false, message: t('competitorProCap') }
-  }
-
-  if (isPaidTier() && competitorUrls.length > 5) {
-    return { valid: true, addOnAmount: (competitorUrls.length - 5) * 3 }
-  }
-
   return { valid: true, addOnAmount: 0 }
 }
 
@@ -1519,6 +1532,13 @@ function renderReport(data, competitorReports = []) {
   const geoResult = data?.geo_result || {}
 
   const seoScore = Number(seoResult.score) || 0
+  const competitorScores = competitorReports
+    .map((entry) => Number(entry?.seo_result?.score) || 0)
+    .filter((score) => Number.isFinite(score))
+  const competitorAvgScore = competitorScores.length
+    ? Math.round(competitorScores.reduce((sum, score) => sum + score, 0) / competitorScores.length)
+    : 0
+  const scoreGap = seoScore - competitorAvgScore
   const seoChecks = collectSeoChecks(seoResult)
   const aeoChecks = collectAeoChecks(aeoResult)
   const allChecks = [...seoChecks, ...aeoChecks]
@@ -1542,15 +1562,6 @@ function renderReport(data, competitorReports = []) {
   const missingAlt = Number(seoResult?.images?.missing_alt) || 0
 
   const issueList = allChecks.filter((check) => check.statusType !== 'pass').slice(0, 6)
-  const comparisonRows = [
-    { url: data.url, score: seoScore, type: t('yourUrlLabel') },
-    ...competitorReports.map((entry) => ({
-      url: entry.url,
-      score: Number(entry?.seo_result?.score) || 0,
-      type: t('competitorLabelShort'),
-    })),
-  ]
-
   const html = `
     <section class="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -1561,29 +1572,30 @@ function renderReport(data, competitorReports = []) {
         </div>
         <div class="h-36 w-36 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-3"><canvas id="score-chart"></canvas></div>
       </div>
-      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiSeoChecks')}</p><h4 class="mt-1 text-lg font-bold text-white">${seoPass}/${seoChecks.length || 0}</h4></article>
-        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiAeoChecks')}</p><h4 class="mt-1 text-lg font-bold text-white">${aeoPass}/${aeoChecks.length || 0}</h4></article>
-        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiGlobalReach')}</p><h4 class="mt-1 text-lg font-bold text-white">${successfulRegions}/${geoEntries.length || 0}</h4></article>
-        <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('kpiAvgLatency')}</p><h4 class="mt-1 text-lg font-bold text-white">${avgLatency}ms</h4></article>
+      <div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-4">
+        <h4 class="text-sm font-bold text-white">${t('sectionExecutiveOverview')}</h4>
+        <div class="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-6">
+          <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiMyScore')}</p><h4 class="mt-1 text-lg font-bold text-white">${seoScore}</h4></article>
+          <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiCompetitorAvg')}</p><h4 class="mt-1 text-lg font-bold text-white">${competitorScores.length ? competitorAvgScore : '-'}</h4></article>
+          <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiScoreGap')}</p><h4 class="mt-1 text-lg font-bold ${scoreGap >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${competitorScores.length ? scoreGap : '-'}</h4></article>
+          <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiCompetitorCount')}</p><h4 class="mt-1 text-lg font-bold text-white">${competitorScores.length}</h4></article>
+          <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiSeoChecks')}</p><h4 class="mt-1 text-lg font-bold text-white">${seoPass}/${seoChecks.length || 0}</h4></article>
+          <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiAeoChecks')}</p><h4 class="mt-1 text-lg font-bold text-white">${aeoPass}/${aeoChecks.length || 0}</h4></article>
+        </div>
       </div>
       <div class="flex flex-wrap gap-2">
         <span class="rounded-full border border-rose-500/25 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-200">Critical ${statusCounts.fail}</span>
         <span class="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200">Caution ${statusCounts.warn}</span>
         <span class="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">Safe ${statusCounts.pass}</span>
       </div>
-      <div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-4">
-        <h4 class="text-sm font-bold text-white">${t('competitorComparisonTitle')}</h4>
-        <ul class="mt-3 space-y-2">${renderComparisonRows(comparisonRows, escapeHtml)}</ul>
-      </div>
     </section>
-    <section class="grid gap-4 lg:grid-cols-2">
+    <section class="grid gap-4 xl:grid-cols-2">
       <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionSeoEssentials')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(seoChecks, t('emptySeoChecks'))}</ul></article>
       <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionAeoSignals')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(aeoChecks, t('emptyAeoChecks'))}</ul></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionStatusMix')}</h4><div class="mt-3 h-56"><canvas id="status-mix-chart"></canvas></div></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionHybridCorrelation')}</h4><div class="mt-3 h-56"><canvas id="hybrid-correlation-chart"></canvas></div></article>
       <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionRegionalLatency')}</h4><div class="mt-3 h-56"><canvas id="geo-latency-chart"></canvas></div><ul class="mt-3 space-y-2">${renderGeoRows(geoResult)}</ul></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionContentSnapshot')}</h4><div class="mt-3 grid grid-cols-2 gap-3"><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaWords')}</span><strong class="text-lg text-white">${words}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaMissingAlt')}</span><strong class="text-lg text-white">${missingAlt}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaCurrencies')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_currencies?.length || 0}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaPhoneFormats')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_phones?.length || 0}</strong></div></div></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionStatusMix')}</h4><div class="mt-3 h-56"><canvas id="status-mix-chart"></canvas></div></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl xl:col-span-2"><h4 class="text-sm font-bold text-white">${t('sectionHybridCorrelation')}</h4><div class="mt-3 h-56"><canvas id="hybrid-correlation-chart"></canvas></div></article>
+      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl xl:col-span-2"><h4 class="text-sm font-bold text-white">${t('sectionContentSnapshot')}</h4><div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4"><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaWords')}</span><strong class="text-lg text-white">${words}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaMissingAlt')}</span><strong class="text-lg text-white">${missingAlt}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaCurrencies')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_currencies?.length || 0}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaPhoneFormats')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_phones?.length || 0}</strong></div></div></article>
     </section>
     <section>
       <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionImmediateFixes')}</h4><div class="mt-3">${renderIssueBoard(issueList, escapeHtml, { p0: t('issuePriorityP0'), p1: t('issuePriorityP1'), p2: t('issuePriorityP2'), empty: t('issuePriorityEmpty') })}</div></article>
@@ -1597,17 +1609,52 @@ function renderReport(data, competitorReports = []) {
   renderCharts({ seoScore, geoResult, statusCounts })
 }
 
+function renderComparisonDashboard(primaryReport, competitorReports) {
+  if (!comparisonDashboard || !comparisonDashboardContent) return
+  if (!competitorReports.length) {
+    comparisonDashboard.classList.add('hidden')
+    comparisonDashboardContent.innerHTML = ''
+    return
+  }
+
+  const rows = [
+    {
+      url: primaryReport.url,
+      score: Number(primaryReport?.seo_result?.score) || 0,
+      type: t('yourUrlLabel'),
+    },
+    ...competitorReports.map((entry) => ({
+      url: entry.url,
+      score: Number(entry?.seo_result?.score) || 0,
+      type: t('competitorLabelShort'),
+    })),
+  ]
+  const competitorOnly = rows.filter((row) => row.type === t('competitorLabelShort'))
+  const competitorAverage = competitorOnly.length
+    ? Math.round(
+        competitorOnly.reduce((sum, row) => sum + (Number(row.score) || 0), 0) /
+          competitorOnly.length
+      )
+    : 0
+
+  comparisonDashboardContent.innerHTML = `
+    <div class="space-y-4 rounded-xl border border-slate-800/60 bg-slate-950/35 p-4">
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiMyScore')}</p><h4 class="mt-1 text-lg font-bold text-white">${Number(primaryReport?.seo_result?.score) || 0}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('competitorAverageLabel')}</p><h4 class="mt-1 text-lg font-bold text-white">${competitorOnly.length ? competitorAverage : '-'}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiScoreGap')}</p><h4 class="mt-1 text-lg font-bold ${(Number(primaryReport?.seo_result?.score) || 0) - competitorAverage >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${competitorOnly.length ? (Number(primaryReport?.seo_result?.score) || 0) - competitorAverage : '-'}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('kpiCompetitorCount')}</p><h4 class="mt-1 text-lg font-bold text-white">${competitorOnly.length}</h4></article>
+      </div>
+      <ul class="space-y-2">${renderComparisonRows(rows, escapeHtml)}</ul>
+    </div>
+  `
+  comparisonDashboard.classList.remove('hidden')
+}
+
 analyzeBtn.addEventListener('click', async () => {
   const url = targetUrlInput.value.trim()
   if (!url) {
     alert(t('emptyUrlAlert'))
-    return
-  }
-
-  if (!token && guestSingleUsed) {
-    postAnalysisCta.classList.remove('hidden')
-    switchTab('pricing')
-    alert(t('guestLimitAlert'))
     return
   }
 
@@ -1619,7 +1666,8 @@ analyzeBtn.addEventListener('click', async () => {
 
   try {
     const competitorUrls = parseCompetitorUrls()
-    const competitorValidation = validateCompetitorLimit(competitorUrls)
+    const effectiveCompetitorUrls = [...new Set(competitorUrls)]
+    const competitorValidation = validateCompetitorLimit(effectiveCompetitorUrls)
     if (!competitorValidation.valid) {
       throw new Error(competitorValidation.message)
     }
@@ -1652,7 +1700,7 @@ analyzeBtn.addEventListener('click', async () => {
     const geoMetrics = data?.geo_result || {}
 
     let competitorReports = []
-    if (competitorUrls.length) {
+    if (effectiveCompetitorUrls.length) {
       if (competitorValidation.addOnAmount > 0) {
         alert(
           t('competitorAddOnEstimate').replace(
@@ -1662,7 +1710,7 @@ analyzeBtn.addEventListener('click', async () => {
         )
       }
 
-      const competitorRequests = competitorUrls.map(async (competitorUrl) => {
+      const competitorRequests = effectiveCompetitorUrls.map(async (competitorUrl) => {
         const competitorResponse = await fetch(apiUrl('/api/analyze'), {
           method: 'POST',
           headers,
@@ -1680,12 +1728,8 @@ analyzeBtn.addEventListener('click', async () => {
 
     setAppState({ seoMetrics, aeoMetrics, geoMetrics })
     renderReport(data, competitorReports)
+    renderComparisonDashboard(data, competitorReports)
     postAnalysisCta.classList.remove('hidden')
-
-    if (!token) {
-      guestSingleUsed = true
-      sessionStorage.setItem('guest_single_used', '1')
-    }
   } catch (err) {
     setAppState({ lastError: err.message })
     alert(`${t('analysisFailedPrefix')}: ${err.message}`)

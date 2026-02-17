@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 
 class AeoOptimizerService:
@@ -22,11 +22,13 @@ class AeoOptimizerService:
     ]
 
     @staticmethod
-    def build_recommendations(url: str, analysis_result: Dict) -> Dict:
+    def build_recommendations(
+        url: str, analysis_result: Dict[str, Any]
+    ) -> Dict[str, Any]:
         seo = analysis_result.get("seo_result") or {}
         aeo = analysis_result.get("aeo_result") or {}
 
-        recommendations: List[Dict] = []
+        recommendations: List[Dict[str, Any]] = []
 
         answer_first = (aeo.get("answer_first") or {}).get("status", "")
         if "Fail" in answer_first or "Warn" in answer_first:
@@ -159,15 +161,29 @@ class AeoOptimizerService:
                 {
                     "priority": "medium",
                     "category": "geo_paper_alignment",
-                    "title": "Add evidence-rich passages",
-                    "detail": "Include concrete facts, statistics, and cited statements in key sections to improve generative citation likelihood.",
+                    "title": "Add evidence-rich passages (GEO)",
+                    "detail": "Convert generic claims to quantifiable facts and source-backed statements. GEO reports higher citation likelihood when pages include measurable evidence (Sec. 2.2.2, Table 1).",
                     "references": AeoOptimizerService.RESEARCH_REFERENCES,
                 },
                 {
                     "priority": "low",
                     "category": "geo_paper_alignment",
-                    "title": "Increase quote and source density",
-                    "detail": "Add expert quotes and outbound references to authoritative sources for higher answer-engine trust.",
+                    "title": "Increase quote and source density (GEO)",
+                    "detail": "Add expert quotations and explicit source links near key claims. GEO highlights quote/citation strategies as strong visibility levers in generative answers (Sec. 2.2.2, Table 1).",
+                    "references": AeoOptimizerService.RESEARCH_REFERENCES,
+                },
+                {
+                    "priority": "medium",
+                    "category": "geo_paper_alignment",
+                    "title": "Use authoritative but clear language",
+                    "detail": "Prefer confident, structured prose over vague wording and avoid keyword stuffing. GEO indicates better generative inclusion with fluent, authoritative text (Sec. 2.2.2, Sec. 4).",
+                    "references": AeoOptimizerService.RESEARCH_REFERENCES,
+                },
+                {
+                    "priority": "medium",
+                    "category": "geo_paper_alignment",
+                    "title": "Match query intent by section design",
+                    "detail": "For technical queries, prioritize terminology + data; for general queries, prioritize concise explanation + references. GEO shows strategy effects vary by domain/intent (Sec. 5.1).",
                     "references": AeoOptimizerService.RESEARCH_REFERENCES,
                 },
             ]
@@ -177,6 +193,6 @@ class AeoOptimizerService:
             "url": url,
             "recommendation_count": len(recommendations),
             "recommendations": recommendations,
-            "notes": "Recommendations are based on URL audit outputs, search quality guidance, SEO technical hygiene, and GEO/AEO research references.",
+            "notes": "Recommendations combine traditional technical SEO checks and AEO/GEO guidance grounded in GEO paper findings (arXiv:2311.09735).",
             "references": AeoOptimizerService.RESEARCH_REFERENCES,
         }

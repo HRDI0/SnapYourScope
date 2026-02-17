@@ -1,117 +1,59 @@
-import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
+import { applyDocumentLanguage, getStoredLanguage, setStoredLanguage } from './core/session'
 import { apiUrl } from './core/api'
 
 const output = document.getElementById('optimizer-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('ao-submit')
-const optimizerUrlInput = document.getElementById('optimizer-url')
-const lockNote = document.getElementById('ao-lock-note')
 const loginBtn = document.getElementById('ao-login-btn')
 
 let currentLanguage = getStoredLanguage('en')
-let currentTier = 'free'
 
 const I18N = {
   en: {
-    title: 'SEO/AEO Optimizer',
+    title: 'SEO/AEO Optimizer Dashboard',
     navMain: 'Main',
-    navKeyword: 'Keyword Rank',
+    navKeyword: 'Search Rank',
     navDashboard: 'Dashboard',
     navPrompt: 'Prompt Tracker',
     navAeo: 'SEO/AEO Optimizer',
     navPricing: 'Pricing',
     navInquiry: 'Inquiry',
-    paidTitle: 'Paid Recommendation Workflow (Pro / Enterprise)',
-    paidDesc: 'Generate optimization recommendations from URL audit outputs with SEO foundation and GEO/AEO principles.',
+    paidTitle: 'Open Beta Recommendation Workflow',
+    paidDesc: 'Provides traditional SEO fixes and GEO-paper aligned AEO guidance from URL analysis.',
     urlLabel: 'Target URL',
     submit: 'Generate Recommendations',
-    resultTitle: 'Result',
-    outputIdle: 'Ready.',
-    loginRequired: 'Error: Login required for paid optimizer feature.',
-    paidRequired: 'Error: Pro or Enterprise subscription is required.',
-    freeDisabled:
-      'SEO/AEO optimizer is disabled on free tier. Sample output is shown below.',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "recommendations": [\n    "Add answer-first paragraph near top of content",\n    "Expand FAQ schema with target intent terms"\n  ]\n}',
-    refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
+    resultTitle: 'Recommendation Dashboard',
+    outputIdle: 'Submit URL to generate dashboard recommendations.',
     outputError: 'Error',
-    loginButton: 'Login (Paused)',
-    loginPaused: 'Login is temporarily paused during open beta. Guest demo mode is active.',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: 'Login is paused during open beta. Guest mode is active.',
+    priority: 'Priority',
+    category: 'Category',
+    titleCol: 'Recommendation',
+    detail: 'Detail',
   },
   ko: {
-    title: 'SEO/AEO 최적화',
+    title: 'SEO/AEO 최적화 대시보드',
     navMain: '메인',
-    navKeyword: '키워드 순위',
+    navKeyword: '검색 순위 추적',
     navDashboard: '대시보드',
     navPrompt: '프롬프트 추적',
     navAeo: 'SEO/AEO 최적화',
     navPricing: '요금제',
     navInquiry: '문의',
-    paidTitle: '유료 추천 워크플로우 (Pro / Enterprise)',
-    paidDesc: 'URL 진단 결과의 SEO 기반 점검과 GEO/AEO 원칙을 바탕으로 최적화 추천을 생성합니다.',
+    paidTitle: '오픈 베타 추천 워크플로우',
+    paidDesc: 'URL 분석 기반 전통 SEO 개선안과 GEO 논문 기반 AEO 개선안을 제공합니다.',
     urlLabel: '대상 URL',
     submit: '추천 생성',
-    resultTitle: '결과',
-    outputIdle: 'URL을 제출하면 추천 결과가 표시됩니다.',
-    loginRequired: '오류: 유료 최적화 기능은 로그인이 필요합니다.',
-    paidRequired: '오류: Pro 또는 Enterprise 구독이 필요합니다.',
-    freeDisabled: '무료 티어에서는 SEO/AEO 최적화가 비활성화됩니다. 아래 예시 결과를 확인하세요.',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "recommendations": [\n    "문서 상단에 answer-first 단락 추가",\n    "FAQ 스키마에 핵심 의도 키워드 보강"\n  ]\n}',
-    refreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
+    resultTitle: '추천 대시보드',
+    outputIdle: 'URL 제출 시 추천 대시보드가 생성됩니다.',
     outputError: '오류',
-    loginButton: '로그인 (일시중단)',
-    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단됩니다. 현재 게스트 데모 모드가 활성화되어 있습니다.',
-  },
-  ja: {
-    title: 'SEO/AEO 最適化',
-    navMain: 'メイン',
-    navKeyword: 'キーワード順位',
-    navDashboard: 'ダッシュボード',
-    navPrompt: 'プロンプト追跡',
-    navAeo: 'SEO/AEO 最適化',
-    paidTitle: '有料提案ワークフロー (Pro / Enterprise)',
-    navPricing: '料金',
-    navInquiry: '問い合わせ',
-    paidDesc: 'URL 監査結果と GEO/AEO 原則に基づいて最適化提案を生成します。',
-    urlLabel: '対象 URL',
-    submit: '提案を生成',
-    resultTitle: '結果',
-    outputIdle: 'URL を送信すると提案結果が表示されます。',
-    loginRequired: 'エラー: 有料最適化機能にはログインが必要です。',
-    paidRequired: 'エラー: Pro または Enterprise の購読が必要です。',
-    freeDisabled: '無料ティアでは SEO/AEO 最適化は無効です。以下にサンプル結果を表示します。',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "recommendations": [\n    "ページ上部に answer-first 段落を追加",\n    "FAQ スキーマに意図キーワードを補強"\n  ]\n}',
-    refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
-    outputError: 'エラー',
-    loginButton: 'ログイン (一時停止)',
-    loginPaused: 'オープンベータ期間中はログインを一時停止しています。現在はゲストデモモードをご利用ください。',
-  },
-  zh: {
-    title: 'SEO/AEO 优化',
-    navMain: '主页',
-    navKeyword: '关键词排名',
-    navDashboard: '仪表盘',
-    navPrompt: '提示词追踪',
-    navAeo: 'SEO/AEO 优化',
-    paidTitle: '付费建议流程 (Pro / Enterprise)',
-    navPricing: '价格',
-    navInquiry: '咨询',
-    paidDesc: '基于 URL 审计结果与 GEO/AEO 原则生成优化建议。',
-    urlLabel: '目标 URL',
-    submit: '生成建议',
-    resultTitle: '结果',
-    outputIdle: '提交 URL 后显示建议结果。',
-    loginRequired: '错误：付费优化功能需要登录。',
-    paidRequired: '错误：需要 Pro 或 Enterprise 订阅。',
-    freeDisabled: '免费层级下 SEO/AEO 优化不可用。下面显示示例结果。',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "recommendations": [\n    "在内容顶部添加 answer-first 段落",\n    "在 FAQ schema 中补充意图关键词"\n  ]\n}',
-    refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
-    outputError: '错误',
-    loginButton: '登录 (暂停)',
-    loginPaused: '开放测试期间登录功能暂时停用。当前可使用访客演示模式。',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단되며 게스트 모드가 활성화됩니다.',
+    priority: '우선순위',
+    category: '카테고리',
+    titleCol: '추천 항목',
+    detail: '상세 설명',
   },
 }
 
@@ -138,13 +80,12 @@ function applyLanguage(lang) {
   setText('ao-nav-aeo', 'navAeo')
   setText('ao-nav-pricing', 'navPricing')
   setText('ao-nav-inquiry', 'navInquiry')
-  setText('ao-login-btn', 'loginButton')
   setText('ao-paid-title', 'paidTitle')
   setText('ao-paid-desc', 'paidDesc')
   setText('ao-url-label', 'urlLabel')
-  setText('ao-refresh-note', 'refreshPolicy')
   setText('ao-submit', 'submit')
   setText('ao-result-title', 'resultTitle')
+  setText('ao-login-btn', 'loginButton')
 
   if (!output.dataset.hasResult) {
     output.dataset.state = 'idle'
@@ -152,48 +93,57 @@ function applyLanguage(lang) {
   }
 }
 
-function applyPaidGating() {
-  const isPaid = isPaidTier(currentTier)
-  submitBtn.disabled = !isPaid
-  if (optimizerUrlInput) {
-    optimizerUrlInput.disabled = !isPaid
-  }
-  if (lockNote) {
-    lockNote.classList.toggle('hidden', isPaid)
-  }
+function renderDashboard(data) {
+  const recommendations = data?.result?.recommendations || []
+  const highPriority = recommendations.filter((item) => String(item.priority).toLowerCase() === 'high').length
+  const mediumPriority = recommendations.filter((item) => String(item.priority).toLowerCase() === 'medium').length
+  const lowPriority = recommendations.filter((item) => String(item.priority).toLowerCase() === 'low').length
+  const rows = recommendations
+    .map(
+      (item) => `
+      <tr class="border-t border-slate-800/60">
+        <td class="px-3 py-2 text-slate-200">${item.priority || '-'}</td>
+        <td class="px-3 py-2 text-slate-300">${item.category || '-'}</td>
+        <td class="px-3 py-2 text-white font-semibold">${item.title || '-'}</td>
+        <td class="px-3 py-2 text-slate-300">${item.detail || '-'}</td>
+      </tr>
+    `
+    )
+    .join('')
 
-  if (!isPaid) {
-    output.dataset.hasResult = '1'
-    output.dataset.state = 'sample'
-    output.textContent = `${t('freeDisabled')}\n\n${t('sampleOutput')}`
-  }
+  output.innerHTML = `
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">Total</p><h4 class="mt-1 text-lg font-bold text-white">${recommendations.length}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">High</p><h4 class="mt-1 text-lg font-bold text-rose-300">${highPriority}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">Medium</p><h4 class="mt-1 text-lg font-bold text-amber-300">${mediumPriority}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">Low</p><h4 class="mt-1 text-lg font-bold text-emerald-300">${lowPriority}</h4></article>
+      </div>
+      <div class="overflow-hidden rounded-xl border border-slate-800/60 bg-slate-950/35">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/60 text-slate-300">
+            <tr>
+              <th class="px-3 py-2">${t('priority')}</th>
+              <th class="px-3 py-2">${t('category')}</th>
+              <th class="px-3 py-2">${t('titleCol')}</th>
+              <th class="px-3 py-2">${t('detail')}</th>
+            </tr>
+          </thead>
+          <tbody>${rows || `<tr><td colspan="4" class="px-3 py-3 text-slate-400">No recommendations</td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>
+  `
 }
 
 document.getElementById('aeo-optimizer-form').addEventListener('submit', async (event) => {
   event.preventDefault()
 
-  const token = localStorage.getItem('access_token')
-  if (!token) {
-    output.dataset.hasResult = '1'
-    output.dataset.state = 'error'
-    output.textContent = t('loginRequired')
-    return
-  }
-
-  if (currentTier !== 'pro' && currentTier !== 'enterprise') {
-    output.dataset.hasResult = '1'
-    output.dataset.state = 'error'
-    output.textContent = t('paidRequired')
-    return
-  }
-
+  submitBtn.disabled = true
   try {
     const response = await fetch(apiUrl('/api/aeo-optimizer/recommend'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url: document.getElementById('optimizer-url').value.trim(),
       }),
@@ -213,11 +163,13 @@ document.getElementById('aeo-optimizer-form').addEventListener('submit', async (
 
     output.dataset.hasResult = '1'
     output.dataset.state = 'result'
-    output.textContent = JSON.stringify(data, null, 2)
+    renderDashboard(data)
   } catch (error) {
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
+  } finally {
+    submitBtn.disabled = false
   }
 })
 
@@ -234,7 +186,3 @@ if (loginBtn) {
 }
 
 applyLanguage(currentLanguage)
-fetchUserTier().then((tier) => {
-  currentTier = tier
-  applyPaidGating()
-})

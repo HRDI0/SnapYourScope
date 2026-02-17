@@ -11,6 +11,12 @@
 - 외부 저장소(R2 또는 Supabase Storage)
 - LLM(OpenAI) + 검색 API + 프록시
 
+오픈 베타(비로그인 데모) 기준 핵심:
+
+- 로그인/결제는 일시 중단 모드로 두고 데모 기능 우선 공개
+- Search Rank / Prompt Tracking / SEO-AEO Optimizer를 대시보드형으로 운영
+- 검색 API/LLM API 키를 우선 연결해 당일 데모 완성도 확보
+
 ---
 
 ## 0) 백엔드 호스팅 최종 선정 (Render vs Railway)
@@ -164,6 +170,131 @@ OPENAI_MODEL=gpt-4o-mini
 
 - 프로젝트 예산 알림 설정
 - key 노출 시 즉시 폐기/재발급
+
+---
+
+## 5-2) Gemini API 설정 (Prompt Tracking 확장)
+
+공식 문서:
+
+- Google AI Studio: https://aistudio.google.com/
+
+클릭 순서:
+
+1. Google 계정으로 AI Studio 로그인
+2. 좌측 `Get API key` 클릭
+3. `Create API key` 클릭
+4. 사용할 GCP 프로젝트 선택(없으면 생성)
+5. 발급된 키 복사
+
+`.env` 반영:
+
+```env
+GEMINI_API_KEY=<your-gemini-api-key>
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+주의:
+
+- 무료 티어는 RPM/TPM 제한이 있으므로 데모 직전 실제 호출 검증 권장
+- 현재 프로젝트 데모 정책상 Prompt Tracking은 GPT 우선 운영 가능
+
+---
+
+## 5-3) Search Rank API 3종 설정 (Google/Bing/Naver)
+
+이 섹션은 **검색 순위 추적(Search Rank)** 기능의 실운영 연결 절차입니다.
+
+### A) Google Custom Search JSON API + Programmable Search Engine(CX)
+
+공식 문서:
+
+- API: https://developers.google.com/custom-search/v1/overview
+- PSE: https://programmablesearchengine.google.com/
+
+클릭 순서:
+
+1. Google Cloud Console 프로젝트 생성
+2. `APIs & Services > Library`에서 `Custom Search API` 활성화
+3. `APIs & Services > Credentials > Create Credentials > API key` 생성
+4. Programmable Search Engine(PSE) 생성
+5. PSE 설정에서 `Search the entire web` 활성화
+6. Search Engine ID(CX) 복사
+
+`.env` 반영:
+
+```env
+GOOGLE_SEARCH_API_KEY=<google-custom-search-api-key>
+GOOGLE_SEARCH_CX=<programmable-search-engine-id>
+```
+
+### B) Bing Web Search API
+
+공식 문서:
+
+- https://learn.microsoft.com/azure/ai-services/bing-web-search/
+
+클릭 순서:
+
+1. Azure Portal 로그인
+2. `Create a resource` -> `Bing Search v7` 생성
+3. 생성 후 `Keys and Endpoint` 이동
+4. Key 1 또는 Key 2 복사
+
+`.env` 반영 (현재 코드 변수명):
+
+```env
+BING_SEARCH_API_KEY=<azure-bing-key>
+```
+
+### C) Naver Search API
+
+공식 문서:
+
+- https://developers.naver.com/docs/serviceapi/search/
+
+클릭 순서:
+
+1. Naver Developers 로그인
+2. `Application > 애플리케이션 등록`
+3. 검색 API 사용 설정
+4. Client ID / Client Secret 발급
+
+`.env` 반영:
+
+```env
+NAVER_CLIENT_ID=<naver-client-id>
+NAVER_CLIENT_SECRET=<naver-client-secret>
+```
+
+---
+
+## 5-4) Prompt Tracking API 등록 순서 (GPT/Gemini/Google Search)
+
+Prompt Tracking에서 "프롬프트 -> LLM 응답 -> 브랜드 언급 티어 + 링크"를 안정적으로 만들기 위한 권장 순서입니다.
+
+필수(데모 최소):
+
+1. OpenAI API (`OPENAI_API_KEY`)
+2. Google Search API (`GOOGLE_SEARCH_API_KEY`, `GOOGLE_SEARCH_CX`)
+
+선택(확장):
+
+3. Gemini API (`GEMINI_API_KEY`)
+
+등록 절차:
+
+1. OpenAI 키 발급/등록
+2. Google Custom Search + CX 발급/등록
+3. 서버 재시작
+4. `/api/prompt-track` 1회 테스트
+5. 필요 시 Gemini 키 추가 후 재테스트
+
+빠른 검증 예시:
+
+```bash
+venv\Scripts\python.exe -c "from fastapi.testclient import TestClient; from api.main import app; c=TestClient(app); r=c.post('/api/prompt-track', json={'query':'best ai seo platform','target_url':'https://example.com','demo_client_id':'demo_local_01','brand_name':'example','llm_sources':['gpt'],'search_engines':['google']}); print(r.status_code); print(r.text[:300])"
+```
 
 ---
 
@@ -425,6 +556,16 @@ npm run build
 4. R2 업로드 실패
    - endpoint/account-id/bucket/token 권한 확인
 
+5. Search Rank 결과가 비어있음
+   - `GOOGLE_SEARCH_API_KEY` / `GOOGLE_SEARCH_CX` 둘 다 입력됐는지 확인
+   - PSE가 전체 웹 검색으로 설정됐는지 확인
+   - Bing/Naver 키는 각각 별도 유효성 확인
+
+6. Prompt Tracking 티어/링크 출력이 비정상
+   - OpenAI 키 유효성 확인
+   - 요청 `llm_sources`, `search_engines`가 데모 허용값과 일치하는지 확인
+   - API 쿼터/과금 제한 여부 콘솔에서 확인
+
 ---
 
 ## 14) 공식 링크 모음 (재확인용)
@@ -441,3 +582,8 @@ npm run build
 - Cloudflare R2 S3: https://developers.cloudflare.com/r2/get-started/s3/
 - Cloudflare R2 tokens: https://developers.cloudflare.com/r2/api/tokens/
 - OpenAI projects: https://help.openai.com/en/articles/9186755-managing-your-work-in-th
+- Google Custom Search API: https://developers.google.com/custom-search/v1/overview
+- Programmable Search Engine: https://programmablesearchengine.google.com/
+- Azure Bing Web Search: https://learn.microsoft.com/azure/ai-services/bing-web-search/
+- Naver Search API: https://developers.naver.com/docs/serviceapi/search/
+- Google AI Studio (Gemini): https://aistudio.google.com/

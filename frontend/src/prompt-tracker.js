@@ -5,128 +5,142 @@ import { apiUrl } from './core/api'
 const output = document.getElementById('result-output')
 const languageSelect = document.getElementById('language-select')
 const promptSubmitBtn = document.getElementById('pt-prompt-submit')
-const promptQueryInput = document.getElementById('prompt-query')
-const promptTargetUrlInput = document.getElementById('prompt-target-url')
-const promptBrandNameInput = document.getElementById('prompt-brand-name')
-const lockNote = document.getElementById('pt-lock-note')
 const loginBtn = document.getElementById('pt-login-btn')
 
 let currentLanguage = getStoredLanguage('en')
-const DEMO_ACTIVE_LLM = ['gpt']
-const DEMO_ACTIVE_ENGINES = ['google']
 
 const I18N = {
   en: {
-    title: 'Prompt Tracker',
+    title: 'Prompt Tracking Dashboard',
     navMain: 'Main',
-    navKeyword: 'Keyword Rank',
+    navKeyword: 'Search Rank',
     navDashboard: 'Dashboard',
     navPrompt: 'Prompt Tracker',
     navOptimizer: 'SEO/AEO Optimizer',
     navPricing: 'Pricing',
     navInquiry: 'Inquiry',
     paidTitle: 'Open Beta Prompt Tracking',
-    paidDesc: 'Logged-in users can test up to 5 prompts per account in demo open beta.',
+    paidDesc: 'Run user prompt as-is and classify brand mention tier with share links.',
     promptQueryLabel: 'Prompt / Query (one per line)',
     promptUrlLabel: 'Target URL',
-    brandLabel: 'Brand Name (optional)',
+    brandLabel: 'Brand Name (reference only)',
     promptSubmit: 'Run Prompt Tracking',
-    resultTitle: 'Result',
-    outputIdle: 'Ready.',
+    resultTitle: 'Prompt Dashboard',
+    outputIdle: 'Run prompt tracking to view dashboard.',
     outputError: 'Error',
-    paidPolicy: `Open beta policy: ${PROMPT_INCLUDED_COUNT} prompts per logged-in account. Demo active sources: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}.`,
+    paidPolicy: `Open beta policy: ${PROMPT_INCLUDED_COUNT} prompts per guest/browser.`,
     refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
-    freeDisabled: 'Google login is required for open beta prompt tracking. Sample output is shown below.',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: 'Enter at least one prompt.',
-    quotaExceeded: 'Open beta quota exceeded for this account.',
-    loginButton: 'Login (Paused)',
-    loginPaused: 'Login is temporarily paused during open beta. Guest demo mode is active.',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: 'Login is paused during open beta. Guest mode is active.',
+    tablePrompt: 'Prompt',
+    tableTier: 'Tier',
+    tableReason: 'Tier Description',
+    tableLink: 'Share Link',
+    noLink: 'Not available',
+    tier1: 'Tier 1',
+    tier2: 'Tier 2',
+    tier3: 'Tier 3',
+    tier4: 'Tier 4',
   },
   ko: {
-    title: '프롬프트 추적',
+    title: '프롬프트 추적 대시보드',
     navMain: '메인',
-    navKeyword: '키워드 순위',
+    navKeyword: '검색 순위 추적',
     navDashboard: '대시보드',
     navPrompt: '프롬프트 추적',
     navOptimizer: 'SEO/AEO 최적화',
     navPricing: '요금제',
     navInquiry: '문의',
     paidTitle: '오픈 베타 프롬프트 추적',
-    paidDesc: '로그인 계정당 최대 5개 프롬프트를 데모 오픈 베타로 테스트할 수 있습니다.',
+    paidDesc: '사용자 프롬프트 원문만 입력하고, 브랜드 언급 티어와 공유 링크를 표시합니다.',
     promptQueryLabel: '프롬프트 / 질의 (한 줄에 하나)',
     promptUrlLabel: '대상 URL',
-    brandLabel: '브랜드명 (선택)',
+    brandLabel: '브랜드명 (참고용)',
     promptSubmit: '프롬프트 추적 실행',
-    resultTitle: '결과',
-    outputIdle: '요청을 실행하면 결과가 표시됩니다.',
+    resultTitle: '프롬프트 대시보드',
+    outputIdle: '프롬프트 추적을 실행하면 대시보드가 표시됩니다.',
     outputError: '오류',
-    paidPolicy: `오픈 베타 정책: 로그인 계정당 ${PROMPT_INCLUDED_COUNT}개. 데모 활성 소스: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}.`,
+    paidPolicy: `오픈 베타 정책: 브라우저 기준 ${PROMPT_INCLUDED_COUNT}개 프롬프트`,
     refreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
-    freeDisabled: '오픈 베타 프롬프트 추적은 Google 로그인 후 사용할 수 있습니다. 아래 예시 결과를 확인하세요.',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: '프롬프트를 1개 이상 입력해주세요.',
-    quotaExceeded: '이 계정의 오픈 베타 할당량을 초과했습니다.',
-    loginButton: '로그인 (일시중단)',
-    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단됩니다. 현재 게스트 데모 모드가 활성화되어 있습니다.',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단되며 게스트 모드가 활성화됩니다.',
+    tablePrompt: '프롬프트',
+    tableTier: '티어',
+    tableReason: '티어 설명',
+    tableLink: '공유 링크',
+    noLink: '제공되지 않음',
+    tier1: 'Tier 1',
+    tier2: 'Tier 2',
+    tier3: 'Tier 3',
+    tier4: 'Tier 4',
   },
   ja: {
-    title: 'プロンプト追跡',
+    title: 'プロンプト追跡ダッシュボード',
     navMain: 'メイン',
-    navKeyword: 'キーワード順位',
+    navKeyword: '検索順位トラッキング',
     navDashboard: 'ダッシュボード',
     navPrompt: 'プロンプト追跡',
     navOptimizer: 'SEO/AEO 最適化',
     navPricing: '料金',
     navInquiry: '問い合わせ',
     paidTitle: 'オープンベータ プロンプト追跡',
-    paidDesc: 'ログイン済みアカウントはデモで最大5件のプロンプトを試せます。',
+    paidDesc: '入力プロンプトそのままで実行し、ブランド言及ティアと共有リンクを表示します。',
     promptQueryLabel: 'プロンプト / クエリ (1行に1件)',
     promptUrlLabel: '対象 URL',
-    brandLabel: 'ブランド名 (任意)',
+    brandLabel: 'ブランド名 (参照用)',
     promptSubmit: 'プロンプト追跡を実行',
-    resultTitle: '結果',
-    outputIdle: '準備完了。',
+    resultTitle: 'プロンプトダッシュボード',
+    outputIdle: '実行するとダッシュボードが表示されます。',
     outputError: 'エラー',
-    paidPolicy: `オープンベータ: ログインアカウントごとに ${PROMPT_INCLUDED_COUNT} 件。デモ有効ソース: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}。`,
+    paidPolicy: `オープンベータ: ブラウザごとに ${PROMPT_INCLUDED_COUNT} 件`,
     refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
-    freeDisabled: 'オープンベータのプロンプト追跡は Google ログインが必要です。以下にサンプル結果を表示します。',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: 'プロンプトを1件以上入力してください。',
-    quotaExceeded: 'このアカウントのオープンベータ上限を超えました。',
-    loginButton: 'ログイン (一時停止)',
-    loginPaused: 'オープンベータ期間中はログインを一時停止しています。現在はゲストデモモードをご利用ください。',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: 'オープンベータ期間中はログインを一時停止しています。',
+    tablePrompt: 'プロンプト',
+    tableTier: 'ティア',
+    tableReason: 'ティア説明',
+    tableLink: '共有リンク',
+    noLink: '未提供',
+    tier1: 'Tier 1',
+    tier2: 'Tier 2',
+    tier3: 'Tier 3',
+    tier4: 'Tier 4',
   },
   zh: {
-    title: '提示词追踪',
+    title: '提示词追踪仪表盘',
     navMain: '主页',
-    navKeyword: '关键词排名',
+    navKeyword: '搜索排名追踪',
     navDashboard: '仪表盘',
     navPrompt: '提示词追踪',
     navOptimizer: 'SEO/AEO 优化',
     navPricing: '价格',
     navInquiry: '咨询',
     paidTitle: '开放测试提示词追踪',
-    paidDesc: '登录账号可在演示开放测试中最多试用 5 条提示词。',
+    paidDesc: '仅使用用户输入的提示词，输出品牌提及层级与分享链接。',
     promptQueryLabel: '提示词 / 查询 (每行一个)',
     promptUrlLabel: '目标 URL',
-    brandLabel: '品牌名 (可选)',
+    brandLabel: '品牌名 (仅参考)',
     promptSubmit: '开始提示词追踪',
-    resultTitle: '结果',
-    outputIdle: '准备就绪。',
+    resultTitle: '提示词仪表盘',
+    outputIdle: '执行后将显示仪表盘。',
     outputError: '错误',
-    paidPolicy: `开放测试规则: 每个登录账号 ${PROMPT_INCLUDED_COUNT} 条。演示启用来源: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}。`,
+    paidPolicy: `开放测试：每个浏览器 ${PROMPT_INCLUDED_COUNT} 条`,
     refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
-    freeDisabled: '开放测试提示词追踪需要 Google 登录。下面显示示例结果。',
-    sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: '请至少输入一条提示词。',
-    quotaExceeded: '该账号已超过开放测试配额。',
-    loginButton: '登录 (暂停)',
-    loginPaused: '开放测试期间登录功能暂时停用。当前可使用访客演示模式。',
+    loginButton: '로그인(오픈베타)',
+    loginPaused: '开放测试期间登录已暂停，访客模式可用。',
+    tablePrompt: '提示词',
+    tableTier: '层级',
+    tableReason: '层级说明',
+    tableLink: '分享链接',
+    noLink: '暂无',
+    tier1: 'Tier 1',
+    tier2: 'Tier 2',
+    tier3: 'Tier 3',
+    tier4: 'Tier 4',
   },
 }
 
@@ -179,10 +193,6 @@ function applyLanguage(lang) {
   }
 }
 
-function checkedValues(name) {
-  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((el) => el.value)
-}
-
 function parsePrompts(raw) {
   return raw
     .split('\n')
@@ -190,52 +200,69 @@ function parsePrompts(raw) {
     .filter(Boolean)
 }
 
-function applyDemoGating() {
-  if (!promptSubmitBtn) return
-
-  promptSubmitBtn.disabled = false
-  if (promptQueryInput) {
-    promptQueryInput.disabled = false
-  }
-  if (promptTargetUrlInput) {
-    promptTargetUrlInput.disabled = false
-  }
-  if (promptBrandNameInput) {
-    promptBrandNameInput.disabled = false
-  }
-  if (lockNote) {
-    lockNote.classList.add('hidden')
-  }
-
-  if (!output.dataset.hasResult) {
-    output.dataset.state = 'idle'
-    output.textContent = t('outputIdle')
-  }
+function checkedValues(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((el) => el.value)
 }
 
-async function postJson(url, payload) {
-  const token = localStorage.getItem('access_token')
-  const headers = { 'Content-Type': 'application/json' }
-  if (token) headers.Authorization = `Bearer ${token}`
+function tierLabel(tier) {
+  if (tier === 'tier1_core_mention') return t('tier1')
+  if (tier === 'tier2_competitive_mention') return t('tier2')
+  if (tier === 'tier3_minor_mention') return t('tier3')
+  return t('tier4')
+}
 
-  const response = await fetch(apiUrl(url), {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
+function renderDashboard(data) {
+  const results = data?.results || []
+  const tierCounts = {
+    tier1_core_mention: 0,
+    tier2_competitive_mention: 0,
+    tier3_minor_mention: 0,
+    tier4_not_mentioned: 0,
+  }
+
+  const rows = results.map((item) => {
+    const llm = (item?.llm_results || [])[0] || {}
+    if (typeof tierCounts[llm.tier] === 'number') {
+      tierCounts[llm.tier] += 1
+    }
+    const link = llm?.response_share_url
+      ? `<a href="${llm.response_share_url}" target="_blank" rel="noreferrer" class="text-violet-300 hover:text-white">${llm.response_share_url}</a>`
+      : t('noLink')
+    return `
+      <tr class="border-t border-slate-800/60">
+        <td class="px-3 py-2 text-slate-200">${item.query || '-'}</td>
+        <td class="px-3 py-2 font-semibold text-white">${tierLabel(llm.tier)}</td>
+        <td class="px-3 py-2 text-slate-300">${llm.reason || '-'}</td>
+        <td class="px-3 py-2 text-slate-300 break-all">${link}</td>
+      </tr>
+    `
   })
 
-  const text = await response.text()
-  let data = text
-  try {
-    data = JSON.parse(text)
-  } catch {
-    data = { raw: text }
-  }
-
-  if (!response.ok) {
-    throw new Error(data?.detail || JSON.stringify(data))
-  }
-  return data
+  output.innerHTML = `
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('tier1')}</p><h4 class="mt-1 text-lg font-bold text-emerald-300">${tierCounts.tier1_core_mention}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('tier2')}</p><h4 class="mt-1 text-lg font-bold text-amber-300">${tierCounts.tier2_competitive_mention}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('tier3')}</p><h4 class="mt-1 text-lg font-bold text-sky-300">${tierCounts.tier3_minor_mention}</h4></article>
+        <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('tier4')}</p><h4 class="mt-1 text-lg font-bold text-rose-300">${tierCounts.tier4_not_mentioned}</h4></article>
+      </div>
+      <div class="overflow-hidden rounded-xl border border-slate-800/60 bg-slate-950/35">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/60 text-slate-300">
+            <tr>
+              <th class="px-3 py-2">${t('tablePrompt')}</th>
+              <th class="px-3 py-2">${t('tableTier')}</th>
+              <th class="px-3 py-2">${t('tableReason')}</th>
+              <th class="px-3 py-2">${t('tableLink')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `
 }
 
 document.getElementById('prompt-track-form').addEventListener('submit', async (event) => {
@@ -248,24 +275,44 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
     output.textContent = `${t('outputError')}: ${t('promptMissing')}`
     return
   }
+
+  promptSubmitBtn.disabled = true
   try {
-    const data = await postJson('/api/prompt-track', {
-      query: prompts[0],
-      queries: prompts,
-      target_url: document.getElementById('prompt-target-url').value.trim(),
-      demo_client_id: getDemoClientId(),
-      brand_name: document.getElementById('prompt-brand-name').value.trim() || null,
-      llm_sources: checkedValues('llm-source'),
-      search_engines: checkedValues('prompt-engine'),
+    const response = await fetch(apiUrl('/api/prompt-track'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: prompts[0],
+        queries: prompts,
+        target_url: document.getElementById('prompt-target-url').value.trim(),
+        demo_client_id: getDemoClientId(),
+        brand_name: document.getElementById('prompt-brand-name').value.trim() || null,
+        llm_sources: checkedValues('llm-source'),
+        search_engines: checkedValues('prompt-engine'),
+      }),
     })
+
+    const text = await response.text()
+    let data = text
+    try {
+      data = JSON.parse(text)
+    } catch {
+      data = { raw: text }
+    }
+
+    if (!response.ok) {
+      throw new Error(data?.detail || JSON.stringify(data))
+    }
 
     output.dataset.hasResult = '1'
     output.dataset.state = 'result'
-    output.textContent = JSON.stringify(data, null, 2)
+    renderDashboard(data)
   } catch (error) {
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
+  } finally {
+    promptSubmitBtn.disabled = false
   }
 })
 
@@ -282,4 +329,3 @@ if (loginBtn) {
 }
 
 applyLanguage(currentLanguage)
-applyDemoGating()
