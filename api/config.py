@@ -11,6 +11,10 @@ def _parse_csv_env(key: str, default: str) -> List[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def _parse_bool_env(key: str, default: str = "false") -> bool:
+    return os.getenv(key, default).strip().lower() == "true"
+
+
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "YOUR_SECRET_KEY_HERE_FOR_DEV")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(
@@ -48,3 +52,7 @@ CORS_ORIGINS = _parse_csv_env(
     "CORS_ORIGINS",
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
 )
+
+OPEN_BETA_MODE = _parse_bool_env("OPEN_BETA_MODE", "false")
+AUTH_TEMP_DISABLED = _parse_bool_env("AUTH_TEMP_DISABLED", "false")
+BILLING_TEMP_DISABLED = _parse_bool_env("BILLING_TEMP_DISABLED", "false")

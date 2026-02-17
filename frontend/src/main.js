@@ -165,7 +165,7 @@ const I18N = {
     workspaceEyebrow: 'Analytics Workspace',
     workspaceTitle: 'Competitive Visibility Dashboard',
     login: 'Log in',
-    register: 'Get started',
+    register: 'Google sign-in',
     logout: 'Logout',
     heroEyebrow: 'URL intelligence',
     heroTitle: 'Run a live audit and view all key signals in one screen',
@@ -186,7 +186,7 @@ const I18N = {
     postCtaDescription:
       'Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).',
     postCtaPricing: 'View Pricing',
-    postCtaLogin: 'Login to upgrade',
+    postCtaLogin: 'Login (Paused)',
     batchTitle: 'Full sitemap analysis (paid)',
     batchDescription: 'Backend logic is implemented. Frontend API wiring can be connected next.',
     batchRefreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
@@ -194,7 +194,7 @@ const I18N = {
     batchButton: 'Start full analysis',
     pricingTitle: 'Pricing',
     pricingDescription: 'Choose a plan based on crawl depth and workflow scale.',
-    pricingClickHint: 'Click Pro to continue checkout. Enterprise opens inquiry.',
+    pricingClickHint: 'Pro and Enterprise payments are coming soon. Open beta is active now.',
     planFreeTitle: 'Free',
     planFreeF1: 'Single URL report',
     planFreeF2: 'SEO + GEO + AEO snapshot',
@@ -202,15 +202,19 @@ const I18N = {
     planProTitle: 'Pro',
     planProF1: 'Full sitemap analysis',
     planProF2: 'URL queue + background batch',
-    planProF3: 'Batch status tracking',
+    planProF3: 'Batch status tracking (Coming Soon)',
+    planProF4: 'Weekly PDF report delivery (Coming Soon)',
     planEntTitle: 'Enterprise',
     planEntPriceLabel: 'Custom',
     planEntF1: 'Improvement strategy',
     planEntF2: 'Managed optimization workflow',
     planEntF3: 'Dedicated support',
+    planEntF4: 'Weekly PDF report delivery (Coming Soon)',
     enterpriseTitle: 'Inquiry for Enterprise Improvement & Management',
     enterpriseDescription:
       'If you want ongoing site improvement and operational management, send an enterprise inquiry.',
+    enterpriseBetaNote:
+      'Open beta notice: limited stability. If you hit a severe error, please report it via this inquiry form.',
     companyPlaceholder: 'Company name',
     contactPlaceholder: 'Work email',
     needsPlaceholder: 'Tell us your SEO/GEO/AEO goals',
@@ -222,10 +226,10 @@ const I18N = {
     passwordPlaceholder: 'Password',
     loginSubmit: 'Sign in',
     registerSubmit: 'Sign up',
-    loginSwitchLabel: 'No account?',
-    loginSwitchButton: 'Create one',
-    registerSwitchLabel: 'Already registered?',
-    registerSwitchButton: 'Back to login',
+    loginSwitchLabel: 'Demo open beta',
+    loginSwitchButton: 'Continue with Google',
+    registerSwitchLabel: 'Demo open beta',
+    registerSwitchButton: 'Continue with Google',
     statusPass: 'Pass',
     statusWarn: 'Warn',
     statusFail: 'Fail',
@@ -269,7 +273,7 @@ const I18N = {
       'Guest mode supports one single URL analysis. Login + paid plan is required for full sitemap analysis.',
     analysisFailedPrefix: 'Analysis failed',
     loginSuccess: 'Logged in successfully.',
-    registrationComplete: 'Registration complete. Please login.',
+    registrationComplete: 'Email signup is paused. Continue with Google.',
     logoutSuccess: 'Logged out.',
     sitemapLoginRequired: 'Login and paid subscription are required for full sitemap analysis.',
     sitemapNotWired:
@@ -278,6 +282,8 @@ const I18N = {
     sitemapSampleOutput:
       '{\n  "status": "sample",\n  "plan_required": ["pro", "enterprise"],\n  "message": "Upgrade to run sitemap batch analysis."\n}',
     enterpriseMailPrefix: '[Enterprise Inquiry]',
+    emailAuthPaused: 'Email login is temporarily paused for the demo open beta.',
+    paymentComingSoon: 'Payment checkout is coming soon. Open beta is active now.',
     checkoutFailed: 'Checkout creation failed',
     checkoutMissingUrl: 'Checkout URL was not returned',
     checkoutSuccess: 'Payment completed successfully.',
@@ -332,7 +338,7 @@ const I18N = {
     workspaceEyebrow: '분석 워크스페이스',
     workspaceTitle: '경쟁 가시성 대시보드',
     login: '로그인',
-    register: '시작하기',
+    register: 'Google 로그인',
     logout: '로그아웃',
     heroEyebrow: 'URL 인텔리전스',
     heroTitle: '라이브 감사를 실행하고 핵심 신호를 한 화면에서 확인하세요',
@@ -351,7 +357,7 @@ const I18N = {
     postCtaTitle: '전체 사이트맵 분석이 필요하신가요?',
     postCtaDescription: '로그인 후 구독하면 전체 사이트 배치 분석(사이트맵 파싱 + URL 큐 + 백그라운드 실행)이 가능합니다.',
     postCtaPricing: '요금제 보기',
-    postCtaLogin: '로그인하고 업그레이드',
+    postCtaLogin: '로그인 (일시중단)',
     batchTitle: '전체 사이트맵 분석 (유료)',
     batchDescription: '백엔드 로직은 구현 완료되었습니다. 프론트 API 연동만 남았습니다.',
     batchRefreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
@@ -359,7 +365,7 @@ const I18N = {
     batchButton: '전체 분석 시작',
     pricingTitle: '요금제',
     pricingDescription: '크롤링 깊이와 운영 규모에 맞춰 선택하세요.',
-    pricingClickHint: 'Pro는 결제 진행, Enterprise는 문의 탭으로 이동합니다.',
+    pricingClickHint: 'Pro/Enterprise 결제는 오픈 예정입니다. 현재는 오픈 베타 체험이 가능합니다.',
     planFreeTitle: '무료',
     planFreeF1: '단일 URL 리포트',
     planFreeF2: 'SEO + GEO + AEO 스냅샷',
@@ -367,14 +373,17 @@ const I18N = {
     planProTitle: '프로',
     planProF1: '전체 사이트맵 분석',
     planProF2: 'URL 큐 + 백그라운드 배치',
-    planProF3: '배치 상태 추적',
+    planProF3: '배치 상태 추적 (Coming Soon)',
+    planProF4: '주간 PDF 보고 전송 기능 (Coming Soon)',
     planEntTitle: '엔터프라이즈',
     planEntPriceLabel: '맞춤형',
     planEntF1: '개선 전략 수립',
     planEntF2: '운영형 최적화 워크플로우',
     planEntF3: '전담 지원',
+    planEntF4: '주간 PDF 보고 전송 기능 (Coming Soon)',
     enterpriseTitle: '엔터프라이즈 개선/운영 문의',
     enterpriseDescription: '지속적인 사이트 개선과 운영 관리를 원하시면 문의를 남겨주세요.',
+    enterpriseBetaNote: '오픈 베타 안내: 안정성이 제한적일 수 있습니다. 심각한 오류가 발생하면 문의 폼으로 제보해주세요.',
     companyPlaceholder: '회사명',
     contactPlaceholder: '업무용 이메일',
     needsPlaceholder: 'SEO/GEO/AEO 목표를 알려주세요',
@@ -386,10 +395,10 @@ const I18N = {
     passwordPlaceholder: '비밀번호',
     loginSubmit: '로그인',
     registerSubmit: '가입하기',
-    loginSwitchLabel: '계정이 없나요?',
-    loginSwitchButton: '회원가입',
-    registerSwitchLabel: '이미 가입했나요?',
-    registerSwitchButton: '로그인으로',
+    loginSwitchLabel: '데모 오픈 베타',
+    loginSwitchButton: 'Google로 계속하기',
+    registerSwitchLabel: '데모 오픈 베타',
+    registerSwitchButton: 'Google로 계속하기',
     statusPass: '통과',
     statusWarn: '주의',
     statusFail: '실패',
@@ -432,7 +441,7 @@ const I18N = {
     guestLimitAlert: '게스트 모드는 단일 URL 1회 분석만 가능합니다. 전체 사이트맵 분석은 로그인 + 유료 플랜이 필요합니다.',
     analysisFailedPrefix: '분석 실패',
     loginSuccess: '로그인되었습니다.',
-    registrationComplete: '회원가입 완료. 로그인해주세요.',
+    registrationComplete: '이메일 회원가입은 일시 중단되었습니다. Google 로그인을 사용해주세요.',
     logoutSuccess: '로그아웃되었습니다.',
     sitemapLoginRequired: '전체 사이트맵 분석은 로그인과 유료 구독이 필요합니다.',
     sitemapNotWired: '전체 사이트맵 분석의 프론트 API 연동은 다음 단계에서 연결됩니다. 백엔드 배치 엔드포인트는 준비되어 있습니다.',
@@ -440,6 +449,8 @@ const I18N = {
     sitemapSampleOutput:
       '{\n  "status": "sample",\n  "plan_required": ["pro", "enterprise"],\n  "message": "업그레이드 후 사이트맵 배치 분석을 실행할 수 있습니다."\n}',
     enterpriseMailPrefix: '[엔터프라이즈 문의]',
+    emailAuthPaused: '데모 오픈 베타 기간에는 이메일 로그인이 일시 중단됩니다.',
+    paymentComingSoon: '결제 체크아웃은 오픈 예정입니다. 현재는 오픈 베타를 이용해주세요.',
     checkoutFailed: '결제 세션 생성 실패',
     checkoutMissingUrl: '체크아웃 URL이 반환되지 않았습니다',
     checkoutSuccess: '결제가 완료되었습니다.',
@@ -494,7 +505,7 @@ const I18N = {
     workspaceEyebrow: '分析ワークスペース',
     workspaceTitle: '競合可視性ダッシュボード',
     login: 'ログイン',
-    register: '始める',
+    register: 'Google ログイン',
     logout: 'ログアウト',
     heroEyebrow: 'URL インテリジェンス',
     heroTitle: 'ライブ監査を実行し、主要シグナルを1画面で確認',
@@ -513,7 +524,7 @@ const I18N = {
     postCtaTitle: 'サイトマップ全体分析が必要ですか？',
     postCtaDescription: 'ログインして購読すると、サイト全体のバッチ分析を実行できます。',
     postCtaPricing: '料金を見る',
-    postCtaLogin: 'ログインしてアップグレード',
+    postCtaLogin: 'ログイン (一時停止)',
     batchTitle: 'サイトマップ全体分析（有料）',
     batchDescription: 'バックエンド実装は完了しています。フロントAPI接続のみ残っています。',
     batchRefreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
@@ -521,7 +532,7 @@ const I18N = {
     batchButton: '全体分析を開始',
     pricingTitle: '料金',
     pricingDescription: 'クロール深度と運用規模に合わせて選択してください。',
-    pricingClickHint: 'Pro または Enterprise をクリックすると決済に進みます。',
+    pricingClickHint: 'Pro / Enterprise の決済は近日公開です。現在はオープンベータをご利用ください。',
     planFreeTitle: '無料',
     planFreeF1: '単一URLレポート',
     planFreeF2: 'SEO + GEO + AEO スナップショット',
@@ -529,14 +540,18 @@ const I18N = {
     planProTitle: 'Pro',
     planProF1: 'サイトマップ全体分析',
     planProF2: 'URLキュー + バックグラウンド処理',
-    planProF3: 'バッチ状況トラッキング',
+    planProF3: 'バッチ状況トラッキング (Coming Soon)',
+    planProF4: '週次 PDF レポート配信 (Coming Soon)',
     planEntTitle: 'エンタープライズ',
     planEntPriceLabel: 'カスタム',
     planEntF1: '改善戦略',
     planEntF2: '運用型最適化ワークフロー',
     planEntF3: '専任サポート',
+    planEntF4: '週次 PDF レポート配信 (Coming Soon)',
     enterpriseTitle: 'エンタープライズ改善/運用',
     enterpriseDescription: '継続的な改善と運用管理をご希望の場合はお問い合わせください。',
+    enterpriseBetaNote:
+      'オープンベータのお知らせ: 安定性が限定される場合があります。重大なエラーはこの問い合わせフォームからご報告ください。',
     companyPlaceholder: '会社名',
     contactPlaceholder: '業務用メール',
     needsPlaceholder: 'SEO/GEO/AEOの目標を入力してください',
@@ -548,10 +563,10 @@ const I18N = {
     passwordPlaceholder: 'パスワード',
     loginSubmit: 'サインイン',
     registerSubmit: '登録',
-    loginSwitchLabel: 'アカウントがありませんか？',
-    loginSwitchButton: '作成する',
-    registerSwitchLabel: 'すでに登録済みですか？',
-    registerSwitchButton: 'ログインへ',
+    loginSwitchLabel: 'デモオープンベータ',
+    loginSwitchButton: 'Google で続行',
+    registerSwitchLabel: 'デモオープンベータ',
+    registerSwitchButton: 'Google で続行',
     statusPass: '合格',
     statusWarn: '警告',
     statusFail: '失敗',
@@ -594,7 +609,7 @@ const I18N = {
     guestLimitAlert: 'ゲストモードでは単一URL分析は1回のみです。サイトマップ全体分析にはログインと有料プランが必要です。',
     analysisFailedPrefix: '分析失敗',
     loginSuccess: 'ログインしました。',
-    registrationComplete: '登録完了。ログインしてください。',
+    registrationComplete: 'メール登録は一時停止中です。Google ログインをご利用ください。',
     logoutSuccess: 'ログアウトしました。',
     sitemapLoginRequired: 'サイトマップ全体分析にはログインと有料購読が必要です。',
     sitemapNotWired: 'サイトマップ全体分析のフロントAPI接続は次のステップで実装されます。',
@@ -602,6 +617,8 @@ const I18N = {
     sitemapSampleOutput:
       '{\n  "status": "sample",\n  "plan_required": ["pro", "enterprise"],\n  "message": "アップグレード後にサイトマップ一括分析を実行できます。"\n}',
     enterpriseMailPrefix: '[エンタープライズ問い合わせ]',
+    emailAuthPaused: 'デモオープンベータ期間中はメールログインを一時停止しています。',
+    paymentComingSoon: '決済チェックアウトは近日公開です。現在はオープンベータをご利用ください。',
     checkoutFailed: '決済セッション作成失敗',
     checkoutMissingUrl: 'チェックアウトURLが返されませんでした',
     checkoutSuccess: '決済が完了しました。',
@@ -656,7 +673,7 @@ const I18N = {
     workspaceEyebrow: '分析工作区',
     workspaceTitle: '竞争可见性仪表盘',
     login: '登录',
-    register: '开始使用',
+    register: 'Google 登录',
     logout: '退出登录',
     heroEyebrow: 'URL 智能分析',
     heroTitle: '执行实时审计，并在一个页面查看全部关键信号',
@@ -675,7 +692,7 @@ const I18N = {
     postCtaTitle: '需要完整站点地图分析吗？',
     postCtaDescription: '登录并订阅后，可运行全站批量分析。',
     postCtaPricing: '查看价格',
-    postCtaLogin: '登录并升级',
+    postCtaLogin: '登录 (暂停)',
     batchTitle: '完整站点地图分析（付费）',
     batchDescription: '后端逻辑已完成，前端 API 接线可在下一步完成。',
     batchRefreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
@@ -683,7 +700,7 @@ const I18N = {
     batchButton: '开始完整分析',
     pricingTitle: '价格',
     pricingDescription: '根据抓取深度与运营规模选择方案。',
-    pricingClickHint: '点击专业版或企业版进入支付。',
+    pricingClickHint: '专业版/企业版支付即将开放。当前可先体验开放测试。',
     planFreeTitle: '免费',
     planFreeF1: '单 URL 报告',
     planFreeF2: 'SEO + GEO + AEO 快照',
@@ -691,14 +708,17 @@ const I18N = {
     planProTitle: '专业版',
     planProF1: '完整站点地图分析',
     planProF2: 'URL 队列 + 后台批处理',
-    planProF3: '批处理状态跟踪',
+    planProF3: '批处理状态跟踪 (Coming Soon)',
+    planProF4: '每周 PDF 报告发送功能 (Coming Soon)',
     planEntTitle: '企业版',
     planEntPriceLabel: '定制',
     planEntF1: '优化策略',
     planEntF2: '托管优化工作流',
     planEntF3: '专属支持',
+    planEntF4: '每周 PDF 报告发送功能 (Coming Soon)',
     enterpriseTitle: '企业优化与运营',
     enterpriseDescription: '如需持续优化和运营管理，请提交企业咨询。',
+    enterpriseBetaNote: '开放测试提示：稳定性可能受限。如遇严重错误，请通过该咨询表单反馈。',
     companyPlaceholder: '公司名称',
     contactPlaceholder: '工作邮箱',
     needsPlaceholder: '请描述你的 SEO/GEO/AEO 目标',
@@ -710,10 +730,10 @@ const I18N = {
     passwordPlaceholder: '密码',
     loginSubmit: '登录',
     registerSubmit: '注册',
-    loginSwitchLabel: '没有账号？',
-    loginSwitchButton: '创建一个',
-    registerSwitchLabel: '已注册？',
-    registerSwitchButton: '返回登录',
+    loginSwitchLabel: '演示开放测试',
+    loginSwitchButton: '使用 Google 继续',
+    registerSwitchLabel: '演示开放测试',
+    registerSwitchButton: '使用 Google 继续',
     statusPass: '通过',
     statusWarn: '警告',
     statusFail: '失败',
@@ -756,7 +776,7 @@ const I18N = {
     guestLimitAlert: '访客模式仅支持 1 次单 URL 分析。完整站点地图分析需要登录并订阅付费方案。',
     analysisFailedPrefix: '分析失败',
     loginSuccess: '登录成功。',
-    registrationComplete: '注册完成，请登录。',
+    registrationComplete: '邮箱注册已暂停，请使用 Google 登录。',
     logoutSuccess: '已退出登录。',
     sitemapLoginRequired: '完整站点地图分析需要登录和付费订阅。',
     sitemapNotWired: '完整站点地图分析的前端 API 接线将在下一步完成，后端已就绪。',
@@ -764,6 +784,8 @@ const I18N = {
     sitemapSampleOutput:
       '{\n  "status": "sample",\n  "plan_required": ["pro", "enterprise"],\n  "message": "升级后可执行站点地图批量分析。"\n}',
     enterpriseMailPrefix: '[企业咨询]',
+    emailAuthPaused: '演示开放测试期间，邮箱登录暂时停用。',
+    paymentComingSoon: '支付结账即将开放，当前请先体验开放测试。',
     checkoutFailed: '创建支付会话失败',
     checkoutMissingUrl: '未返回支付链接',
     checkoutSuccess: '支付已完成。',
@@ -878,13 +900,16 @@ function applyLanguage(lang) {
   setText('plan-pro-f1', 'planProF1')
   setText('plan-pro-f2', 'planProF2')
   setText('plan-pro-f3', 'planProF3')
+  setText('plan-pro-f4', 'planProF4')
   setText('plan-ent-title', 'planEntTitle')
   setText('plan-ent-price-label', 'planEntPriceLabel')
   setText('plan-ent-f1', 'planEntF1')
   setText('plan-ent-f2', 'planEntF2')
   setText('plan-ent-f3', 'planEntF3')
+  setText('plan-ent-f4', 'planEntF4')
   setText('enterprise-title', 'enterpriseTitle')
   setText('enterprise-description', 'enterpriseDescription')
+  setText('enterprise-beta-note', 'enterpriseBetaNote')
   setPlaceholder('company-name', 'companyPlaceholder')
   setPlaceholder('contact-email', 'contactPlaceholder')
   setPlaceholder('enterprise-needs', 'needsPlaceholder')
@@ -903,6 +928,7 @@ function applyLanguage(lang) {
   setText('to-register', 'loginSwitchButton')
   setText('register-switch-label', 'registerSwitchLabel')
   setText('to-login', 'registerSwitchButton')
+  setText('email-auth-paused-note', 'emailAuthPaused')
 
   if (latestReportData) {
     renderReport(latestReportData)
@@ -991,52 +1017,14 @@ function validateCompetitorLimit(competitorUrls) {
 }
 
 async function createCheckoutSession(plan) {
-  if (!token) {
-    pendingCheckoutPlan = plan
-    openAuthModal('login')
-    return
-  }
-
-  try {
-    const response = await fetch(apiUrl('/api/billing/create-checkout-session'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        plan,
-        success_url: `${window.location.origin}/app.html?checkout=success`,
-        cancel_url: `${window.location.origin}/app.html?checkout=cancel&tab=pricing`,
-      }),
-    })
-
-    const text = await response.text()
-    let data = text
-    try {
-      data = JSON.parse(text)
-    } catch {
-      data = { raw: text }
-    }
-
-    if (!response.ok) {
-      throw new Error(data?.detail || JSON.stringify(data))
-    }
-
-    if (!data.checkout_url) {
-      throw new Error(t('checkoutMissingUrl'))
-    }
-
-    window.location.href = data.checkout_url
-  } catch (error) {
-    alert(`${t('checkoutFailed')}: ${error.message}`)
-  }
+  pendingCheckoutPlan = plan
+  switchTab('pricing')
+  alert(t('paymentComingSoon'))
 }
 
 function handlePlanSelection(plan) {
   const normalized = (plan || '').toLowerCase()
   if (normalized === 'free') {
-    switchTab('analyze')
     return
   }
 
@@ -1052,26 +1040,15 @@ function handlePlanSelection(plan) {
 }
 
 function setAuthButtons() {
-  if (token) {
-    openLoginBtn.classList.add('hidden')
-    openRegisterBtn.classList.add('hidden')
-    logoutBtn.classList.remove('hidden')
-  } else {
-    openLoginBtn.classList.remove('hidden')
-    openRegisterBtn.classList.remove('hidden')
-    logoutBtn.classList.add('hidden')
-  }
+  openLoginBtn.classList.remove('hidden')
+  openRegisterBtn.classList.add('hidden')
+  logoutBtn.classList.add('hidden')
 }
 
 function openAuthModal(mode) {
   authModal.classList.remove('hidden')
-  if (mode === 'register') {
-    loginContainer.classList.add('hidden')
-    registerContainer.classList.remove('hidden')
-  } else {
-    registerContainer.classList.add('hidden')
-    loginContainer.classList.remove('hidden')
-  }
+  registerContainer.classList.add('hidden')
+  loginContainer.classList.remove('hidden')
 }
 
 function closeAuthModal() {
@@ -1722,76 +1699,23 @@ tabButtons.forEach((button) => {
   button.addEventListener('click', () => switchTab(button.dataset.tab))
 })
 
-openLoginBtn.addEventListener('click', () => openAuthModal('login'))
-openRegisterBtn.addEventListener('click', () => openAuthModal('register'))
+openLoginBtn.addEventListener('click', () => alert(t('emailAuthPaused')))
+openRegisterBtn.addEventListener('click', () => alert(t('emailAuthPaused')))
 closeAuthModalBtn.addEventListener('click', closeAuthModal)
-toRegister.addEventListener('click', () => openAuthModal('register'))
-toLogin.addEventListener('click', () => openAuthModal('login'))
+toRegister.addEventListener('click', () => alert(t('emailAuthPaused')))
+toLogin.addEventListener('click', () => alert(t('emailAuthPaused')))
 authModal.addEventListener('click', (event) => {
   if (event.target === authModal) closeAuthModal()
 })
 
 loginForm.addEventListener('submit', async (event) => {
   event.preventDefault()
-  const email = document.getElementById('email').value.trim()
-  const password = document.getElementById('password').value
-
-  try {
-    const formData = new URLSearchParams()
-    formData.append('username', email)
-    formData.append('password', password)
-
-    const res = await fetch(apiUrl('/api/token'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData,
-    })
-
-    if (!res.ok) {
-      const message = await extractErrorMessage(res, 'Login failed')
-      throw new Error(message)
-    }
-
-    const data = await res.json()
-    token = data.access_token
-    localStorage.setItem('access_token', token)
-    await syncCurrentUserTier()
-    setAuthButtons()
-    closeAuthModal()
-    alert(t('loginSuccess'))
-
-    if (pendingCheckoutPlan) {
-      const plan = pendingCheckoutPlan
-      pendingCheckoutPlan = null
-      createCheckoutSession(plan)
-    }
-  } catch (err) {
-    alert(err.message)
-  }
+  alert(t('emailAuthPaused'))
 })
 
 registerForm.addEventListener('submit', async (event) => {
   event.preventDefault()
-  const email = document.getElementById('reg-email').value.trim()
-  const password = document.getElementById('reg-password').value
-
-  try {
-    const res = await fetch(apiUrl('/api/register'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-
-    if (!res.ok) {
-      const message = await extractErrorMessage(res, 'Registration failed')
-      throw new Error(message)
-    }
-
-    alert(t('registrationComplete'))
-    openAuthModal('login')
-  } catch (err) {
-    alert(err.message)
-  }
+  alert(t('emailAuthPaused'))
 })
 
 logoutBtn.addEventListener('click', () => {
@@ -1803,23 +1727,10 @@ logoutBtn.addEventListener('click', () => {
 })
 
 ctaOpenPricing.addEventListener('click', () => switchTab('pricing'))
-ctaOpenLogin.addEventListener('click', () => openAuthModal('login'))
+ctaOpenLogin.addEventListener('click', () => alert(t('emailAuthPaused')))
 
 async function startGoogleOAuth() {
-  try {
-    const response = await fetch(apiUrl('/api/auth/google/login-url'))
-    if (!response.ok) {
-      const message = await extractErrorMessage(response, 'Google login is unavailable')
-      throw new Error(message)
-    }
-    const data = await response.json()
-    if (!data?.login_url) {
-      throw new Error('Google login URL is unavailable')
-    }
-    window.location.href = data.login_url
-  } catch (error) {
-    alert(error.message)
-  }
+  alert(t('emailAuthPaused'))
 }
 
 if (googleLoginBtn) {
@@ -1876,8 +1787,8 @@ setAuthButtons()
 const initialTab = urlParams.get('tab') || 'analyze'
 switchTab(initialTab)
 
-if (urlParams.get('openLogin') === '1' && !token) {
-  openAuthModal('login')
+if (urlParams.get('openLogin') === '1') {
+  alert(t('emailAuthPaused'))
 }
 
 const checkoutState = urlParams.get('checkout')
@@ -1890,14 +1801,13 @@ if (checkoutState === 'cancel') {
 
 const oauthToken = urlParams.get('oauth_token')
 if (oauthToken) {
-  token = oauthToken
-  localStorage.setItem('access_token', oauthToken)
-  syncCurrentUserTier()
-  setAuthButtons()
+  localStorage.removeItem('access_token')
+  token = null
   const cleanUrl = new URL(window.location.href)
   cleanUrl.searchParams.delete('oauth_token')
-  cleanUrl.searchParams.set('auth', 'google-success')
+  cleanUrl.searchParams.set('auth', 'paused')
   window.history.replaceState({}, '', cleanUrl.toString())
+  alert(t('emailAuthPaused'))
 }
 
 applyLanguage(currentLanguage)

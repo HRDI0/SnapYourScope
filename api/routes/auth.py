@@ -12,6 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from .. import database, models, auth
 from ..config import (
+    AUTH_TEMP_DISABLED,
     FRONTEND_APP_URL,
     GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_CLIENT_SECRET,
@@ -39,10 +40,19 @@ def _normalize_email(value: str) -> str:
     return (value or "").strip().lower()
 
 
+def _ensure_auth_enabled() -> None:
+    if AUTH_TEMP_DISABLED:
+        raise HTTPException(
+            status_code=503,
+            detail="Authentication is temporarily paused during open beta.",
+        )
+
+
 @router.post("/register", response_model=user_schemas.UserResponse)
 def register_user(
     user: user_schemas.UserCreate, db: Session = Depends(database.get_db)
 ):
+    _ensure_auth_enabled()
     normalized_email = _normalize_email(user.email)
 
     # Check if user exists
@@ -72,6 +82,7 @@ def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(database.get_db),
 ):
+    _ensure_auth_enabled()
     normalized_email = _normalize_email(form_data.username)
     user = (
         db.query(models.User)
@@ -94,6 +105,7 @@ def login_for_access_token(
 
 @router.get("/auth/google/login-url")
 def get_google_login_url():
+    _ensure_auth_enabled()
     if not GOOGLE_OAUTH_CLIENT_ID or not GOOGLE_OAUTH_CLIENT_SECRET:
         raise HTTPException(
             status_code=503,
@@ -122,6 +134,7 @@ def get_google_login_url():
 def google_oauth_callback(
     code: str, state: str, db: Session = Depends(database.get_db)
 ):
+    _ensure_auth_enabled()
     now_ts = time.time()
     _prune_google_states(now_ts)
     expiry = _GOOGLE_OAUTH_STATES.pop(state, None)
@@ -190,7 +203,12 @@ def google_oauth_callback(
         )
         .first()
     )
-    if existing_provider and existing_provider.user_id != user.id:
+    existing_provider_user_id = (
+        getattr(existing_provider, "user_id", None)
+        if existing_provider is not None
+        else None
+    )
+    if existing_provider_user_id is not None and existing_provider_user_id != user.id:
         raise HTTPException(
             status_code=400,
             detail="This Google account is already linked to another user.",
@@ -204,7 +222,7 @@ def google_oauth_callback(
         )
         .first()
     )
-    if not provider_row:
+    if provider_row is None:
         provider_row = models.UserAuthProvider(
             user_id=user.id,
             provider="google",
@@ -213,8 +231,8 @@ def google_oauth_callback(
             is_active=True,
         )
         db.add(provider_row)
-    elif provider_row.subject != google_subject:
-        provider_row.subject = google_subject
+    elif str(getattr(provider_row, "subject", "")) != google_subject:
+        setattr(provider_row, "subject", google_subject)
 
     try:
         db.commit()

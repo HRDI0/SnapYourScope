@@ -1,5 +1,5 @@
-import { calculatePromptAddOnMonthly, PROMPT_INCLUDED_COUNT, PROMPT_ADDON_BLOCK_SIZE, PROMPT_ADDON_BLOCK_PRICE_USD } from './core/policy'
-import { applyDocumentLanguage, fetchUserTier, getStoredLanguage, isPaidTier, setStoredLanguage } from './core/session'
+import { PROMPT_INCLUDED_COUNT } from './core/policy'
+import { applyDocumentLanguage, getStoredLanguage, setStoredLanguage } from './core/session'
 import { apiUrl } from './core/api'
 
 const output = document.getElementById('result-output')
@@ -9,9 +9,11 @@ const promptQueryInput = document.getElementById('prompt-query')
 const promptTargetUrlInput = document.getElementById('prompt-target-url')
 const promptBrandNameInput = document.getElementById('prompt-brand-name')
 const lockNote = document.getElementById('pt-lock-note')
+const loginBtn = document.getElementById('pt-login-btn')
 
 let currentLanguage = getStoredLanguage('en')
-let currentTier = 'free'
+const DEMO_ACTIVE_LLM = ['gpt']
+const DEMO_ACTIVE_ENGINES = ['google']
 
 const I18N = {
   en: {
@@ -23,8 +25,8 @@ const I18N = {
     navOptimizer: 'SEO/AEO Optimizer',
     navPricing: 'Pricing',
     navInquiry: 'Inquiry',
-    paidTitle: 'Paid Prompt Tracking (Pro / Enterprise)',
-    paidDesc: 'Score mention tier in LLM answers plus linked web search ranking.',
+    paidTitle: 'Open Beta Prompt Tracking',
+    paidDesc: 'Logged-in users can test up to 5 prompts per account in demo open beta.',
     promptQueryLabel: 'Prompt / Query (one per line)',
     promptUrlLabel: 'Target URL',
     brandLabel: 'Brand Name (optional)',
@@ -32,14 +34,15 @@ const I18N = {
     resultTitle: 'Result',
     outputIdle: 'Ready.',
     outputError: 'Error',
-    paidPolicy: `Paid policy: ${PROMPT_INCLUDED_COUNT} included; +$${PROMPT_ADDON_BLOCK_PRICE_USD}/month per extra ${PROMPT_ADDON_BLOCK_SIZE} prompts. Scope: SEO + AEO/GEO visibility workflow.`,
+    paidPolicy: `Open beta policy: ${PROMPT_INCLUDED_COUNT} prompts per logged-in account. Demo active sources: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}.`,
     refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
-    freeDisabled:
-      'Paid prompt tracking is disabled on free tier. Sample output is shown below.',
+    freeDisabled: 'Google login is required for open beta prompt tracking. Sample output is shown below.',
     sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "pro_or_enterprise",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
+      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: 'Enter at least one prompt.',
-    addOnEstimate: 'Estimated add-on: $${amount}/month for this prompt volume.',
+    quotaExceeded: 'Open beta quota exceeded for this account.',
+    loginButton: 'Login (Paused)',
+    loginPaused: 'Login is temporarily paused during open beta. Guest demo mode is active.',
   },
   ko: {
     title: '프롬프트 추적',
@@ -50,8 +53,8 @@ const I18N = {
     navOptimizer: 'SEO/AEO 최적화',
     navPricing: '요금제',
     navInquiry: '문의',
-    paidTitle: '유료 프롬프트 추적 (Pro / Enterprise)',
-    paidDesc: 'LLM 응답 티어 점수와 웹 검색 순위를 함께 제공합니다.',
+    paidTitle: '오픈 베타 프롬프트 추적',
+    paidDesc: '로그인 계정당 최대 5개 프롬프트를 데모 오픈 베타로 테스트할 수 있습니다.',
     promptQueryLabel: '프롬프트 / 질의 (한 줄에 하나)',
     promptUrlLabel: '대상 URL',
     brandLabel: '브랜드명 (선택)',
@@ -59,14 +62,15 @@ const I18N = {
     resultTitle: '결과',
     outputIdle: '요청을 실행하면 결과가 표시됩니다.',
     outputError: '오류',
-    paidPolicy: `유료 정책: 기본 ${PROMPT_INCLUDED_COUNT}개 포함, ${PROMPT_ADDON_BLOCK_SIZE}개 추가마다 월 $${PROMPT_ADDON_BLOCK_PRICE_USD}. 범위: SEO + AEO/GEO 통합 가시성 워크플로우.`,
+    paidPolicy: `오픈 베타 정책: 로그인 계정당 ${PROMPT_INCLUDED_COUNT}개. 데모 활성 소스: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}.`,
     refreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
-    freeDisabled:
-      '무료 티어에서는 유료 프롬프트 추적이 비활성화됩니다. 아래 예시 결과를 확인하세요.',
+    freeDisabled: '오픈 베타 프롬프트 추적은 Google 로그인 후 사용할 수 있습니다. 아래 예시 결과를 확인하세요.',
     sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "pro_or_enterprise",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
+      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: '프롬프트를 1개 이상 입력해주세요.',
-    addOnEstimate: '현재 입력 기준 예상 추가 과금: 월 $${amount}',
+    quotaExceeded: '이 계정의 오픈 베타 할당량을 초과했습니다.',
+    loginButton: '로그인 (일시중단)',
+    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단됩니다. 현재 게스트 데모 모드가 활성화되어 있습니다.',
   },
   ja: {
     title: 'プロンプト追跡',
@@ -77,8 +81,8 @@ const I18N = {
     navOptimizer: 'SEO/AEO 最適化',
     navPricing: '料金',
     navInquiry: '問い合わせ',
-    paidTitle: '有料プロンプト追跡 (Pro / Enterprise)',
-    paidDesc: 'LLM 応答の言及ティアと連動する検索順位を評価します。',
+    paidTitle: 'オープンベータ プロンプト追跡',
+    paidDesc: 'ログイン済みアカウントはデモで最大5件のプロンプトを試せます。',
     promptQueryLabel: 'プロンプト / クエリ (1行に1件)',
     promptUrlLabel: '対象 URL',
     brandLabel: 'ブランド名 (任意)',
@@ -86,14 +90,15 @@ const I18N = {
     resultTitle: '結果',
     outputIdle: '準備完了。',
     outputError: 'エラー',
-    paidPolicy: `有料ポリシー: ${PROMPT_INCLUDED_COUNT}件を含み、追加 ${PROMPT_ADDON_BLOCK_SIZE}件ごとに月額 $${PROMPT_ADDON_BLOCK_PRICE_USD}。対象: SEO + AEO/GEO 可視性ワークフロー。`,
+    paidPolicy: `オープンベータ: ログインアカウントごとに ${PROMPT_INCLUDED_COUNT} 件。デモ有効ソース: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}。`,
     refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
-    freeDisabled:
-      '無料ティアでは有料プロンプト追跡は無効です。以下にサンプル結果を表示します。',
+    freeDisabled: 'オープンベータのプロンプト追跡は Google ログインが必要です。以下にサンプル結果を表示します。',
     sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "pro_or_enterprise",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
+      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: 'プロンプトを1件以上入力してください。',
-    addOnEstimate: 'この件数での追加料金見積り: 月額 $${amount}',
+    quotaExceeded: 'このアカウントのオープンベータ上限を超えました。',
+    loginButton: 'ログイン (一時停止)',
+    loginPaused: 'オープンベータ期間中はログインを一時停止しています。現在はゲストデモモードをご利用ください。',
   },
   zh: {
     title: '提示词追踪',
@@ -104,8 +109,8 @@ const I18N = {
     navOptimizer: 'SEO/AEO 优化',
     navPricing: '价格',
     navInquiry: '咨询',
-    paidTitle: '付费提示词追踪 (Pro / Enterprise)',
-    paidDesc: '评估 LLM 回答中的品牌提及层级及其关联搜索排名。',
+    paidTitle: '开放测试提示词追踪',
+    paidDesc: '登录账号可在演示开放测试中最多试用 5 条提示词。',
     promptQueryLabel: '提示词 / 查询 (每行一个)',
     promptUrlLabel: '目标 URL',
     brandLabel: '品牌名 (可选)',
@@ -113,15 +118,25 @@ const I18N = {
     resultTitle: '结果',
     outputIdle: '准备就绪。',
     outputError: '错误',
-    paidPolicy: `付费规则: 含 ${PROMPT_INCLUDED_COUNT} 条，超出后每增加 ${PROMPT_ADDON_BLOCK_SIZE} 条每月 +$${PROMPT_ADDON_BLOCK_PRICE_USD}。范围: SEO + AEO/GEO 可见性工作流。`,
+    paidPolicy: `开放测试规则: 每个登录账号 ${PROMPT_INCLUDED_COUNT} 条。演示启用来源: ${DEMO_ACTIVE_LLM.join(', ')} / ${DEMO_ACTIVE_ENGINES.join(', ')}。`,
     refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
-    freeDisabled:
-      '免费层级下付费提示词追踪不可用。下面显示示例结果。',
+    freeDisabled: '开放测试提示词追踪需要 Google 登录。下面显示示例结果。',
     sampleOutput:
-      '{\n  "status": "sample",\n  "policy": "pro_or_enterprise",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
+      '{\n  "status": "sample",\n  "policy": "open_beta_demo",\n  "result": {\n    "tier": "mentioned_and_linked",\n    "score": 70\n  }\n}',
     promptMissing: '请至少输入一条提示词。',
-    addOnEstimate: '按当前数量预估附加费用: 每月 $${amount}',
+    quotaExceeded: '该账号已超过开放测试配额。',
+    loginButton: '登录 (暂停)',
+    loginPaused: '开放测试期间登录功能暂时停用。当前可使用访客演示模式。',
   },
+}
+
+function getDemoClientId() {
+  const key = 'demo_client_id'
+  const existing = localStorage.getItem(key)
+  if (existing) return existing
+  const created = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+  localStorage.setItem(key, created)
+  return created
 }
 
 function t(key) {
@@ -147,6 +162,7 @@ function applyLanguage(lang) {
   setText('pt-nav-optimizer', 'navOptimizer')
   setText('pt-nav-pricing', 'navPricing')
   setText('pt-nav-inquiry', 'navInquiry')
+  setText('pt-login-btn', 'loginButton')
   setText('pt-paid-title', 'paidTitle')
   setText('pt-paid-desc', 'paidDesc')
   setText('pt-prompt-query-label', 'promptQueryLabel')
@@ -174,29 +190,24 @@ function parsePrompts(raw) {
     .filter(Boolean)
 }
 
-function applyPaidGating() {
-  const isPaid = isPaidTier(currentTier)
+function applyDemoGating() {
   if (!promptSubmitBtn) return
 
-  promptSubmitBtn.disabled = !isPaid
+  promptSubmitBtn.disabled = false
   if (promptQueryInput) {
-    promptQueryInput.disabled = !isPaid
+    promptQueryInput.disabled = false
   }
   if (promptTargetUrlInput) {
-    promptTargetUrlInput.disabled = !isPaid
+    promptTargetUrlInput.disabled = false
   }
   if (promptBrandNameInput) {
-    promptBrandNameInput.disabled = !isPaid
+    promptBrandNameInput.disabled = false
   }
   if (lockNote) {
-    lockNote.classList.toggle('hidden', isPaid)
+    lockNote.classList.add('hidden')
   }
 
-  if (!isPaid) {
-    output.dataset.hasResult = '1'
-    output.dataset.state = 'sample'
-    output.textContent = `${t('freeDisabled')}\n\n${t('sampleOutput')}`
-  } else if (!output.dataset.hasResult) {
+  if (!output.dataset.hasResult) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
@@ -237,21 +248,16 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
     output.textContent = `${t('outputError')}: ${t('promptMissing')}`
     return
   }
-  const addOnAmount = calculatePromptAddOnMonthly(prompts.length)
-
   try {
     const data = await postJson('/api/prompt-track', {
       query: prompts[0],
       queries: prompts,
       target_url: document.getElementById('prompt-target-url').value.trim(),
+      demo_client_id: getDemoClientId(),
       brand_name: document.getElementById('prompt-brand-name').value.trim() || null,
       llm_sources: checkedValues('llm-source'),
       search_engines: checkedValues('prompt-engine'),
     })
-
-    if (addOnAmount > 0) {
-      alert(t('addOnEstimate').replace('${amount}', String(addOnAmount)))
-    }
 
     output.dataset.hasResult = '1'
     output.dataset.state = 'result'
@@ -269,8 +275,11 @@ if (languageSelect) {
   })
 }
 
+if (loginBtn) {
+  loginBtn.addEventListener('click', () => {
+    alert(t('loginPaused'))
+  })
+}
+
 applyLanguage(currentLanguage)
-fetchUserTier().then((tier) => {
-  currentTier = tier
-  applyPaidGating()
-})
+applyDemoGating()

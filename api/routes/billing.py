@@ -2,17 +2,26 @@ import os
 import json
 from importlib import import_module
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from .. import auth, database, models
+from ..config import BILLING_TEMP_DISABLED
 from ..logger import setup_logger
 
 router = APIRouter(tags=["Billing"])
 logger = setup_logger("api.billing")
+
+
+def _ensure_billing_enabled() -> None:
+    if BILLING_TEMP_DISABLED:
+        raise HTTPException(
+            status_code=503,
+            detail="Billing checkout is temporarily paused during open beta.",
+        )
 
 
 class CheckoutSessionRequest(BaseModel):
@@ -67,7 +76,7 @@ def _safe_int(value: Optional[str]) -> Optional[int]:
         return None
 
 
-def _build_event_payload_summary(event: dict) -> str:
+def _build_event_payload_summary(event: Dict[str, Any]) -> str:
     data_object = event.get("data", {}).get("object", {})
     summary = {
         "id": event.get("id"),
@@ -80,7 +89,9 @@ def _build_event_payload_summary(event: dict) -> str:
     return json.dumps(summary, default=str)
 
 
-def _start_webhook_event(db: Session, event: dict) -> models.BillingWebhookEvent:
+def _start_webhook_event(
+    db: Session, event: Dict[str, Any]
+) -> models.BillingWebhookEvent:
     event_id = str(event.get("id") or "").strip()
     event_type = str(event.get("type") or "").strip()
 
@@ -178,6 +189,7 @@ async def create_checkout_session(
     request: CheckoutSessionRequest,
     current_user: models.User = Depends(auth.get_current_user),
 ):
+    _ensure_billing_enabled()
     plan = request.plan.strip().lower()
     if plan not in {"pro", "enterprise"}:
         raise HTTPException(status_code=400, detail="Unsupported plan")
@@ -227,6 +239,7 @@ async def create_portal_session(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db),
 ):
+    _ensure_billing_enabled()
     subscription = (
         db.query(models.BillingSubscription)
         .filter(models.BillingSubscription.user_id == current_user.id)

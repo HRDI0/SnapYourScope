@@ -64,6 +64,7 @@ yarn-error.log*
 # 런타임/데이터 산출물
 # ------------------------------------------------
 logs/
+deliverables/
 storage_blobs/
 *.sqlite
 *.sqlite3

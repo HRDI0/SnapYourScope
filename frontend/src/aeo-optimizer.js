@@ -6,6 +6,7 @@ const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('ao-submit')
 const optimizerUrlInput = document.getElementById('optimizer-url')
 const lockNote = document.getElementById('ao-lock-note')
+const loginBtn = document.getElementById('ao-login-btn')
 
 let currentLanguage = getStoredLanguage('en')
 let currentTier = 'free'
@@ -34,6 +35,8 @@ const I18N = {
       '{\n  "status": "sample",\n  "recommendations": [\n    "Add answer-first paragraph near top of content",\n    "Expand FAQ schema with target intent terms"\n  ]\n}',
     refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
     outputError: 'Error',
+    loginButton: 'Login (Paused)',
+    loginPaused: 'Login is temporarily paused during open beta. Guest demo mode is active.',
   },
   ko: {
     title: 'SEO/AEO 최적화',
@@ -57,6 +60,8 @@ const I18N = {
       '{\n  "status": "sample",\n  "recommendations": [\n    "문서 상단에 answer-first 단락 추가",\n    "FAQ 스키마에 핵심 의도 키워드 보강"\n  ]\n}',
     refreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
     outputError: '오류',
+    loginButton: '로그인 (일시중단)',
+    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단됩니다. 현재 게스트 데모 모드가 활성화되어 있습니다.',
   },
   ja: {
     title: 'SEO/AEO 最適化',
@@ -80,6 +85,8 @@ const I18N = {
       '{\n  "status": "sample",\n  "recommendations": [\n    "ページ上部に answer-first 段落を追加",\n    "FAQ スキーマに意図キーワードを補強"\n  ]\n}',
     refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
     outputError: 'エラー',
+    loginButton: 'ログイン (一時停止)',
+    loginPaused: 'オープンベータ期間中はログインを一時停止しています。現在はゲストデモモードをご利用ください。',
   },
   zh: {
     title: 'SEO/AEO 优化',
@@ -103,6 +110,8 @@ const I18N = {
       '{\n  "status": "sample",\n  "recommendations": [\n    "在内容顶部添加 answer-first 段落",\n    "在 FAQ schema 中补充意图关键词"\n  ]\n}',
     refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
     outputError: '错误',
+    loginButton: '登录 (暂停)',
+    loginPaused: '开放测试期间登录功能暂时停用。当前可使用访客演示模式。',
   },
 }
 
@@ -129,6 +138,7 @@ function applyLanguage(lang) {
   setText('ao-nav-aeo', 'navAeo')
   setText('ao-nav-pricing', 'navPricing')
   setText('ao-nav-inquiry', 'navInquiry')
+  setText('ao-login-btn', 'loginButton')
   setText('ao-paid-title', 'paidTitle')
   setText('ao-paid-desc', 'paidDesc')
   setText('ao-url-label', 'urlLabel')
@@ -214,6 +224,12 @@ document.getElementById('aeo-optimizer-form').addEventListener('submit', async (
 if (languageSelect) {
   languageSelect.addEventListener('change', (event) => {
     applyLanguage(event.target.value)
+  })
+}
+
+if (loginBtn) {
+  loginBtn.addEventListener('click', () => {
+    alert(t('loginPaused'))
   })
 }
 

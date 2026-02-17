@@ -1,6 +1,6 @@
-export const PROMPT_INCLUDED_COUNT = 30
+export const PROMPT_INCLUDED_COUNT = 5
 export const PROMPT_ADDON_BLOCK_SIZE = 5
-export const PROMPT_ADDON_BLOCK_PRICE_USD = 10
+export const PROMPT_ADDON_BLOCK_PRICE_USD = 0
 
 export function calculatePromptAddOnMonthly(promptCount) {
   const extraCount = Math.max(0, promptCount - PROMPT_INCLUDED_COUNT)

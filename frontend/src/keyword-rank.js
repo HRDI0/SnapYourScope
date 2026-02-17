@@ -5,6 +5,7 @@ const output = document.getElementById('kr-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('kr-submit')
 const multiKeywordInput = document.getElementById('kr-query')
+const loginBtn = document.getElementById('kr-login-btn')
 
 let currentLanguage = getStoredLanguage('en')
 let currentTier = 'free'
@@ -38,6 +39,8 @@ const I18N = {
     freeBatchBlocked:
       'Multi-keyword tracking is paid. Free tier can run one keyword only. Showing sample for batch mode.',
     missingQuery: 'Enter at least one keyword.',
+    loginButton: 'Login (Paused)',
+    loginPaused: 'Login is temporarily paused during open beta. Guest demo mode is active.',
   },
   ko: {
     title: '키워드 순위 추적',
@@ -67,6 +70,8 @@ const I18N = {
     freeBatchBlocked:
       '다중 키워드 추적은 유료 기능입니다. 무료 티어는 키워드 1개만 가능합니다. 배치 모드 예시를 표시합니다.',
     missingQuery: '키워드를 1개 이상 입력해주세요.',
+    loginButton: '로그인 (일시중단)',
+    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단됩니다. 현재 게스트 데모 모드가 활성화되어 있습니다.',
   },
   ja: {
     title: 'キーワード順位トラッカー',
@@ -96,6 +101,8 @@ const I18N = {
     freeBatchBlocked:
       '複数キーワード追跡は有料機能です。無料ティアは1キーワードのみ実行できます。バッチモードのサンプルを表示します。',
     missingQuery: 'キーワードを1件以上入力してください。',
+    loginButton: 'ログイン (一時停止)',
+    loginPaused: 'オープンベータ期間中はログインを一時停止しています。現在はゲストデモモードをご利用ください。',
   },
   zh: {
     title: '关键词排名追踪',
@@ -125,6 +132,8 @@ const I18N = {
     freeBatchBlocked:
       '多关键词追踪为付费功能。免费用户仅可执行 1 个关键词。当前展示批量模式示例。',
     missingQuery: '请至少输入一个关键词。',
+    loginButton: '登录 (暂停)',
+    loginPaused: '开放测试期间登录功能暂时停用。当前可使用访客演示模式。',
   },
 }
 
@@ -151,6 +160,7 @@ function applyLanguage(lang) {
   setText('kr-nav-optimizer', 'navOptimizer')
   setText('kr-nav-pricing', 'navPricing')
   setText('kr-nav-inquiry', 'navInquiry')
+  setText('kr-login-btn', 'loginButton')
   setText('kr-free-title', 'freeTitle')
   setText('kr-free-desc', 'freeDesc')
   setText('kr-query-single-label', 'querySingleLabel')
@@ -252,6 +262,12 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
 if (languageSelect) {
   languageSelect.addEventListener('change', (event) => {
     applyLanguage(event.target.value)
+  })
+}
+
+if (loginBtn) {
+  loginBtn.addEventListener('click', () => {
+    alert(t('loginPaused'))
   })
 }
 

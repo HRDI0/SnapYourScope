@@ -1,6 +1,5 @@
-import { apiUrl } from './core/api'
-
 const languageSelect = document.getElementById('language-select')
+const loginBtn = document.getElementById('landing-login-btn')
 const planCards = document.querySelectorAll('.landing-plan-card[data-plan]')
 
 let currentLanguage = localStorage.getItem('ui_lang') || 'en'
@@ -22,11 +21,13 @@ const I18N = {
     openDashboard: 'Open Dashboard',
     openKeyword: 'Open Keyword Rank',
     tryPrompt: 'Try Prompt Tracker',
+    loginButton: 'Login (Paused)',
+    loginPaused: 'Login is temporarily paused during open beta. Guest demo mode is active.',
     whatNow: 'What you can run now',
-    li1: 'Single URL SEO/AEO/GEO analysis',
-    li2: 'Free web search rank tracking (Google/Bing/Naver)',
-    li3: 'Paid prompt tracking with share-of-model scoring',
-    li4: 'Paid SEO/AEO optimization recommendations',
+    li1: '[Open Beta] Limited single URL SEO/AEO/GEO analysis',
+    li2: '[Open Beta] Limited rank tracking with selected engines/sources',
+    li3: '[Open Beta] Prompt tracking demo with capped usage',
+    li4: '[Open Beta] Features and limits may change; severe issues should be reported via Inquiry.',
     feature1Title: 'SEO & AEO Dashboard',
     feature1Desc: 'Analyze technical and answer-engine signals with chart-based diagnostics.',
     feature2Title: 'Prompt Tracking',
@@ -43,13 +44,16 @@ const I18N = {
     planProF1: 'Sitemap batch analysis',
     planProF2: 'Prompt tracking and scoring',
     planProF3: 'AEO optimization recommendations',
+    planProF4: 'Weekly PDF report delivery (Coming Soon)',
     planEntTitle: 'Enterprise',
     planEntF1: 'Workflow and policy customization',
     planEntF2: 'Provider strategy and reliability controls',
-    planHint: 'Click Pro or Enterprise to continue to checkout.',
+    planEntF3: 'Weekly PDF report delivery (Coming Soon)',
+    planHint: 'Pro/Enterprise checkout is coming soon. Use open beta features now.',
     enterpriseContactOnly: 'Enterprise opens the inquiry tab.',
     goProduct: 'Go to product',
     checkoutFailed: 'Checkout creation failed',
+    paymentComingSoon: 'Payment checkout is coming soon. Open beta is active now.',
   },
   ko: {
     landingTagline: '가벼운 URL 기반 SEO/AEO 인텔리전스',
@@ -66,11 +70,13 @@ const I18N = {
     openDashboard: '대시보드 열기',
     openKeyword: '키워드 순위 열기',
     tryPrompt: '프롬프트 추적 시작',
+    loginButton: '로그인 (일시중단)',
+    loginPaused: '오픈 베타 기간에는 로그인이 일시 중단됩니다. 현재 게스트 데모 모드가 활성화되어 있습니다.',
     whatNow: '지금 바로 가능한 기능',
-    li1: '단일 URL SEO/AEO/GEO 분석',
-    li2: '무료 웹 검색 순위 추적 (Google/Bing/Naver)',
-    li3: '유료 share-of-model 점수 기반 프롬프트 추적',
-    li4: '유료 SEO/AEO 최적화 추천',
+    li1: '[오픈 베타] 제한된 단일 URL SEO/AEO/GEO 분석',
+    li2: '[오픈 베타] 일부 소스/엔진 기반 제한형 순위 추적',
+    li3: '[오픈 베타] 사용량 제한이 있는 프롬프트 추적 데모',
+    li4: '[오픈 베타] 기능/정책은 변동될 수 있으며 심각한 오류는 문의 탭으로 제보해주세요.',
     feature1Title: 'SEO & AEO 대시보드',
     feature1Desc: '기술/답변엔진 신호를 차트 중심으로 분석합니다.',
     feature2Title: '프롬프트 추적',
@@ -87,13 +93,16 @@ const I18N = {
     planProF1: '사이트맵 배치 분석',
     planProF2: '프롬프트 추적 및 점수화',
     planProF3: 'AEO 최적화 추천',
+    planProF4: '주간 PDF 보고 전송 기능 (Coming Soon)',
     planEntTitle: '엔터프라이즈',
     planEntF1: '워크플로우/정책 커스터마이징',
     planEntF2: '공급자 전략/신뢰성 제어',
-    planHint: 'Pro 또는 Enterprise를 클릭하면 결제로 이동합니다.',
+    planEntF3: '주간 PDF 보고 전송 기능 (Coming Soon)',
+    planHint: 'Pro/Enterprise 결제는 오픈 예정입니다. 현재는 오픈 베타를 이용하세요.',
     enterpriseContactOnly: 'Enterprise는 문의 탭으로 이동합니다.',
     goProduct: '제품으로 이동',
     checkoutFailed: '결제 세션 생성 실패',
+    paymentComingSoon: '결제 체크아웃은 오픈 예정입니다. 현재는 오픈 베타를 이용해주세요.',
   },
   ja: {
     landingTagline: '軽量な URL ベース SEO/AEO インテリジェンス',
@@ -110,11 +119,13 @@ const I18N = {
     openDashboard: 'ダッシュボードを開く',
     openKeyword: 'キーワード順位を開く',
     tryPrompt: 'プロンプト追跡を試す',
+    loginButton: 'ログイン (一時停止)',
+    loginPaused: 'オープンベータ期間中はログインを一時停止しています。現在はゲストデモモードをご利用ください。',
     whatNow: '今すぐ実行できる機能',
-    li1: '単一 URL SEO/AEO/GEO 分析',
-    li2: '無料の検索順位追跡 (Google/Bing/Naver)',
-    li3: '有料の share-of-model スコア追跡',
-    li4: '有料 SEO/AEO 最適化提案',
+    li1: '[オープンベータ] 限定的な単一 URL SEO/AEO/GEO 分析',
+    li2: '[オープンベータ] 一部ソース/エンジンでの限定順位追跡',
+    li3: '[オープンベータ] 利用上限付きプロンプト追跡デモ',
+    li4: '[オープンベータ] 機能と制限は変更される場合があります。重大な不具合は Inquiry からご連絡ください。',
     feature1Title: 'SEO & AEO ダッシュボード',
     feature1Desc: '技術シグナルと回答エンジンシグナルを可視化します。',
     feature2Title: 'プロンプト追跡',
@@ -131,13 +142,16 @@ const I18N = {
     planProF1: 'サイトマップ一括分析',
     planProF2: 'プロンプト追跡とスコアリング',
     planProF3: 'AEO 最適化提案',
+    planProF4: '週次 PDF レポート配信 (Coming Soon)',
     planEntTitle: 'Enterprise',
     planEntF1: 'ワークフロー/ポリシーのカスタマイズ',
     planEntF2: 'プロバイダー戦略と信頼性制御',
-    planHint: 'Pro または Enterprise をクリックすると決済に進みます。',
+    planEntF3: '週次 PDF レポート配信 (Coming Soon)',
+    planHint: 'Pro / Enterprise の決済は近日公開です。現在はオープンベータをご利用ください。',
     enterpriseContactOnly: 'Enterprise は問い合わせタブを開きます。',
     goProduct: '製品へ移動',
     checkoutFailed: '決済セッション作成に失敗しました',
+    paymentComingSoon: '決済チェックアウトは近日公開です。現在はオープンベータをご利用ください。',
   },
   zh: {
     landingTagline: '轻量级 URL SEO/AEO 智能分析',
@@ -154,11 +168,13 @@ const I18N = {
     openDashboard: '打开仪表盘',
     openKeyword: '打开关键词排名',
     tryPrompt: '试用提示词追踪',
+    loginButton: '登录 (暂停)',
+    loginPaused: '开放测试期间登录功能暂时停用。当前可使用访客演示模式。',
     whatNow: '当前可用功能',
-    li1: '单 URL SEO/AEO/GEO 分析',
-    li2: '免费搜索排名追踪 (Google/Bing/Naver)',
-    li3: '付费 share-of-model 评分追踪',
-    li4: '付费 SEO/AEO 优化建议',
+    li1: '[开放测试] 限制版单 URL SEO/AEO/GEO 分析',
+    li2: '[开放测试] 部分来源/引擎的限制型排名追踪',
+    li3: '[开放测试] 带配额限制的提示词追踪演示',
+    li4: '[开放测试] 功能与限制可能变更，严重错误请通过 Inquiry 反馈。',
     feature1Title: 'SEO & AEO 仪表盘',
     feature1Desc: '用图表分析技术信号与回答引擎信号。',
     feature2Title: '提示词追踪',
@@ -175,13 +191,16 @@ const I18N = {
     planProF1: '站点地图批量分析',
     planProF2: '提示词追踪与评分',
     planProF3: 'AEO 优化建议',
+    planProF4: '每周 PDF 报告发送功能 (Coming Soon)',
     planEntTitle: '企业版',
     planEntF1: '工作流/策略定制',
     planEntF2: '提供方策略与可靠性控制',
-    planHint: '点击专业版或企业版进入支付。',
+    planEntF3: '每周 PDF 报告发送功能 (Coming Soon)',
+    planHint: '专业版/企业版支付即将开放。当前可先体验开放测试。',
     enterpriseContactOnly: '企业版将打开咨询标签。',
     goProduct: '进入产品',
     checkoutFailed: '创建支付会话失败',
+    paymentComingSoon: '支付结账即将开放，当前请先体验开放测试。',
   },
 }
 
@@ -214,6 +233,7 @@ function applyLanguage(lang) {
   setText('landing-open-dashboard', 'openDashboard')
   setText('landing-open-keyword', 'openKeyword')
   setText('landing-try-prompt', 'tryPrompt')
+  setText('landing-login-btn', 'loginButton')
   setText('landing-what-now', 'whatNow')
   setText('landing-li-1', 'li1')
   setText('landing-li-2', 'li2')
@@ -235,48 +255,18 @@ function applyLanguage(lang) {
   setText('landing-plan-pro-f1', 'planProF1')
   setText('landing-plan-pro-f2', 'planProF2')
   setText('landing-plan-pro-f3', 'planProF3')
+  setText('landing-plan-pro-f4', 'planProF4')
   setText('landing-plan-ent-title', 'planEntTitle')
   setText('landing-plan-ent-f1', 'planEntF1')
   setText('landing-plan-ent-f2', 'planEntF2')
+  setText('landing-plan-ent-f3', 'planEntF3')
   setText('landing-plan-hint', 'planHint')
   setText('landing-go-product', 'goProduct')
 }
 
 async function createCheckout(plan) {
-  const token = localStorage.getItem('access_token')
-  if (!token) {
-    const redirect = encodeURIComponent('/app.html?tab=pricing&openLogin=1')
-    window.location.href = `/app.html?tab=pricing&openLogin=1&plan=${encodeURIComponent(plan)}&next=${redirect}`
-    return
-  }
-
-  try {
-    const response = await fetch(apiUrl('/api/billing/create-checkout-session'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        plan,
-        success_url: `${window.location.origin}/app.html?checkout=success`,
-        cancel_url: `${window.location.origin}/app.html?checkout=cancel&tab=pricing`,
-      }),
-    })
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(data?.detail || JSON.stringify(data))
-    }
-
-    if (data.checkout_url) {
-      window.location.href = data.checkout_url
-      return
-    }
-
-    throw new Error('Missing checkout_url')
-  } catch (error) {
-    alert(`${t('checkoutFailed')}: ${error.message}`)
-  }
+  window.location.href = '/app.html?tab=pricing'
+  alert(t('paymentComingSoon'))
 }
 
 planCards.forEach((card) => {
@@ -299,3 +289,9 @@ if (languageSelect) {
 }
 
 applyLanguage(currentLanguage)
+
+if (loginBtn) {
+  loginBtn.addEventListener('click', () => {
+    alert(t('loginPaused'))
+  })
+}
