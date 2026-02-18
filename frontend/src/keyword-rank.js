@@ -5,8 +5,10 @@ const output = document.getElementById('kr-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('kr-submit')
 const loginBtn = document.getElementById('kr-login-btn')
+const SESSION_KEY = 'kr_page_state_v1'
 
 let currentLanguage = getStoredLanguage('en')
+let lastRankResponse = null
 
 const I18N = {
   en: {
@@ -31,7 +33,7 @@ const I18N = {
     outputIdle: 'Run search rank tracking to view dashboard.',
     outputError: 'Error',
     missingQuery: 'Enter a search query.',
-    loginButton: '로그인(오픈베타)',
+    loginButton: 'Login (Open Beta)',
     loginPaused: 'Login is paused during open beta. Guest mode is active.',
     engine: 'Engine',
     rank: 'Rank',
@@ -97,7 +99,7 @@ const I18N = {
     outputIdle: '実行するとダッシュボードが表示されます。',
     outputError: 'エラー',
     missingQuery: '検索クエリを入力してください。',
-    loginButton: '로그인(오픈베타)',
+    loginButton: 'ログイン（オープンベータ）',
     loginPaused: 'オープンベータ期間中はログインを一時停止しています。',
     engine: 'エンジン',
     rank: '順位',
@@ -130,7 +132,7 @@ const I18N = {
     outputIdle: '执行后将显示仪表盘。',
     outputError: '错误',
     missingQuery: '请输入搜索词。',
-    loginButton: '로그인(오픈베타)',
+    loginButton: '登录（开放测试）',
     loginPaused: '开放测试期间登录已暂停，访客模式可用。',
     engine: '引擎',
     rank: '排名',
@@ -180,21 +182,83 @@ function applyLanguage(lang) {
   const singleInput = document.getElementById('kr-query-single')
   if (singleInput) singleInput.placeholder = t('querySinglePlaceholder')
 
+  if (output.dataset.state === 'result' && lastRankResponse) {
+    renderDashboard(lastRankResponse)
+    return
+  }
+
   if (!output.dataset.hasResult) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
 }
 
+function saveSessionState() {
+  const queryInput = document.getElementById('kr-query-single')
+  const targetUrlInput = document.getElementById('kr-target-url')
+
+  const snapshot = {
+    query: queryInput?.value || '',
+    targetUrl: targetUrlInput?.value || '',
+    hasResult: Boolean(output?.dataset?.hasResult),
+    outputState: output?.dataset?.state || 'idle',
+    resultData: lastRankResponse,
+    errorText: output?.dataset?.state === 'error' ? output.textContent : '',
+  }
+
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(snapshot))
+}
+
+function restoreSessionState() {
+  const raw = sessionStorage.getItem(SESSION_KEY)
+  if (!raw) return
+
+  try {
+    const saved = JSON.parse(raw)
+    const queryInput = document.getElementById('kr-query-single')
+    const targetUrlInput = document.getElementById('kr-target-url')
+
+    if (queryInput && typeof saved.query === 'string') queryInput.value = saved.query
+    if (targetUrlInput && typeof saved.targetUrl === 'string') targetUrlInput.value = saved.targetUrl
+
+    if (saved?.resultData && saved.outputState === 'result') {
+      lastRankResponse = saved.resultData
+      output.dataset.hasResult = '1'
+      output.dataset.state = 'result'
+      renderDashboard(saved.resultData)
+      return
+    }
+
+    if (saved?.hasResult && saved.outputState === 'error' && typeof saved.errorText === 'string') {
+      output.dataset.hasResult = '1'
+      output.dataset.state = 'error'
+      output.textContent = saved.errorText
+    }
+  } catch {
+    sessionStorage.removeItem(SESSION_KEY)
+  }
+}
+
 function renderDashboard(response) {
+  lastRankResponse = response
+
   const query = response?.query || '-'
   const targetUrl = response?.target_url || '-'
   const byQuery = response?.results?.[query] || {}
   const rows = Object.entries(byQuery)
   const rankedRows = rows.filter(([, info]) => Number.isInteger(info?.rank))
+  const unavailableRows = rows.filter(([, info]) => String(info?.status || '').toLowerCase() === 'unavailable')
   const bestRank = rankedRows.length
     ? Math.min(...rankedRows.map(([, info]) => Number(info.rank)))
     : null
+
+  const statusBadgeClass = (status) => {
+    const normalized = String(status || '').toLowerCase()
+    if (normalized === 'ok') return 'inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-200'
+    if (normalized === 'unavailable') return 'inline-flex rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-200'
+    if (normalized === 'error') return 'inline-flex rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] font-semibold text-rose-200'
+    return 'inline-flex rounded-full bg-slate-500/15 px-2 py-0.5 text-[11px] font-semibold text-slate-200'
+  }
 
   const tableRows = rows
     .map(([engine, info]) => {
@@ -202,7 +266,7 @@ function renderDashboard(response) {
       const status = info?.status || 'unknown'
       const resultCount = Number(info?.result_count || 0)
       const found = Number.isInteger(info?.rank) ? t('found') : t('notFound')
-      return `<tr class="border-t border-slate-800/60"><td class="px-3 py-2 text-slate-200">${engine}</td><td class="px-3 py-2 text-white font-semibold">${rank}</td><td class="px-3 py-2 text-slate-300">${status}</td><td class="px-3 py-2 text-slate-300">${resultCount}</td><td class="px-3 py-2 text-slate-300">${found}</td></tr>`
+      return `<tr class="border-t border-slate-800/60"><td class="px-3 py-2 text-slate-200">${engine}</td><td class="px-3 py-2 text-white font-semibold">${rank}</td><td class="px-3 py-2 text-slate-300"><span class="${statusBadgeClass(status)}">${status}</span></td><td class="px-3 py-2 text-slate-300">${resultCount}</td><td class="px-3 py-2 text-slate-300">${found}</td></tr>`
     })
     .join('')
 
@@ -214,6 +278,7 @@ function renderDashboard(response) {
         <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('found')}</p><h4 class="mt-1 text-lg font-bold text-emerald-300">${rankedRows.length}</h4></article>
         <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">${t('notFound')}</p><h4 class="mt-1 text-lg font-bold text-rose-300">${rows.length - rankedRows.length}</h4></article>
       </div>
+      ${unavailableRows.length ? `<p class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">Search provider returned no results for ${unavailableRows.length} engine(s). Check API key/CX or query coverage.</p>` : ''}
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('query')}</p><h4 class="mt-1 text-sm font-semibold text-white">${query}</h4></article>
         <article class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><p class="text-xs text-slate-400">${t('targetUrl')}</p><h4 class="mt-1 text-sm font-semibold text-white break-all">${targetUrl}</h4></article>
@@ -244,6 +309,7 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${t('missingQuery')}`
+    saveSessionState()
     return
   }
 
@@ -275,10 +341,12 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
     output.dataset.hasResult = '1'
     output.dataset.state = 'result'
     renderDashboard(data)
+    saveSessionState()
   } catch (error) {
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
+    saveSessionState()
   } finally {
     submitBtn.disabled = false
   }
@@ -297,3 +365,4 @@ if (loginBtn) {
 }
 
 applyLanguage(currentLanguage)
+restoreSessionState()

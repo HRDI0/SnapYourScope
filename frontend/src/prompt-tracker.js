@@ -6,12 +6,14 @@ const output = document.getElementById('result-output')
 const languageSelect = document.getElementById('language-select')
 const promptSubmitBtn = document.getElementById('pt-prompt-submit')
 const loginBtn = document.getElementById('pt-login-btn')
+const SESSION_KEY = 'pt_page_state_v1'
 
 let currentLanguage = getStoredLanguage('en')
+let lastPromptResponse = null
 
 const I18N = {
   en: {
-    title: 'Prompt Tracking Dashboard',
+    title: 'Prompt Tracker Dashboard',
     navMain: 'Main',
     navKeyword: 'Search Rank',
     navDashboard: 'Dashboard',
@@ -25,13 +27,13 @@ const I18N = {
     promptUrlLabel: 'Target URL',
     brandLabel: 'Brand Name (reference only)',
     promptSubmit: 'Run Prompt Tracking',
-    resultTitle: 'Prompt Dashboard',
+    resultTitle: 'Prompt Tracker Dashboard',
     outputIdle: 'Run prompt tracking to view dashboard.',
     outputError: 'Error',
     paidPolicy: `Open beta policy: ${PROMPT_INCLUDED_COUNT} prompts per guest/browser.`,
     refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
     promptMissing: 'Enter at least one prompt.',
-    loginButton: '로그인(오픈베타)',
+    loginButton: 'Login (Open Beta)',
     loginPaused: 'Login is paused during open beta. Guest mode is active.',
     tablePrompt: 'Prompt',
     tableTier: 'Tier',
@@ -44,7 +46,7 @@ const I18N = {
     tier4: 'Tier 4',
   },
   ko: {
-    title: '프롬프트 추적 대시보드',
+    title: '프롬프트 추적기 대시보드',
     navMain: '메인',
     navKeyword: '검색 순위 추적',
     navDashboard: '대시보드',
@@ -58,7 +60,7 @@ const I18N = {
     promptUrlLabel: '대상 URL',
     brandLabel: '브랜드명 (참고용)',
     promptSubmit: '프롬프트 추적 실행',
-    resultTitle: '프롬프트 대시보드',
+    resultTitle: '프롬프트 추적기 대시보드',
     outputIdle: '프롬프트 추적을 실행하면 대시보드가 표시됩니다.',
     outputError: '오류',
     paidPolicy: `오픈 베타 정책: 브라우저 기준 ${PROMPT_INCLUDED_COUNT}개 프롬프트`,
@@ -77,7 +79,7 @@ const I18N = {
     tier4: 'Tier 4',
   },
   ja: {
-    title: 'プロンプト追跡ダッシュボード',
+    title: 'プロンプトトラッカーダッシュボード',
     navMain: 'メイン',
     navKeyword: '検索順位トラッキング',
     navDashboard: 'ダッシュボード',
@@ -91,13 +93,13 @@ const I18N = {
     promptUrlLabel: '対象 URL',
     brandLabel: 'ブランド名 (参照用)',
     promptSubmit: 'プロンプト追跡を実行',
-    resultTitle: 'プロンプトダッシュボード',
+    resultTitle: 'プロンプトトラッカーダッシュボード',
     outputIdle: '実行するとダッシュボードが表示されます。',
     outputError: 'エラー',
     paidPolicy: `オープンベータ: ブラウザごとに ${PROMPT_INCLUDED_COUNT} 件`,
     refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
     promptMissing: 'プロンプトを1件以上入力してください。',
-    loginButton: '로그인(오픈베타)',
+    loginButton: 'ログイン（オープンベータ）',
     loginPaused: 'オープンベータ期間中はログインを一時停止しています。',
     tablePrompt: 'プロンプト',
     tableTier: 'ティア',
@@ -110,7 +112,7 @@ const I18N = {
     tier4: 'Tier 4',
   },
   zh: {
-    title: '提示词追踪仪表盘',
+    title: '提示词追踪器仪表盘',
     navMain: '主页',
     navKeyword: '搜索排名追踪',
     navDashboard: '仪表盘',
@@ -124,13 +126,13 @@ const I18N = {
     promptUrlLabel: '目标 URL',
     brandLabel: '品牌名 (仅参考)',
     promptSubmit: '开始提示词追踪',
-    resultTitle: '提示词仪表盘',
+    resultTitle: '提示词追踪器仪表盘',
     outputIdle: '执行后将显示仪表盘。',
     outputError: '错误',
     paidPolicy: `开放测试：每个浏览器 ${PROMPT_INCLUDED_COUNT} 条`,
     refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
     promptMissing: '请至少输入一条提示词。',
-    loginButton: '로그인(오픈베타)',
+    loginButton: '登录（开放测试）',
     loginPaused: '开放测试期间登录已暂停，访客模式可用。',
     tablePrompt: '提示词',
     tableTier: '层级',
@@ -187,9 +189,86 @@ function applyLanguage(lang) {
   setText('pt-prompt-submit', 'promptSubmit')
   setText('pt-result-title', 'resultTitle')
 
+  if (output.dataset.state === 'result' && lastPromptResponse) {
+    renderDashboard(lastPromptResponse)
+    return
+  }
+
   if (!output.dataset.hasResult) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
+  }
+}
+
+function setCheckedValues(name, values) {
+  const selected = new Set(values || [])
+  document.querySelectorAll(`input[name="${name}"]`).forEach((el) => {
+    el.checked = selected.has(el.value)
+  })
+}
+
+function saveSessionState() {
+  const promptQueryInput = document.getElementById('prompt-query')
+  const promptTargetUrlInput = document.getElementById('prompt-target-url')
+  const promptBrandNameInput = document.getElementById('prompt-brand-name')
+
+  const snapshot = {
+    promptQuery: promptQueryInput?.value || '',
+    targetUrl: promptTargetUrlInput?.value || '',
+    brandName: promptBrandNameInput?.value || '',
+    llmSources: checkedValues('llm-source'),
+    searchEngines: checkedValues('prompt-engine'),
+    hasResult: Boolean(output?.dataset?.hasResult),
+    outputState: output?.dataset?.state || 'idle',
+    resultData: lastPromptResponse,
+    errorText: output?.dataset?.state === 'error' ? output.textContent : '',
+  }
+
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(snapshot))
+}
+
+function restoreSessionState() {
+  const raw = sessionStorage.getItem(SESSION_KEY)
+  if (!raw) return
+
+  try {
+    const saved = JSON.parse(raw)
+    const promptQueryInput = document.getElementById('prompt-query')
+    const promptTargetUrlInput = document.getElementById('prompt-target-url')
+    const promptBrandNameInput = document.getElementById('prompt-brand-name')
+
+    if (promptQueryInput && typeof saved.promptQuery === 'string') {
+      promptQueryInput.value = saved.promptQuery
+    }
+    if (promptTargetUrlInput && typeof saved.targetUrl === 'string') {
+      promptTargetUrlInput.value = saved.targetUrl
+    }
+    if (promptBrandNameInput && typeof saved.brandName === 'string') {
+      promptBrandNameInput.value = saved.brandName
+    }
+
+    if (Array.isArray(saved.llmSources)) {
+      setCheckedValues('llm-source', saved.llmSources)
+    }
+    if (Array.isArray(saved.searchEngines)) {
+      setCheckedValues('prompt-engine', saved.searchEngines)
+    }
+
+    if (saved?.resultData && saved.outputState === 'result') {
+      lastPromptResponse = saved.resultData
+      output.dataset.hasResult = '1'
+      output.dataset.state = 'result'
+      renderDashboard(saved.resultData)
+      return
+    }
+
+    if (saved?.hasResult && saved.outputState === 'error' && typeof saved.errorText === 'string') {
+      output.dataset.hasResult = '1'
+      output.dataset.state = 'error'
+      output.textContent = saved.errorText
+    }
+  } catch {
+    sessionStorage.removeItem(SESSION_KEY)
   }
 }
 
@@ -212,6 +291,8 @@ function tierLabel(tier) {
 }
 
 function renderDashboard(data) {
+  lastPromptResponse = data
+
   const results = data?.results || []
   const tierCounts = {
     tier1_core_mention: 0,
@@ -226,7 +307,7 @@ function renderDashboard(data) {
       tierCounts[llm.tier] += 1
     }
     const link = llm?.response_share_url
-      ? `<a href="${llm.response_share_url}" target="_blank" rel="noreferrer" class="text-violet-300 hover:text-white">${llm.response_share_url}</a>`
+      ? `<a href="${llm.response_share_url}" target="_blank" rel="noreferrer" class="block max-w-[18rem] truncate text-violet-300 hover:text-white" title="${llm.response_share_url}">${llm.response_share_url}</a>`
       : t('noLink')
     return `
       <tr class="border-t border-slate-800/60">
@@ -273,6 +354,7 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${t('promptMissing')}`
+    saveSessionState()
     return
   }
 
@@ -307,10 +389,12 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
     output.dataset.hasResult = '1'
     output.dataset.state = 'result'
     renderDashboard(data)
+    saveSessionState()
   } catch (error) {
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
+    saveSessionState()
   } finally {
     promptSubmitBtn.disabled = false
   }
@@ -329,3 +413,4 @@ if (loginBtn) {
 }
 
 applyLanguage(currentLanguage)
+restoreSessionState()

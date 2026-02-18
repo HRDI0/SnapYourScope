@@ -9,7 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <meta name="theme-color" content="#020617" />
   <script>
-    tailwind.config = {
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = {
       theme: {
         extend: {
           fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
@@ -43,13 +44,13 @@
           </div>
 
           <nav class="mt-6 grid gap-2" id="tab-links">
-            <a id="tab-main-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/">Main</a>
-            <button id="tab-analyze-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="analyze" type="button">Dashboard</button>
-            <a id="tab-keyword-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/keyword-rank.html">Search Rank</a>
-            <a id="tab-prompt-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/prompt-tracker.html">Prompt Tracker</a>
-            <a id="tab-aeo-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
-            <button id="tab-pricing-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="pricing" type="button">Pricing</button>
-            <button id="tab-enterprise-btn" class="tab-link flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="enterprise" type="button">Inquiry</button>
+            <a id="tab-main-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/">Main</a>
+            <button id="tab-analyze-btn" class="tab-link flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="analyze" type="button">Dashboard</button>
+            <a id="tab-keyword-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/keyword-rank.html">Search Rank</a>
+            <a id="tab-prompt-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/prompt-tracker.html">Prompt Tracker</a>
+            <a id="tab-aeo-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
+            <button id="tab-pricing-btn" class="tab-link flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="pricing" type="button">Pricing</button>
+            <button id="tab-enterprise-btn" class="tab-link flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="enterprise" type="button">Inquiry</button>
           </nav>
 
           <div class="mt-6 rounded-2xl border border-slate-800/60 bg-slate-950/35 p-4">
@@ -77,7 +78,7 @@
               <p id="workspace-eyebrow" class="text-xs font-semibold uppercase tracking-widest text-slate-400">Analytics Workspace</p>
               <h2 id="workspace-title" class="mt-2 text-2xl font-bold text-white">Competitive Visibility Dashboard</h2>
             </div>
-            <nav class="flex flex-wrap gap-2" aria-label="Product navigation">
+            <nav class="hidden 2xl:flex 2xl:flex-wrap gap-2" aria-label="Product navigation">
               <a id="gnb-main" href="/" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Main</a>
               <a id="gnb-keyword" href="/keyword-rank.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Search Rank</a>
               <a id="gnb-prompt" href="/prompt-tracker.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Prompt Tracker</a>
@@ -90,7 +91,7 @@
                 <option value="ja">JP</option>
                 <option value="zh">CN</option>
               </select>
-              <button id="open-login-btn" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">로그인(오픈베타)</button>
+              <button id="open-login-btn" type="button" class="whitespace-nowrap rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">Login (Open Beta)</button>
               <button id="open-register-btn" type="button" class="hidden rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.03]">Get started</button>
               <button id="logout-btn" type="button" class="hidden rounded-xl border border-slate-700/60 bg-slate-900/35 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-white">Logout</button>
             </div>
@@ -119,14 +120,14 @@
               </div>
             </div>
 
-            <div id="analysis-result" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
-              <h3 id="analysis-report-title" class="text-xl font-bold text-white">Analysis report</h3>
-              <div id="report-content" class="mt-6 grid gap-6"></div>
-            </div>
-
             <div id="comparison-dashboard" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
               <h3 id="comparison-dashboard-title" class="text-xl font-bold text-white">Competitor Comparison Dashboard</h3>
               <div id="comparison-dashboard-content" class="mt-6"></div>
+            </div>
+
+            <div id="analysis-result" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+              <h3 id="analysis-report-title" class="text-xl font-bold text-white">Analysis report</h3>
+              <div id="report-content" class="mt-6 grid gap-6"></div>
             </div>
 
             <div id="post-analysis-cta" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
@@ -134,7 +135,7 @@
               <p id="post-cta-description" class="mt-2 text-sm text-slate-300">Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).</p>
               <div class="mt-5 flex flex-wrap gap-3">
                 <button id="cta-open-pricing" type="button" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">View Pricing</button>
-                <button id="cta-open-login" type="button" class="rounded-xl border border-slate-700/60 bg-slate-900/35 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:text-white">로그인(오픈베타)</button>
+                <button id="cta-open-login" type="button" class="whitespace-nowrap rounded-xl border border-slate-700/60 bg-slate-900/35 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:text-white">Login (Open Beta)</button>
               </div>
             </div>
 
@@ -157,7 +158,7 @@
               <p id="pricing-description" class="mt-2 text-sm text-slate-300">Choose a plan based on crawl depth and workflow scale.</p>
               <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <article class="plan-card rounded-2xl border border-slate-800/60 bg-slate-950/25 p-6" data-plan="free"><h3 id="plan-free-title" class="text-lg font-bold text-white">Free</h3><p class="mt-2 text-3xl font-extrabold text-white">$0</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-free-f1">Single URL report</li><li id="plan-free-f2">SEO + GEO + AEO snapshot</li><li id="plan-free-f3">No sitemap batch</li></ul></article>
-                <article class="plan-card cursor-pointer rounded-2xl border border-violet-500/20 bg-slate-950/25 p-6" data-plan="pro"><h3 id="plan-pro-title" class="text-lg font-bold text-white">Pro</h3><p class="mt-2 text-3xl font-extrabold text-white">$49/mo</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-pro-f1">Full sitemap analysis</li><li id="plan-pro-f2">URL queue + background batch</li><li id="plan-pro-f3">Batch status tracking (Coming Soon)</li><li id="plan-pro-f4">Weekly PDF report delivery (Coming Soon)</li></ul></article>
+            <article class="plan-card cursor-pointer rounded-2xl border border-violet-500/20 bg-slate-950/25 p-6" data-plan="pro"><h3 id="plan-pro-title" class="text-lg font-bold text-white">Pro</h3><p class="mt-2 text-3xl font-extrabold text-white">$19.9/mo</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-pro-f1">Full sitemap analysis</li><li id="plan-pro-f2">URL queue + background batch</li><li id="plan-pro-f3">Batch status tracking (Coming Soon)</li><li id="plan-pro-f4">Weekly PDF report delivery (Coming Soon)</li></ul></article>
                 <article class="plan-card cursor-pointer rounded-2xl border border-slate-800/60 bg-slate-950/25 p-6" data-plan="enterprise"><h3 id="plan-ent-title" class="text-lg font-bold text-white">Enterprise</h3><p id="plan-ent-price-label" class="mt-2 text-3xl font-extrabold text-white">Custom</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-ent-f1">Improvement strategy</li><li id="plan-ent-f2">Managed optimization workflow</li><li id="plan-ent-f3">Dedicated support</li><li id="plan-ent-f4">Weekly PDF report delivery (Coming Soon)</li></ul></article>
               </div>
               <p id="pricing-click-hint" class="mt-4 text-sm text-slate-400">Click Pro to continue checkout. Enterprise opens inquiry.</p>
@@ -184,7 +185,7 @@
 
   <div id="auth-modal" class="hidden fixed inset-0 z-50 grid place-items-center bg-black/55 p-4 backdrop-blur-sm">
     <div class="relative w-full max-w-md rounded-2xl border border-slate-800/60 bg-slate-900/70 p-6 backdrop-blur-xl">
-      <button id="close-auth-modal" class="absolute right-3 top-3 rounded-xl border border-slate-700/60 bg-slate-950/40 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white" aria-label="Close">x</button>
+      <button id="close-auth-modal" type="button" class="absolute right-3 top-3 rounded-xl border border-slate-700/60 bg-slate-950/40 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white" aria-label="Close">x</button>
 
       <div id="login-container">
         <h2 id="login-title" class="text-xl font-bold text-white">Log in</h2>

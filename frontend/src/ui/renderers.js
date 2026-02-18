@@ -13,7 +13,7 @@ export function renderComparisonRows(rows, escapeHtml) {
         <li class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-3 ${HOVER_GLOW}">
           <div class="min-w-0">
             <p class="truncate text-sm font-semibold text-white">${label}</p>
-            <p class="mt-0.5 truncate text-xs text-slate-400">${url}</p>
+            <p class="mt-0.5 truncate text-xs text-slate-400" title="${url}">${url}</p>
           </div>
           <div class="shrink-0 text-xs font-semibold text-slate-300">SEO <span class="ml-1 text-sm font-extrabold text-white">${score}</span></div>
         </li>
@@ -51,6 +51,7 @@ export function renderIssueBoard(issues, escapeHtml, labels) {
               (issue) =>
                 `<li class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3 ${HOVER_GLOW}">
                   <p class="text-sm font-semibold text-white break-words">${escapeHtml(issue.label)}</p>
+                  <p class="mt-1 text-xs text-slate-300 break-words">${escapeHtml(issue.why || '')}</p>
                 </li>`
             )
             .join('')}

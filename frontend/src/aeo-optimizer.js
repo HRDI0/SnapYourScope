@@ -5,8 +5,10 @@ const output = document.getElementById('optimizer-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('ao-submit')
 const loginBtn = document.getElementById('ao-login-btn')
+const SESSION_KEY = 'ao_page_state_v1'
 
 let currentLanguage = getStoredLanguage('en')
+let lastOptimizerResponse = null
 
 const I18N = {
   en: {
@@ -25,7 +27,7 @@ const I18N = {
     resultTitle: 'Recommendation Dashboard',
     outputIdle: 'Submit URL to generate dashboard recommendations.',
     outputError: 'Error',
-    loginButton: '로그인(오픈베타)',
+    loginButton: 'Login (Open Beta)',
     loginPaused: 'Login is paused during open beta. Guest mode is active.',
     priority: 'Priority',
     category: 'Category',
@@ -87,13 +89,63 @@ function applyLanguage(lang) {
   setText('ao-result-title', 'resultTitle')
   setText('ao-login-btn', 'loginButton')
 
+  if (output.dataset.state === 'result' && lastOptimizerResponse) {
+    renderDashboard(lastOptimizerResponse)
+    return
+  }
+
   if (!output.dataset.hasResult) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
 }
 
+function saveSessionState() {
+  const optimizerUrlInput = document.getElementById('optimizer-url')
+  const snapshot = {
+    url: optimizerUrlInput?.value || '',
+    hasResult: Boolean(output?.dataset?.hasResult),
+    outputState: output?.dataset?.state || 'idle',
+    resultData: lastOptimizerResponse,
+    errorText: output?.dataset?.state === 'error' ? output.textContent : '',
+  }
+
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(snapshot))
+}
+
+function restoreSessionState() {
+  const raw = sessionStorage.getItem(SESSION_KEY)
+  if (!raw) return
+
+  try {
+    const saved = JSON.parse(raw)
+    const optimizerUrlInput = document.getElementById('optimizer-url')
+
+    if (optimizerUrlInput && typeof saved.url === 'string') {
+      optimizerUrlInput.value = saved.url
+    }
+
+    if (saved?.resultData && saved.outputState === 'result') {
+      lastOptimizerResponse = saved.resultData
+      output.dataset.hasResult = '1'
+      output.dataset.state = 'result'
+      renderDashboard(saved.resultData)
+      return
+    }
+
+    if (saved?.hasResult && saved.outputState === 'error' && typeof saved.errorText === 'string') {
+      output.dataset.hasResult = '1'
+      output.dataset.state = 'error'
+      output.textContent = saved.errorText
+    }
+  } catch {
+    sessionStorage.removeItem(SESSION_KEY)
+  }
+}
+
 function renderDashboard(data) {
+  lastOptimizerResponse = data
+
   const recommendations = data?.result?.recommendations || []
   const highPriority = recommendations.filter((item) => String(item.priority).toLowerCase() === 'high').length
   const mediumPriority = recommendations.filter((item) => String(item.priority).toLowerCase() === 'medium').length
@@ -101,11 +153,11 @@ function renderDashboard(data) {
   const rows = recommendations
     .map(
       (item) => `
-      <tr class="border-t border-slate-800/60">
+      <tr class="border-t border-slate-800/60 align-top">
         <td class="px-3 py-2 text-slate-200">${item.priority || '-'}</td>
         <td class="px-3 py-2 text-slate-300">${item.category || '-'}</td>
         <td class="px-3 py-2 text-white font-semibold">${item.title || '-'}</td>
-        <td class="px-3 py-2 text-slate-300">${item.detail || '-'}</td>
+        <td class="px-3 py-2 text-slate-300 break-words leading-6">${item.detail || '-'}</td>
       </tr>
     `
     )
@@ -120,7 +172,7 @@ function renderDashboard(data) {
         <article class="rounded-xl border border-slate-800/60 bg-slate-900/55 p-3"><p class="text-xs text-slate-400">Low</p><h4 class="mt-1 text-lg font-bold text-emerald-300">${lowPriority}</h4></article>
       </div>
       <div class="overflow-hidden rounded-xl border border-slate-800/60 bg-slate-950/35">
-        <table class="w-full text-left text-xs">
+        <table class="w-full text-left text-sm">
           <thead class="bg-slate-900/60 text-slate-300">
             <tr>
               <th class="px-3 py-2">${t('priority')}</th>
@@ -164,10 +216,12 @@ document.getElementById('aeo-optimizer-form').addEventListener('submit', async (
     output.dataset.hasResult = '1'
     output.dataset.state = 'result'
     renderDashboard(data)
+    saveSessionState()
   } catch (error) {
     output.dataset.hasResult = '1'
     output.dataset.state = 'error'
     output.textContent = `${t('outputError')}: ${error.message}`
+    saveSessionState()
   } finally {
     submitBtn.disabled = false
   }
@@ -186,3 +240,4 @@ if (loginBtn) {
 }
 
 applyLanguage(currentLanguage)
+restoreSessionState()

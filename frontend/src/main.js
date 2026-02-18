@@ -48,11 +48,13 @@ const competitorUrlsInput = document.getElementById('competitor-urls')
 const sitemapOutput = document.getElementById('sitemap-output')
 const googleLoginBtn = document.getElementById('google-login-btn')
 const googleRegisterBtn = document.getElementById('google-register-btn')
+const PAGE_SESSION_KEY = 'main_page_state_v1'
 
 const urlParams = new URLSearchParams(window.location.search)
 let pendingCheckoutPlan = urlParams.get('plan') || null
 
 let latestReportData = null
+let latestComparisonReports = []
 let currentLanguage = localStorage.getItem('ui_lang') || 'en'
 let currentUserTier = 'free'
 
@@ -165,7 +167,7 @@ const I18N = {
     gnbAeo: 'SEO/AEO Optimizer',
     workspaceEyebrow: 'Analytics Workspace',
     workspaceTitle: 'Competitive Visibility Dashboard',
-    login: '로그인(오픈베타)',
+    login: 'Login (Open Beta)',
     register: 'Google sign-in',
     logout: 'Logout',
     heroEyebrow: 'URL intelligence',
@@ -187,7 +189,7 @@ const I18N = {
     postCtaDescription:
       'Log in and subscribe to run full-site batch analysis (sitemap parse + URL queue + background run).',
     postCtaPricing: 'View Pricing',
-    postCtaLogin: '로그인(오픈베타)',
+    postCtaLogin: 'Login (Open Beta)',
     batchTitle: 'Full sitemap analysis (paid)',
     batchDescription: 'Backend logic is implemented. Frontend API wiring can be connected next.',
     batchRefreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
@@ -517,7 +519,7 @@ const I18N = {
     gnbAeo: 'SEO/AEO 最適化',
     workspaceEyebrow: '分析ワークスペース',
     workspaceTitle: '競合可視性ダッシュボード',
-    login: '로그인(오픈베타)',
+    login: 'ログイン（オープンベータ）',
     register: 'Google ログイン',
     logout: 'ログアウト',
     heroEyebrow: 'URL インテリジェンス',
@@ -537,7 +539,7 @@ const I18N = {
     postCtaTitle: 'サイトマップ全体分析が必要ですか？',
     postCtaDescription: 'ログインして購読すると、サイト全体のバッチ分析を実行できます。',
     postCtaPricing: '料金を見る',
-    postCtaLogin: '로그인(오픈베타)',
+    postCtaLogin: 'ログイン（オープンベータ）',
     batchTitle: 'サイトマップ全体分析（有料）',
     batchDescription: 'バックエンド実装は完了しています。フロントAPI接続のみ残っています。',
     batchRefreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
@@ -691,7 +693,7 @@ const I18N = {
     gnbAeo: 'SEO/AEO 优化',
     workspaceEyebrow: '分析工作区',
     workspaceTitle: '竞争可见性仪表盘',
-    login: '로그인(오픈베타)',
+    login: '登录（开放测试）',
     register: 'Google 登录',
     logout: '退出登录',
     heroEyebrow: 'URL 智能分析',
@@ -711,7 +713,7 @@ const I18N = {
     postCtaTitle: '需要完整站点地图分析吗？',
     postCtaDescription: '登录并订阅后，可运行全站批量分析。',
     postCtaPricing: '查看价格',
-    postCtaLogin: '로그인(오픈베타)',
+    postCtaLogin: '登录（开放测试）',
     batchTitle: '完整站点地图分析（付费）',
     batchDescription: '后端逻辑已完成，前端 API 接线可在下一步完成。',
     batchRefreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
@@ -957,7 +959,55 @@ function applyLanguage(lang) {
   setText('email-auth-paused-note', 'emailAuthPaused')
 
   if (latestReportData) {
-    renderReport(latestReportData)
+    renderReport(latestReportData, latestComparisonReports)
+    renderComparisonDashboard(latestReportData, latestComparisonReports)
+    if (postAnalysisCta) {
+      postAnalysisCta.classList.remove('hidden')
+    }
+  }
+}
+
+function savePageSessionState() {
+  const snapshot = {
+    targetUrl: targetUrlInput?.value || '',
+    competitorUrls: competitorUrlsInput?.value || '',
+    reportData: latestReportData,
+    comparisonReports: latestComparisonReports,
+    postCtaVisible: postAnalysisCta ? !postAnalysisCta.classList.contains('hidden') : false,
+  }
+
+  sessionStorage.setItem(PAGE_SESSION_KEY, JSON.stringify(snapshot))
+}
+
+function restorePageSessionState() {
+  const raw = sessionStorage.getItem(PAGE_SESSION_KEY)
+  if (!raw) return
+
+  try {
+    const saved = JSON.parse(raw)
+
+    if (targetUrlInput && typeof saved.targetUrl === 'string') {
+      targetUrlInput.value = saved.targetUrl
+    }
+    if (competitorUrlsInput && typeof saved.competitorUrls === 'string') {
+      competitorUrlsInput.value = saved.competitorUrls
+    }
+
+    if (saved?.reportData && typeof saved.reportData === 'object') {
+      latestReportData = saved.reportData
+      latestComparisonReports = Array.isArray(saved.comparisonReports)
+        ? saved.comparisonReports
+        : []
+
+      renderReport(latestReportData, latestComparisonReports)
+      renderComparisonDashboard(latestReportData, latestComparisonReports)
+
+      if (postAnalysisCta && saved.postCtaVisible) {
+        postAnalysisCta.classList.remove('hidden')
+      }
+    }
+  } catch {
+    sessionStorage.removeItem(PAGE_SESSION_KEY)
   }
 }
 
@@ -1251,10 +1301,10 @@ function renderStatusRows(checks, emptyText) {
     .map((check) => {
       const badge = toBadge(check.status)
       return `
-        <li class="flex items-start justify-between gap-4 rounded-xl border border-slate-800/60 bg-slate-950/35 px-4 py-3">
+        <li class="flex items-start justify-between gap-4 rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3">
           <div>
-            <p class="text-sm font-semibold text-white">${escapeHtml(check.label)}</p>
-            <p class="mt-1 text-xs text-slate-300">${escapeHtml(check.detail || t('noDetails'))}</p>
+            <p class="text-[15px] font-semibold text-white">${escapeHtml(check.label)}</p>
+            <p class="mt-1 text-sm leading-6 text-slate-300">${escapeHtml(check.detail || t('noDetails'))}</p>
           </div>
           <span class="${badge.className}">${badge.label}</span>
         </li>
@@ -1405,11 +1455,11 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
       scales: {
         y: {
           beginAtZero: true,
-          ticks: { color: '#5f6f86' },
-          grid: { color: '#edf2fa' },
+          ticks: { color: '#cbd5e1' },
+          grid: { color: 'rgba(148, 163, 184, 0.2)' },
         },
         x: {
-          ticks: { color: '#5f6f86' },
+          ticks: { color: '#cbd5e1' },
           grid: { display: false },
         },
       },
@@ -1437,7 +1487,7 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
           position: 'bottom',
           labels: {
             boxWidth: 12,
-            color: '#4a5a72',
+            color: '#cbd5e1',
           },
         },
         valueLabels: {
@@ -1489,7 +1539,7 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
             position: 'bottom',
             labels: {
               boxWidth: 12,
-              color: '#4a5a72',
+              color: '#cbd5e1',
             },
           },
           valueLabels: {
@@ -1504,18 +1554,18 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
             position: 'left',
             reverse: true,
             beginAtZero: false,
-            ticks: { color: '#5f6f86' },
-            grid: { color: '#edf2fa' },
+            ticks: { color: '#cbd5e1' },
+            grid: { color: 'rgba(148, 163, 184, 0.2)' },
           },
           y1: {
             type: 'linear',
             position: 'right',
             beginAtZero: true,
-            ticks: { color: '#5f6f86' },
+            ticks: { color: '#cbd5e1' },
             grid: { drawOnChartArea: false },
           },
           x: {
-            ticks: { color: '#5f6f86' },
+            ticks: { color: '#cbd5e1' },
             grid: { display: false },
           },
         },
@@ -1526,6 +1576,7 @@ function renderCharts({ seoScore, geoResult, statusCounts }) {
 
 function renderReport(data, competitorReports = []) {
   latestReportData = data
+  latestComparisonReports = competitorReports
 
   const seoResult = data?.seo_result || {}
   const aeoResult = data?.aeo_result || {}
@@ -1563,7 +1614,7 @@ function renderReport(data, competitorReports = []) {
 
   const issueList = allChecks.filter((check) => check.statusType !== 'pass').slice(0, 6)
   const html = `
-    <section class="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
+    <section id="report-overview" class="space-y-4 rounded-2xl border border-violet-500/25 bg-slate-900/65 p-6 backdrop-blur-xl">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 class="text-xl font-bold text-white">${t('dashboardTitle')}</h3>
@@ -1588,17 +1639,23 @@ function renderReport(data, competitorReports = []) {
         <span class="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200">Caution ${statusCounts.warn}</span>
         <span class="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">Safe ${statusCounts.pass}</span>
       </div>
+      <div class="flex flex-wrap gap-2 text-xs font-semibold">
+        <a href="#report-seo" class="rounded-lg border border-slate-700/60 bg-slate-950/35 px-3 py-1 text-slate-200 transition hover:text-white">${t('sectionSeoEssentials')}</a>
+        <a href="#report-aeo" class="rounded-lg border border-slate-700/60 bg-slate-950/35 px-3 py-1 text-slate-200 transition hover:text-white">${t('sectionAeoSignals')}</a>
+        <a href="#report-latency" class="rounded-lg border border-slate-700/60 bg-slate-950/35 px-3 py-1 text-slate-200 transition hover:text-white">${t('sectionRegionalLatency')}</a>
+        <a href="#report-fixes" class="rounded-lg border border-slate-700/60 bg-slate-950/35 px-3 py-1 text-slate-200 transition hover:text-white">${t('sectionImmediateFixes')}</a>
+      </div>
     </section>
     <section class="grid gap-4 xl:grid-cols-2">
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionSeoEssentials')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(seoChecks, t('emptySeoChecks'))}</ul></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionAeoSignals')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(aeoChecks, t('emptyAeoChecks'))}</ul></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionRegionalLatency')}</h4><div class="mt-3 h-56"><canvas id="geo-latency-chart"></canvas></div><ul class="mt-3 space-y-2">${renderGeoRows(geoResult)}</ul></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionStatusMix')}</h4><div class="mt-3 h-56"><canvas id="status-mix-chart"></canvas></div></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl xl:col-span-2"><h4 class="text-sm font-bold text-white">${t('sectionHybridCorrelation')}</h4><div class="mt-3 h-56"><canvas id="hybrid-correlation-chart"></canvas></div></article>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl xl:col-span-2"><h4 class="text-sm font-bold text-white">${t('sectionContentSnapshot')}</h4><div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4"><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaWords')}</span><strong class="text-lg text-white">${words}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaMissingAlt')}</span><strong class="text-lg text-white">${missingAlt}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaCurrencies')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_currencies?.length || 0}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaPhoneFormats')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_phones?.length || 0}</strong></div></div></article>
+      <article id="report-seo" class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionSeoEssentials')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(seoChecks, t('emptySeoChecks'))}</ul></article>
+      <article id="report-aeo" class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionAeoSignals')}</h4><ul class="mt-3 space-y-2">${renderStatusRows(aeoChecks, t('emptyAeoChecks'))}</ul></article>
+      <article id="report-latency" class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionRegionalLatency')}</h4><div class="mt-3 h-56"><canvas id="geo-latency-chart"></canvas></div><ul class="mt-3 space-y-2">${renderGeoRows(geoResult)}</ul></article>
+      <article class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionStatusMix')}</h4><div class="mt-3 h-56"><canvas id="status-mix-chart"></canvas></div></article>
+      <article class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-6 backdrop-blur-xl xl:col-span-2"><h4 class="text-sm font-bold text-white">${t('sectionHybridCorrelation')}</h4><div class="mt-3 h-56"><canvas id="hybrid-correlation-chart"></canvas></div></article>
+      <article class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-6 backdrop-blur-xl xl:col-span-2"><h4 class="text-sm font-bold text-white">${t('sectionContentSnapshot')}</h4><div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4"><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaWords')}</span><strong class="text-lg text-white">${words}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaMissingAlt')}</span><strong class="text-lg text-white">${missingAlt}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaCurrencies')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_currencies?.length || 0}</strong></div><div class="rounded-xl border border-slate-800/60 bg-slate-950/35 p-3"><span class="block text-xs text-slate-400">${t('metaPhoneFormats')}</span><strong class="text-lg text-white">${seoResult?.geo_signals?.found_phones?.length || 0}</strong></div></div></article>
     </section>
-    <section>
-      <article class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionImmediateFixes')}</h4><div class="mt-3">${renderIssueBoard(issueList, escapeHtml, { p0: t('issuePriorityP0'), p1: t('issuePriorityP1'), p2: t('issuePriorityP2'), empty: t('issuePriorityEmpty') })}</div></article>
+    <section id="report-fixes">
+      <article class="rounded-2xl border border-amber-500/25 bg-slate-900/60 p-6 backdrop-blur-xl"><h4 class="text-sm font-bold text-white">${t('sectionImmediateFixes')}</h4><div class="mt-3">${renderIssueBoard(issueList, escapeHtml, { p0: t('issuePriorityP0'), p1: t('issuePriorityP1'), p2: t('issuePriorityP2'), empty: t('issuePriorityEmpty') })}</div></article>
     </section>
   `
 
@@ -1730,6 +1787,7 @@ analyzeBtn.addEventListener('click', async () => {
     renderReport(data, competitorReports)
     renderComparisonDashboard(data, competitorReports)
     postAnalysisCta.classList.remove('hidden')
+    savePageSessionState()
   } catch (err) {
     setAppState({ lastError: err.message })
     alert(`${t('analysisFailedPrefix')}: ${err.message}`)
@@ -1855,4 +1913,5 @@ if (oauthToken) {
 }
 
 applyLanguage(currentLanguage)
+restorePageSessionState()
 syncCurrentUserTier()
