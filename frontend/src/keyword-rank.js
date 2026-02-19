@@ -1,14 +1,20 @@
 import { applyDocumentLanguage, getStoredLanguage, setStoredLanguage } from './core/session'
 import { apiUrl } from './core/api'
+import { createLoadingController } from './core/loading'
 
 const output = document.getElementById('kr-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('kr-submit')
 const loginBtn = document.getElementById('kr-login-btn')
 const SESSION_KEY = 'kr_page_state_v1'
+const loading = createLoadingController({
+  modalId: 'kr-loading-modal',
+  defaultMessage: 'Loading...',
+})
 
 let currentLanguage = getStoredLanguage('en')
 let lastRankResponse = null
+let isSubmitting = false
 
 const I18N = {
   en: {
@@ -29,9 +35,11 @@ const I18N = {
     policyNote: 'Open beta: single query dashboard tracking. Multi-query is coming soon.',
     refreshNote: 'Refresh policy: daily (lightweight search tracking).',
     submit: 'Run Search Rank',
+    submitting: 'Loading...',
     resultTitle: 'Search Rank Dashboard',
     outputIdle: 'Run search rank tracking to view dashboard.',
     outputError: 'Error',
+    rankPaused: 'Search rank tracking is temporarily paused during open beta.',
     missingQuery: 'Enter a search query.',
     loginButton: 'Login (Open Beta)',
     loginPaused: 'Login is paused during open beta. Guest mode is active.',
@@ -62,9 +70,11 @@ const I18N = {
     policyNote: '오픈 베타: 단일 검색어 추적만 제공하며 다중 검색어는 오픈 예정입니다.',
     refreshNote: '갱신 주기: 매일 (경량 검색 추적).',
     submit: '검색 순위 실행',
+    submitting: '로딩 중...',
     resultTitle: '검색 순위 추적 대시보드',
     outputIdle: '검색 순위를 실행하면 대시보드가 표시됩니다.',
     outputError: '오류',
+    rankPaused: '오픈 베타 기간 동안 검색 순위 추적이 일시 중단되었습니다.',
     missingQuery: '검색어를 입력해주세요.',
     loginButton: '로그인(오픈베타)',
     loginPaused: '오픈 베타 기간에는 로그인이 일시 중단되며 게스트 모드가 활성화됩니다.',
@@ -95,9 +105,11 @@ const I18N = {
     policyNote: 'オープンベータ: 単一クエリのみ提供。複数クエリは近日公開。',
     refreshNote: '更新ポリシー: 毎日 (軽量トラッキング)。',
     submit: '検索順位を実行',
+    submitting: '読み込み中...',
     resultTitle: '検索順位トラッキング ダッシュボード',
     outputIdle: '実行するとダッシュボードが表示されます。',
     outputError: 'エラー',
+    rankPaused: 'オープンベータ期間中、検索順位トラッキングは一時停止中です。',
     missingQuery: '検索クエリを入力してください。',
     loginButton: 'ログイン（オープンベータ）',
     loginPaused: 'オープンベータ期間中はログインを一時停止しています。',
@@ -128,9 +140,11 @@ const I18N = {
     policyNote: '开放测试: 当前仅支持单搜索词追踪，多搜索词即将开放。',
     refreshNote: '刷新策略: 每日 (轻量追踪)。',
     submit: '执行搜索排名',
+    submitting: '加载中...',
     resultTitle: '搜索排名追踪仪表盘',
     outputIdle: '执行后将显示仪表盘。',
     outputError: '错误',
+    rankPaused: '开放测试期间，搜索排名追踪暂时停用。',
     missingQuery: '请输入搜索词。',
     loginButton: '登录（开放测试）',
     loginPaused: '开放测试期间登录已暂停，访客模式可用。',
@@ -175,7 +189,9 @@ function applyLanguage(lang) {
   setText('kr-url-label', 'urlLabel')
   setText('kr-policy-note', 'policyNote')
   setText('kr-refresh-note', 'refreshNote')
-  setText('kr-submit', 'submit')
+  if (submitBtn) {
+    submitBtn.textContent = isSubmitting ? t('submitting') : t('submit')
+  }
   setText('kr-result-title', 'resultTitle')
   setText('kr-login-btn', 'loginButton')
 
@@ -191,6 +207,20 @@ function applyLanguage(lang) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
+}
+
+function setSubmittingState(active) {
+  isSubmitting = active
+  if (!submitBtn) return
+
+  submitBtn.disabled = active || output.dataset.paused === '1'
+  submitBtn.textContent = active ? t('submitting') : t('submit')
+
+  if (active) {
+    loading.show(t('submitting'))
+    return
+  }
+  loading.hide()
 }
 
 function saveSessionState() {
@@ -237,6 +267,15 @@ function restoreSessionState() {
   } catch {
     sessionStorage.removeItem(SESSION_KEY)
   }
+}
+
+function setPausedState(message) {
+  output.dataset.hasResult = '1'
+  output.dataset.state = 'error'
+  output.dataset.paused = '1'
+  output.textContent = message || `${t('outputError')}: ${t('rankPaused')}`
+  setSubmittingState(false)
+  submitBtn.disabled = true
 }
 
 function renderDashboard(response) {
@@ -313,7 +352,8 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
     return
   }
 
-  submitBtn.disabled = true
+  setSubmittingState(true)
+  output.dataset.paused = ''
   try {
     const response = await fetch(apiUrl('/api/search-rank'), {
       method: 'POST',
@@ -335,6 +375,12 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
     }
 
     if (!response.ok) {
+      if (response.status === 503) {
+        const detail = data?.detail || t('rankPaused')
+        setPausedState(`${t('outputError')}: ${detail}`)
+        saveSessionState()
+        return
+      }
       throw new Error(data?.detail || JSON.stringify(data))
     }
 
@@ -348,7 +394,7 @@ document.getElementById('rank-track-form').addEventListener('submit', async (eve
     output.textContent = `${t('outputError')}: ${error.message}`
     saveSessionState()
   } finally {
-    submitBtn.disabled = false
+    setSubmittingState(false)
   }
 })
 

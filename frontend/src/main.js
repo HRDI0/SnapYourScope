@@ -1,6 +1,7 @@
 import Chart from 'chart.js/auto'
 import { renderComparisonRows, renderIssueBoard } from './ui/renderers'
 import { apiUrl } from './core/api'
+import { createLoadingController } from './core/loading'
 
 let token = localStorage.getItem('access_token')
 
@@ -21,6 +22,10 @@ const charts = {
   statusMix: null,
   hybridCorrelation: null,
 }
+const analyzeLoading = createLoadingController({
+  modalId: 'app-loading-modal',
+  defaultMessage: 'Analyzing...',
+})
 
 const openLoginBtn = document.getElementById('open-login-btn')
 const openRegisterBtn = document.getElementById('open-register-btn')
@@ -137,7 +142,9 @@ Chart.register(chartValueLabelPlugin)
 
 function setAppState(nextState) {
   Object.assign(appState, nextState)
-  stateListeners.forEach((listener) => listener(appState))
+  stateListeners.forEach((listener) => {
+    listener(appState)
+  })
 }
 
 function subscribeAppState(listener) {
@@ -901,7 +908,9 @@ function applyLanguage(lang) {
   setText('competitor-policy', 'competitorPolicy')
   setPlaceholder('target-url', 'targetUrlPlaceholder')
   setPlaceholder('competitor-urls', 'competitorPlaceholder')
-  setText('analyze-btn', 'analyzeButton')
+  if (analyzeBtn) {
+    analyzeBtn.textContent = appState.isLoading ? t('analyzingButton') : t('analyzeButton')
+  }
   setText('analysis-report-title', 'analysisReportTitle')
   setText('comparison-dashboard-title', 'competitorComparisonTitle')
   setText('post-cta-title', 'postCtaTitle')
@@ -1882,6 +1891,11 @@ subscribeAppState((state) => {
   if (!analyzeBtn) return
   analyzeBtn.disabled = state.isLoading
   analyzeBtn.innerText = state.isLoading ? t('analyzingButton') : t('analyzeButton')
+  if (state.isLoading) {
+    analyzeLoading.show(t('analyzingButton'))
+    return
+  }
+  analyzeLoading.hide()
 })
 
 setAuthButtons()

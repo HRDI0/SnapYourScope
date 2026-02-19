@@ -27,9 +27,14 @@ async def recommend_aeo_optimization(
             include_aeo=True,
             include_pagespeed=False,
         )
-        recommendation = AeoOptimizerService.build_recommendations(
+        rule_recommendation = AeoOptimizerService.build_recommendations(
             url=request.url,
             analysis_result=analysis,
+        )
+        recommendation = AeoOptimizerService.build_recommendations_with_llm(
+            url=request.url,
+            analysis_result=analysis,
+            rule_result=rule_recommendation,
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

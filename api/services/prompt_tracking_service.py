@@ -3,9 +3,13 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
+from ..logger import setup_logger
 from .ai_ops_service import AiOpsService
 from .llm_service import LlmService
 from .search_tracking_service import SearchTrackingService
+
+
+logger = setup_logger("api.services.prompt_tracking")
 
 
 @dataclass
@@ -97,6 +101,14 @@ class PromptTrackingService:
         llm_sources: List[str],
         search_engines: List[str],
     ) -> Dict[str, object]:
+        logger.info(
+            "Run prompt-tracking target_url='%s' llm_sources=%s search_engines=%s query_length=%s",
+            target_url,
+            [source.lower().strip() for source in llm_sources],
+            [engine.lower().strip() for engine in search_engines],
+            len(query or ""),
+        )
+
         brand = PromptTrackingService.extract_brand(
             target_url=target_url, brand_name=brand_name
         )

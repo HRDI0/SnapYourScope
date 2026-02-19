@@ -1,15 +1,21 @@
 import { PROMPT_INCLUDED_COUNT } from './core/policy'
 import { applyDocumentLanguage, getStoredLanguage, setStoredLanguage } from './core/session'
 import { apiUrl } from './core/api'
+import { createLoadingController } from './core/loading'
 
 const output = document.getElementById('result-output')
 const languageSelect = document.getElementById('language-select')
 const promptSubmitBtn = document.getElementById('pt-prompt-submit')
 const loginBtn = document.getElementById('pt-login-btn')
 const SESSION_KEY = 'pt_page_state_v1'
+const loading = createLoadingController({
+  modalId: 'pt-loading-modal',
+  defaultMessage: 'Loading...',
+})
 
 let currentLanguage = getStoredLanguage('en')
 let lastPromptResponse = null
+let isSubmitting = false
 
 const I18N = {
   en: {
@@ -27,10 +33,11 @@ const I18N = {
     promptUrlLabel: 'Target URL',
     brandLabel: 'Brand Name (reference only)',
     promptSubmit: 'Run Prompt Tracking',
+    submitting: 'Loading...',
     resultTitle: 'Prompt Tracker Dashboard',
     outputIdle: 'Run prompt tracking to view dashboard.',
     outputError: 'Error',
-    paidPolicy: `Open beta policy: ${PROMPT_INCLUDED_COUNT} prompts per guest/browser.`,
+    paidPolicy: `Open beta policy: up to ${PROMPT_INCLUDED_COUNT} prompts per request only.`,
     refreshPolicy: 'Refresh policy: weekly (LLM/API-intensive).',
     promptMissing: 'Enter at least one prompt.',
     loginButton: 'Login (Open Beta)',
@@ -39,7 +46,7 @@ const I18N = {
     tableTier: 'Tier',
     tableReason: 'Tier Description',
     tableLink: 'Share Link',
-    noLink: 'Not available',
+    noLink: 'Coming Soon!',
     tier1: 'Tier 1',
     tier2: 'Tier 2',
     tier3: 'Tier 3',
@@ -60,10 +67,11 @@ const I18N = {
     promptUrlLabel: '대상 URL',
     brandLabel: '브랜드명 (참고용)',
     promptSubmit: '프롬프트 추적 실행',
+    submitting: '로딩 중...',
     resultTitle: '프롬프트 추적기 대시보드',
     outputIdle: '프롬프트 추적을 실행하면 대시보드가 표시됩니다.',
     outputError: '오류',
-    paidPolicy: `오픈 베타 정책: 브라우저 기준 ${PROMPT_INCLUDED_COUNT}개 프롬프트`,
+    paidPolicy: `오픈 베타 정책: 1회 요청당 최대 ${PROMPT_INCLUDED_COUNT}개 프롬프트만 허용`,
     refreshPolicy: '갱신 주기: 매주 (LLM/API 고비용 기능).',
     promptMissing: '프롬프트를 1개 이상 입력해주세요.',
     loginButton: '로그인(오픈베타)',
@@ -72,7 +80,7 @@ const I18N = {
     tableTier: '티어',
     tableReason: '티어 설명',
     tableLink: '공유 링크',
-    noLink: '제공되지 않음',
+    noLink: 'Coming Soon!',
     tier1: 'Tier 1',
     tier2: 'Tier 2',
     tier3: 'Tier 3',
@@ -93,10 +101,11 @@ const I18N = {
     promptUrlLabel: '対象 URL',
     brandLabel: 'ブランド名 (参照用)',
     promptSubmit: 'プロンプト追跡を実行',
+    submitting: '読み込み中...',
     resultTitle: 'プロンプトトラッカーダッシュボード',
     outputIdle: '実行するとダッシュボードが表示されます。',
     outputError: 'エラー',
-    paidPolicy: `オープンベータ: ブラウザごとに ${PROMPT_INCLUDED_COUNT} 件`,
+    paidPolicy: `オープンベータ: 1回のリクエストで最大 ${PROMPT_INCLUDED_COUNT} 件のみ`,
     refreshPolicy: '更新ポリシー: 毎週 (LLM/API 高コスト機能)。',
     promptMissing: 'プロンプトを1件以上入力してください。',
     loginButton: 'ログイン（オープンベータ）',
@@ -105,7 +114,7 @@ const I18N = {
     tableTier: 'ティア',
     tableReason: 'ティア説明',
     tableLink: '共有リンク',
-    noLink: '未提供',
+    noLink: 'Coming Soon!',
     tier1: 'Tier 1',
     tier2: 'Tier 2',
     tier3: 'Tier 3',
@@ -126,10 +135,11 @@ const I18N = {
     promptUrlLabel: '目标 URL',
     brandLabel: '品牌名 (仅参考)',
     promptSubmit: '开始提示词追踪',
+    submitting: '加载中...',
     resultTitle: '提示词追踪器仪表盘',
     outputIdle: '执行后将显示仪表盘。',
     outputError: '错误',
-    paidPolicy: `开放测试：每个浏览器 ${PROMPT_INCLUDED_COUNT} 条`,
+    paidPolicy: `开放测试：仅支持每次请求最多 ${PROMPT_INCLUDED_COUNT} 条`,
     refreshPolicy: '刷新策略: 每周 (LLM/API 高成本功能)。',
     promptMissing: '请至少输入一条提示词。',
     loginButton: '登录（开放测试）',
@@ -138,7 +148,7 @@ const I18N = {
     tableTier: '层级',
     tableReason: '层级说明',
     tableLink: '分享链接',
-    noLink: '暂无',
+    noLink: 'Coming Soon!',
     tier1: 'Tier 1',
     tier2: 'Tier 2',
     tier3: 'Tier 3',
@@ -186,7 +196,9 @@ function applyLanguage(lang) {
   setText('pt-brand-label', 'brandLabel')
   setText('pt-policy-note', 'paidPolicy')
   setText('pt-refresh-note', 'refreshPolicy')
-  setText('pt-prompt-submit', 'promptSubmit')
+  if (promptSubmitBtn) {
+    promptSubmitBtn.textContent = isSubmitting ? t('submitting') : t('promptSubmit')
+  }
   setText('pt-result-title', 'resultTitle')
 
   if (output.dataset.state === 'result' && lastPromptResponse) {
@@ -198,6 +210,20 @@ function applyLanguage(lang) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
+}
+
+function setSubmittingState(active) {
+  isSubmitting = active
+  if (!promptSubmitBtn) return
+
+  promptSubmitBtn.disabled = active
+  promptSubmitBtn.textContent = active ? t('submitting') : t('promptSubmit')
+
+  if (active) {
+    loading.show(t('submitting'))
+    return
+  }
+  loading.hide()
 }
 
 function setCheckedValues(name, values) {
@@ -290,6 +316,11 @@ function tierLabel(tier) {
   return t('tier4')
 }
 
+function isPublicChatGptShareUrl(url) {
+  if (!url || typeof url !== 'string') return false
+  return /^https:\/\/chatgpt\.com\/share\/[A-Za-z0-9-]+$/.test(url.trim())
+}
+
 function renderDashboard(data) {
   lastPromptResponse = data
 
@@ -306,8 +337,9 @@ function renderDashboard(data) {
     if (typeof tierCounts[llm.tier] === 'number') {
       tierCounts[llm.tier] += 1
     }
-    const link = llm?.response_share_url
-      ? `<a href="${llm.response_share_url}" target="_blank" rel="noreferrer" class="block max-w-[18rem] truncate text-violet-300 hover:text-white" title="${llm.response_share_url}">${llm.response_share_url}</a>`
+    const shareUrl = llm?.response_share_url
+    const link = isPublicChatGptShareUrl(shareUrl)
+      ? `<a href="${shareUrl}" target="_blank" rel="noreferrer" class="block max-w-[18rem] truncate text-violet-300 hover:text-white" title="${shareUrl}">${shareUrl}</a>`
       : t('noLink')
     return `
       <tr class="border-t border-slate-800/60">
@@ -358,7 +390,7 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
     return
   }
 
-  promptSubmitBtn.disabled = true
+  setSubmittingState(true)
   try {
     const response = await fetch(apiUrl('/api/prompt-track'), {
       method: 'POST',
@@ -396,7 +428,7 @@ document.getElementById('prompt-track-form').addEventListener('submit', async (e
     output.textContent = `${t('outputError')}: ${error.message}`
     saveSessionState()
   } finally {
-    promptSubmitBtn.disabled = false
+    setSubmittingState(false)
   }
 })
 

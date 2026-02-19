@@ -56,3 +56,4 @@ CORS_ORIGINS = _parse_csv_env(
 OPEN_BETA_MODE = _parse_bool_env("OPEN_BETA_MODE", "false")
 AUTH_TEMP_DISABLED = _parse_bool_env("AUTH_TEMP_DISABLED", "false")
 BILLING_TEMP_DISABLED = _parse_bool_env("BILLING_TEMP_DISABLED", "false")
+SEARCH_RANK_TEMP_DISABLED = _parse_bool_env("SEARCH_RANK_TEMP_DISABLED", "false")

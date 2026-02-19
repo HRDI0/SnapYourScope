@@ -1,14 +1,20 @@
 import { applyDocumentLanguage, getStoredLanguage, setStoredLanguage } from './core/session'
 import { apiUrl } from './core/api'
+import { createLoadingController } from './core/loading'
 
 const output = document.getElementById('optimizer-output')
 const languageSelect = document.getElementById('language-select')
 const submitBtn = document.getElementById('ao-submit')
 const loginBtn = document.getElementById('ao-login-btn')
 const SESSION_KEY = 'ao_page_state_v1'
+const loading = createLoadingController({
+  modalId: 'ao-loading-modal',
+  defaultMessage: 'Loading...',
+})
 
 let currentLanguage = getStoredLanguage('en')
 let lastOptimizerResponse = null
+let isSubmitting = false
 
 const I18N = {
   en: {
@@ -24,6 +30,7 @@ const I18N = {
     paidDesc: 'Provides traditional SEO fixes and GEO-paper aligned AEO guidance from URL analysis.',
     urlLabel: 'Target URL',
     submit: 'Generate Recommendations',
+    submitting: 'Loading...',
     resultTitle: 'Recommendation Dashboard',
     outputIdle: 'Submit URL to generate dashboard recommendations.',
     outputError: 'Error',
@@ -47,6 +54,7 @@ const I18N = {
     paidDesc: 'URL 분석 기반 전통 SEO 개선안과 GEO 논문 기반 AEO 개선안을 제공합니다.',
     urlLabel: '대상 URL',
     submit: '추천 생성',
+    submitting: '로딩 중...',
     resultTitle: '추천 대시보드',
     outputIdle: 'URL 제출 시 추천 대시보드가 생성됩니다.',
     outputError: '오류',
@@ -85,7 +93,9 @@ function applyLanguage(lang) {
   setText('ao-paid-title', 'paidTitle')
   setText('ao-paid-desc', 'paidDesc')
   setText('ao-url-label', 'urlLabel')
-  setText('ao-submit', 'submit')
+  if (submitBtn) {
+    submitBtn.textContent = isSubmitting ? t('submitting') : t('submit')
+  }
   setText('ao-result-title', 'resultTitle')
   setText('ao-login-btn', 'loginButton')
 
@@ -98,6 +108,20 @@ function applyLanguage(lang) {
     output.dataset.state = 'idle'
     output.textContent = t('outputIdle')
   }
+}
+
+function setSubmittingState(active) {
+  isSubmitting = active
+  if (!submitBtn) return
+
+  submitBtn.disabled = active
+  submitBtn.textContent = active ? t('submitting') : t('submit')
+
+  if (active) {
+    loading.show(t('submitting'))
+    return
+  }
+  loading.hide()
 }
 
 function saveSessionState() {
@@ -191,7 +215,7 @@ function renderDashboard(data) {
 document.getElementById('aeo-optimizer-form').addEventListener('submit', async (event) => {
   event.preventDefault()
 
-  submitBtn.disabled = true
+  setSubmittingState(true)
   try {
     const response = await fetch(apiUrl('/api/aeo-optimizer/recommend'), {
       method: 'POST',
@@ -223,7 +247,7 @@ document.getElementById('aeo-optimizer-form').addEventListener('submit', async (
     output.textContent = `${t('outputError')}: ${error.message}`
     saveSessionState()
   } finally {
-    submitBtn.disabled = false
+    setSubmittingState(false)
   }
 })
 

@@ -4,9 +4,9 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 
 from .. import auth, database, models
+from ..config import SEARCH_RANK_TEMP_DISABLED
 from ..services.prompt_tracking_service import PromptTrackingService
 from ..services.search_tracking_service import SearchTrackingService
 
@@ -16,14 +16,14 @@ PROMPT_INCLUDED_COUNT = 5
 PROMPT_ADDON_BLOCK_SIZE = 5
 PROMPT_ADDON_BLOCK_PRICE_USD = 0
 DEMO_ENABLED_LLM_SOURCES = {"gpt"}
-DEMO_ENABLED_SEARCH_ENGINES = {"google"}
+DEMO_ENABLED_SEARCH_ENGINES = set()
 
 
 class SearchRankRequest(BaseModel):
     query: Optional[str] = None
     queries: Optional[List[str]] = None
     target_url: str
-    engines: List[str] = Field(default_factory=lambda: ["google", "bing", "naver"])
+    engines: List[str] = Field(default_factory=lambda: ["google", "naver"])
 
 
 class PromptTrackRequest(BaseModel):
@@ -33,15 +33,22 @@ class PromptTrackRequest(BaseModel):
     demo_client_id: Optional[str] = None
     brand_name: Optional[str] = None
     llm_sources: List[str] = Field(default_factory=lambda: ["gpt", "gemini"])
-    search_engines: List[str] = Field(
-        default_factory=lambda: ["google", "bing", "naver"]
-    )
+    search_engines: List[str] = Field(default_factory=list)
 
 
-def _normalize_queries(query: Optional[str], queries: Optional[List[str]]) -> List[str]:
+def _normalize_queries(
+    query: Optional[str],
+    queries: Optional[List[str]],
+    dedup: bool = True,
+) -> List[str]:
     normalized = [item.strip() for item in (queries or []) if item and item.strip()]
-    if query and query.strip():
-        normalized.insert(0, query.strip())
+
+    query_value = (query or "").strip()
+    if query_value and (not normalized or normalized[0] != query_value):
+        normalized.insert(0, query_value)
+
+    if not dedup:
+        return normalized
 
     deduped: List[str] = []
     seen = set()
@@ -102,12 +109,22 @@ def _normalize_options(values: List[str], allowed: set[str]) -> List[str]:
     return normalized
 
 
+def _ensure_search_rank_enabled() -> None:
+    if SEARCH_RANK_TEMP_DISABLED:
+        raise HTTPException(
+            status_code=503,
+            detail="Search rank tracking is temporarily paused during open beta.",
+        )
+
+
 @router.post("/search-rank")
 async def search_rank(
     request: SearchRankRequest,
     current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
 ):
-    dedup_queries = _normalize_queries(request.query, request.queries)
+    _ensure_search_rank_enabled()
+
+    dedup_queries = _normalize_queries(request.query, request.queries, dedup=True)
     if not dedup_queries:
         raise HTTPException(status_code=400, detail="At least one query is required.")
 
@@ -144,9 +161,9 @@ async def search_rank(
 async def prompt_track(
     request: PromptTrackRequest,
     current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
-    db: Session = Depends(database.get_db),
+    db=Depends(database.get_db),
 ):
-    dedup_queries = _normalize_queries(request.query, request.queries)
+    dedup_queries = _normalize_queries(request.query, request.queries, dedup=False)
     if not dedup_queries:
         raise HTTPException(
             status_code=400, detail="At least one prompt query is required."
@@ -162,10 +179,13 @@ async def prompt_track(
     search_engines = _normalize_options(
         request.search_engines, DEMO_ENABLED_SEARCH_ENGINES
     )
-    if not search_engines:
+
+    if len(dedup_queries) > PROMPT_INCLUDED_COUNT:
         raise HTTPException(
             status_code=400,
-            detail="No enabled search engine selected. Available in demo: google.",
+            detail=(
+                f"Prompt tracking accepts up to {PROMPT_INCLUDED_COUNT} prompts per request."
+            ),
         )
 
     demo_client_id = (request.demo_client_id or "").strip()
@@ -173,27 +193,6 @@ async def prompt_track(
         raise HTTPException(
             status_code=400,
             detail="demo_client_id is required for guest open beta prompt tracking.",
-        )
-
-    if current_user is not None:
-        usage_filter = db.query(models.PromptTrackRun).filter(
-            models.PromptTrackRun.user_id == current_user.id
-        )
-    else:
-        usage_filter = db.query(models.PromptTrackRun).filter(
-            models.PromptTrackRun.user_id == 0,
-            models.PromptTrackRun.query_text == f"[guest_demo:{demo_client_id}]",
-        )
-
-    used_prompt_count = usage_filter.count()
-    remaining_prompts = max(0, PROMPT_INCLUDED_COUNT - used_prompt_count)
-    if len(dedup_queries) > remaining_prompts:
-        raise HTTPException(
-            status_code=403,
-            detail=(
-                "Demo beta prompt quota exceeded. "
-                f"Remaining prompts: {remaining_prompts}/{PROMPT_INCLUDED_COUNT}."
-            ),
         )
 
     extra_prompts = max(0, len(dedup_queries) - PROMPT_INCLUDED_COUNT)
@@ -260,10 +259,8 @@ async def prompt_track(
             "add_on_usd_monthly": add_on_usd_monthly,
             "add_on_block_size": PROMPT_ADDON_BLOCK_SIZE,
             "beta_mode": "open_beta",
-            "used_prompts": used_prompt_count + len(dedup_queries),
-            "remaining_prompts": max(
-                0, PROMPT_INCLUDED_COUNT - used_prompt_count - len(dedup_queries)
-            ),
+            "used_prompts": len(dedup_queries),
+            "remaining_prompts": max(0, PROMPT_INCLUDED_COUNT - len(dedup_queries)),
             "enabled_llm_sources": sorted(DEMO_ENABLED_LLM_SOURCES),
             "enabled_search_engines": sorted(DEMO_ENABLED_SEARCH_ENGINES),
         },
