@@ -1,6 +1,6 @@
 # Implementation Progress
 
-Last updated: 2026-02-15
+Last updated: 2026-02-20
 
 ## 기록 기준
 
@@ -65,7 +65,7 @@ Last updated: 2026-02-15
   - `api/services/sitemap_batch_service.py`
 - 배포/스토리지 점검 자산 추가
   - `scripts/storage_connection_check.py`
-  - `deliverables/PHASE3_DEPLOYMENT_CHECKLIST.md`
+  - `deliverables/GO_LIVE_CHECKLIST.md` (현재 통합본으로 흡수)
 
 ### Phase 4 완료
 - webhook idempotency 구현
@@ -74,7 +74,7 @@ Last updated: 2026-02-15
   - `api/models.py` (`BillingWebhookEvent`)
 - 결제 운영 문서 추가
   - `deliverables/BILLING_RUNBOOK.md`
-  - `deliverables/WEBHOOK_TEST_CHECKLIST.md`
+  - (웹훅 체크리스트는 현재 `BILLING_RUNBOOK.md`에 통합)
 
 ### Phase 5 완료
 - AI 운영 메타 계층 추가
@@ -87,8 +87,7 @@ Last updated: 2026-02-15
 
 ### Phase 6 완료
 - 계정 연동 핸드오프 패키지 정리
-  - `deliverables/ACCOUNT_HANDOFF_GUIDE.md`
-  - `deliverables/GO_LIVE_CHECKLIST.md`
+  - `deliverables/GO_LIVE_CHECKLIST.md` (핸드오프 가이드 통합)
 - 준비 상태 점검 스크립트 추가
   - `scripts/account_handoff_readiness.py`
 - staging preflight 점검 스크립트 추가
@@ -184,8 +183,7 @@ Last updated: 2026-02-15
   - `deliverables/IMPLEMENTATION_PROGRESS.md`
 
 ### ULW Phase 7 (요청 기반 확장) 완료
-- 실행 계획 문서 추가
-  - `deliverables/ULW_PHASE7_EXECUTION_PLAN.md`
+- 실행 계획 기준 확장 작업 완료
 - UX 게이팅 개선
   - 비로그인/무료에서도 유료 기능 URL 입력칸은 표시 유지, 입력은 잠금(회색) 처리
   - 파일: `frontend/app.html`, `frontend/src/main.js`, `frontend/style.css`, `frontend/prompt-tracker.html`, `frontend/aeo-optimizer.html`, `frontend/src/prompt-tracker.js`, `frontend/src/aeo-optimizer.js`, `frontend/src/tools.css`
@@ -234,6 +232,26 @@ Last updated: 2026-02-15
   - SEO 기술 권고(canonical, heading, alt, meta) 추가
   - 파일: `api/services/aeo_optimizer_service.py`
 
+## 2026-02-20
+
+### 오픈베타 통합 UI/리포트 정리
+- 메인 대시보드에서 경쟁 URL 흐름 제거, 단일 URL 분석으로 정리
+  - `frontend/src/main.js`
+- SEO/AEO Optimizer 추천을 메인 리포트 섹션으로 통합
+  - `frontend/src/main.js`
+- 글로벌 속도는 그래프 제거 후 숫자 지표 중심으로 재구성
+  - `frontend/src/main.js`
+- 검색순위/경쟁URL 관련 미사용 i18n 키 정리
+  - `frontend/src/main.js`, `frontend/src/landing.js`, `frontend/src/prompt-tracker.js`, `frontend/src/aeo-optimizer.js`
+
+### 메뉴 순서 통일 작업
+- 상단 메뉴 + 좌측 탭에서 `SEO/AEO Optimizer -> Prompt Tracker` 순서로 통일
+  - `frontend/app.html`, `frontend/index.html`, `frontend/prompt-tracker.html`, `frontend/aeo-optimizer.html`, `frontend/keyword-rank.html`
+
+### 검증
+- LSP diagnostics: 수정 파일 에러 없음
+- Frontend build: `frontend`에서 `npm run build` 통과
+
 ## 검증 로그 (최근)
 
 - `venv/Scripts/python.exe -m compileall api *.py scripts` 통과
@@ -261,4 +279,3 @@ Last updated: 2026-02-15
 - 개발 보고: `deliverables/DEVELOPMENT_REPORT.md`
 - 개발 계획: `deliverables/DEVELOPMENT_PLAN.md`
 - 디자인 계획: `deliverables/design_implementation_progress.md`
-- 원본 리서치: `deliverables/deep-research-report.md`

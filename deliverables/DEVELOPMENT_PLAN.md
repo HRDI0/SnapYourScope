@@ -1,7 +1,6 @@
 # Development Plan (Integrated)
 
-Last updated: 2026-02-15
-Source baseline: `deliverables/deep-research-report.md`
+Last updated: 2026-02-20
 
 ## 1) 계획 목적
 
@@ -18,6 +17,7 @@ Source baseline: `deliverables/deep-research-report.md`
 - 프롬프트 저장 정책: raw prompt/raw LLM response 미저장
 - 결제 정책: Stripe 단일 경로 유지
 - 가격 정책: Prompt Tracking 기본 30개 + 추가 5개당 월 $10
+- 오픈베타 UI 정책: Search Rank는 코드 보존 + UI 비노출 유지
 
 ## 3) 아키텍처 원칙
 
@@ -64,6 +64,7 @@ Source baseline: `deliverables/deep-research-report.md`
 | D0~D5 | 디자인 현대화 트랙 | `design_implementation_progress.md` 기준 SEO+AEO(GEO) 통합 단계 계획 | Completed |
 | 7 | ULW 요청 반영 | paid URL lock UX, Google OAuth scaffold, admin seed, primer scenario verify | Completed |
 | 7-R2 | ULW 전면 재수정 | risk-first dashboard palette, nav order unification, inquiry tab rename, SEO/AEO optimizer rename | Completed |
+| 8 | 오픈베타 통합 정리 | 메인 리포트에 optimizer 통합, 경쟁 URL 흐름 제거, 네비 순서 재정렬, 미사용 i18n 정리 | Completed |
 
 ## 6) 의존성/리스크/완화
 
@@ -96,10 +97,7 @@ Source baseline: `deliverables/deep-research-report.md`
 아래 문서는 실행 계획 본문과 분리하여 운영 절차 전용으로 유지합니다.
 
 - `deliverables/BILLING_RUNBOOK.md`
-- `deliverables/WEBHOOK_TEST_CHECKLIST.md`
 - `deliverables/AI_OPERATIONS_GUIDE.md`
-- `deliverables/PHASE3_DEPLOYMENT_CHECKLIST.md`
-- `deliverables/ACCOUNT_HANDOFF_GUIDE.md`
 - `deliverables/GO_LIVE_CHECKLIST.md`
 
 ## 9) 다음 실행 단위 (연동 단계)
