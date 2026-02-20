@@ -20,7 +20,6 @@ const I18N = {
   en: {
     title: 'SEO/AEO Optimizer Dashboard',
     navMain: 'Main',
-    navKeyword: 'Search Rank',
     navDashboard: 'Dashboard',
     navPrompt: 'Prompt Tracker',
     navAeo: 'SEO/AEO Optimizer',
@@ -44,7 +43,6 @@ const I18N = {
   ko: {
     title: 'SEO/AEO 최적화 대시보드',
     navMain: '메인',
-    navKeyword: '검색 순위 추적',
     navDashboard: '대시보드',
     navPrompt: '프롬프트 추적',
     navAeo: 'SEO/AEO 최적화',
@@ -84,7 +82,6 @@ function applyLanguage(lang) {
 
   setText('ao-title', 'title')
   setText('ao-nav-main', 'navMain')
-  setText('ao-nav-keyword', 'navKeyword')
   setText('ao-nav-dashboard', 'navDashboard')
   setText('ao-nav-prompt', 'navPrompt')
   setText('ao-nav-aeo', 'navAeo')

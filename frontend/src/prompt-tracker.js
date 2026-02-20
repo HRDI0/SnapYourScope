@@ -21,7 +21,6 @@ const I18N = {
   en: {
     title: 'Prompt Tracker Dashboard',
     navMain: 'Main',
-    navKeyword: 'Search Rank',
     navDashboard: 'Dashboard',
     navPrompt: 'Prompt Tracker',
     navOptimizer: 'SEO/AEO Optimizer',
@@ -55,7 +54,6 @@ const I18N = {
   ko: {
     title: '프롬프트 추적기 대시보드',
     navMain: '메인',
-    navKeyword: '검색 순위 추적',
     navDashboard: '대시보드',
     navPrompt: '프롬프트 추적',
     navOptimizer: 'SEO/AEO 최적화',
@@ -89,7 +87,6 @@ const I18N = {
   ja: {
     title: 'プロンプトトラッカーダッシュボード',
     navMain: 'メイン',
-    navKeyword: '検索順位トラッキング',
     navDashboard: 'ダッシュボード',
     navPrompt: 'プロンプト追跡',
     navOptimizer: 'SEO/AEO 最適化',
@@ -123,7 +120,6 @@ const I18N = {
   zh: {
     title: '提示词追踪器仪表盘',
     navMain: '主页',
-    navKeyword: '搜索排名追踪',
     navDashboard: '仪表盘',
     navPrompt: '提示词追踪',
     navOptimizer: 'SEO/AEO 优化',
@@ -182,7 +178,6 @@ function applyLanguage(lang) {
 
   setText('pt-title', 'title')
   setText('pt-nav-main', 'navMain')
-  setText('pt-nav-keyword', 'navKeyword')
   setText('pt-nav-dashboard', 'navDashboard')
   setText('pt-nav-prompt', 'navPrompt')
   setText('pt-nav-optimizer', 'navOptimizer')

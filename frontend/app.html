@@ -31,9 +31,29 @@
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.07),transparent_60%)]"></div>
   </div>
 
-  <div id="app" class="mx-auto max-w-7xl px-4 py-6 lg:py-10 motion-safe:animate-fade-in motion-reduce:animate-none">
+  <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/70 backdrop-blur-xl">
+    <div class="mx-auto flex max-w-[96rem] items-center justify-between gap-3 px-4 py-2.5">
+      <a href="/" class="flex items-center gap-3">
+        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-xs font-extrabold text-white">S</span>
+        <div class="leading-tight">
+          <p class="text-sm font-semibold text-white">SnapYourScope</p>
+          <p class="text-[11px] text-slate-400">SEO/GEO/AEO Intelligence</p>
+        </div>
+      </a>
+      <nav class="hidden items-center gap-2 text-xs font-semibold text-slate-300 lg:flex">
+        <a href="/" class="whitespace-nowrap rounded-lg px-2 py-1.5 transition hover:text-white">Main</a>
+        <a href="/app.html" class="whitespace-nowrap rounded-lg px-2 py-1.5 text-white">Dashboard</a>
+        <a href="/aeo-optimizer.html" class="whitespace-nowrap rounded-lg px-2 py-1.5 transition hover:text-white">SEO/AEO Optimizer</a>
+        <a href="/prompt-tracker.html" class="whitespace-nowrap rounded-lg px-2 py-1.5 transition hover:text-white">Prompt Tracker</a>
+        <a href="/app.html?tab=pricing" class="whitespace-nowrap rounded-lg px-2 py-1.5 transition hover:text-white">Pricing</a>
+        <a href="/app.html?tab=enterprise" class="whitespace-nowrap rounded-lg px-2 py-1.5 transition hover:text-white">Inquiry</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="app" class="mx-auto max-w-[96rem] px-4 py-4 lg:py-6 motion-safe:animate-fade-in motion-reduce:animate-none">
     <div class="flex flex-col gap-6 lg:flex-row">
-      <aside class="lg:sticky lg:top-6 lg:w-80">
+      <aside class="lg:sticky lg:top-20 lg:h-[calc(100vh-5.5rem)] lg:w-52 lg:shrink-0 lg:overflow-auto">
         <div class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
           <div class="flex items-center gap-3">
             <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-sm font-extrabold text-white">S</span>
@@ -46,9 +66,8 @@
           <nav class="mt-6 grid gap-2" id="tab-links">
             <a id="tab-main-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/">Main</a>
             <button id="tab-analyze-btn" class="tab-link flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="analyze" type="button">Dashboard</button>
-            <a id="tab-keyword-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/keyword-rank.html">Search Rank</a>
-            <a id="tab-prompt-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/prompt-tracker.html">Prompt Tracker</a>
             <a id="tab-aeo-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/aeo-optimizer.html">SEO/AEO Optimizer</a>
+            <a id="tab-prompt-link" class="tab-link tab-link-anchor flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" href="/prompt-tracker.html">Prompt Tracker</a>
             <button id="tab-pricing-btn" class="tab-link flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="pricing" type="button">Pricing</button>
             <button id="tab-enterprise-btn" class="tab-link flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700/60 hover:bg-slate-900/60 hover:text-white" data-tab="enterprise" type="button">Inquiry</button>
           </nav>
@@ -63,9 +82,8 @@
             <p class="mt-2 text-sm text-slate-300">
               <a href="/" class="font-semibold text-slate-200 hover:text-white">Main</a> ·
               <a href="/app.html" class="font-semibold text-slate-200 hover:text-white">Dashboard</a> ·
-              <a href="/keyword-rank.html" class="font-semibold text-slate-200 hover:text-white">Search Rank</a> ·
-              <a href="/prompt-tracker.html" class="font-semibold text-slate-200 hover:text-white">Prompt Tracker</a> ·
-              <a href="/aeo-optimizer.html" class="font-semibold text-slate-200 hover:text-white">SEO/AEO Optimizer</a>
+              <a href="/aeo-optimizer.html" class="font-semibold text-slate-200 hover:text-white">SEO/AEO Optimizer</a> ·
+              <a href="/prompt-tracker.html" class="font-semibold text-slate-200 hover:text-white">Prompt Tracker</a>
             </p>
           </div>
         </div>
@@ -80,9 +98,8 @@
             </div>
             <nav class="hidden 2xl:flex 2xl:flex-wrap gap-2" aria-label="Product navigation">
               <a id="gnb-main" href="/" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Main</a>
-              <a id="gnb-keyword" href="/keyword-rank.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Search Rank</a>
-              <a id="gnb-prompt" href="/prompt-tracker.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Prompt Tracker</a>
               <a id="gnb-aeo" href="/aeo-optimizer.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">SEO/AEO Optimizer</a>
+              <a id="gnb-prompt" href="/prompt-tracker.html" class="rounded-xl border border-slate-700/60 bg-slate-950/30 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:text-white">Prompt Tracker</a>
             </nav>
             <div class="flex flex-wrap items-center gap-2">
               <select id="language-select" aria-label="Language" class="rounded-xl border border-slate-700/60 bg-slate-950/60 px-3 py-2 text-xs font-semibold text-slate-200 outline-none transition focus-visible:ring-2 focus-visible:ring-violet-500/70">
@@ -102,27 +119,17 @@
           <section id="tab-analyze" class="tab-panel grid gap-6">
             <div class="rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
               <p id="hero-eyebrow" class="text-xs font-semibold uppercase tracking-widest text-slate-400">URL intelligence</p>
-              <h3 id="hero-title" class="mt-2 text-xl font-bold text-white">Run a live audit and view all key signals in one screen</h3>
+              <h3 id="hero-title" class="mt-2 text-xl font-bold text-white">Run a live audit and get SEO/AEO recommendations in one screen</h3>
               <p id="hero-description" class="mt-2 text-sm text-slate-300">Inspired by enterprise analytics layouts: KPI ribbon, chart board, and prioritized fixes.</p>
               <div class="mt-6 grid gap-3 lg:grid-cols-[1fr_auto]">
                 <input type="url" id="target-url" placeholder="https://example.com" class="w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none" />
                 <button id="analyze-btn" type="button" class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.03]">Analyze URL</button>
-              </div>
-              <div class="mt-6">
-                <label id="competitor-label" for="competitor-urls" class="text-sm font-semibold text-slate-200">Competitor URLs (one per line)</label>
-                <textarea id="competitor-urls" rows="3" placeholder="https://competitor-a.com" class="mt-2 w-full rounded-xl border border-slate-700/60 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-500 outline-none"></textarea>
-                <p id="competitor-policy" class="mt-2 text-xs text-slate-400">Open beta: multiple competitor URLs are analyzed and shown as average comparison.</p>
               </div>
               <div class="mt-5 flex flex-wrap gap-2">
                 <span id="hero-meta-guest" class="rounded-full border border-slate-700/60 bg-slate-950/30 px-3 py-1 text-xs font-semibold text-slate-300">Guest: one URL analysis</span>
                 <span id="hero-meta-pro" class="rounded-full border border-slate-700/60 bg-slate-950/30 px-3 py-1 text-xs font-semibold text-slate-300">Pro: full sitemap batch</span>
                 <span id="hero-meta-mode" class="rounded-full border border-slate-700/60 bg-slate-950/30 px-3 py-1 text-xs font-semibold text-slate-300">Mode: realtime snapshot</span>
               </div>
-            </div>
-
-            <div id="comparison-dashboard" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
-              <h3 id="comparison-dashboard-title" class="text-xl font-bold text-white">Competitor Comparison Dashboard</h3>
-              <div id="comparison-dashboard-content" class="mt-6"></div>
             </div>
 
             <div id="analysis-result" class="hidden rounded-2xl border border-slate-800/60 bg-slate-900/55 p-6 backdrop-blur-xl">
@@ -158,7 +165,7 @@
               <p id="pricing-description" class="mt-2 text-sm text-slate-300">Choose a plan based on crawl depth and workflow scale.</p>
               <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <article class="plan-card rounded-2xl border border-slate-800/60 bg-slate-950/25 p-6" data-plan="free"><h3 id="plan-free-title" class="text-lg font-bold text-white">Free</h3><p class="mt-2 text-3xl font-extrabold text-white">$0</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-free-f1">Single URL report</li><li id="plan-free-f2">SEO + GEO + AEO snapshot</li><li id="plan-free-f3">No sitemap batch</li></ul></article>
-            <article class="plan-card cursor-pointer rounded-2xl border border-violet-500/20 bg-slate-950/25 p-6" data-plan="pro"><h3 id="plan-pro-title" class="text-lg font-bold text-white">Pro</h3><p class="mt-2 text-3xl font-extrabold text-white">$19.9/mo</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-pro-f1">Full sitemap analysis</li><li id="plan-pro-f2">URL queue + background batch</li><li id="plan-pro-f3">Batch status tracking (Coming Soon)</li><li id="plan-pro-f4">Weekly PDF report delivery (Coming Soon)</li></ul></article>
+            <article class="plan-card cursor-pointer rounded-2xl border border-violet-500/20 bg-slate-950/25 p-6" data-plan="pro"><h3 id="plan-pro-title" class="text-lg font-bold text-white">Pro</h3><p id="plan-pro-price-label" class="mt-2 text-3xl font-extrabold text-white">Open Beta</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-pro-f1">Full sitemap analysis</li><li id="plan-pro-f2">URL queue + background batch</li><li id="plan-pro-f3">Batch status tracking (Coming Soon)</li><li id="plan-pro-f4">Weekly PDF report delivery (Coming Soon)</li></ul></article>
                 <article class="plan-card cursor-pointer rounded-2xl border border-slate-800/60 bg-slate-950/25 p-6" data-plan="enterprise"><h3 id="plan-ent-title" class="text-lg font-bold text-white">Enterprise</h3><p id="plan-ent-price-label" class="mt-2 text-3xl font-extrabold text-white">Custom</p><ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-slate-300"><li id="plan-ent-f1">Improvement strategy</li><li id="plan-ent-f2">Managed optimization workflow</li><li id="plan-ent-f3">Dedicated support</li><li id="plan-ent-f4">Weekly PDF report delivery (Coming Soon)</li></ul></article>
               </div>
               <p id="pricing-click-hint" class="mt-4 text-sm text-slate-400">Click Pro to continue checkout. Enterprise opens inquiry.</p>
